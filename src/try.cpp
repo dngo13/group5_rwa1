@@ -112,18 +112,15 @@ order;
 class Agv
 {
   public:
-<<<<<<< HEAD
     Agv(std::string stat, std::string ship_id){
         station = stat;
         shipment_id = ship_id;
     }
  
-=======
     Agv(std::string sta, std::string ship_id){
         station = sta;
         shipment_id = ship_id;
     }
->>>>>>> 851d4067dc520a7a76c239310cc2e69d7063d1d4
   void agv_submit_shipment(ros::NodeHandle & node, std::string agvid)
 {
   ros::ServiceClient client1 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv1/submit_shipment");
@@ -270,7 +267,6 @@ public:
     return competition_state_;
   }
 
-<<<<<<< HEAD
   std::string get_kitt_agv_id(){
     return kitt.agv_id;
   }
@@ -279,8 +275,6 @@ public:
     return asmb.stations;
   }
 
-=======
->>>>>>> 851d4067dc520a7a76c239310cc2e69d7063d1d4
   /// Called when a new Order message is received.
   void order_callback(const nist_gear::Order::ConstPtr & order_msg)
   {
@@ -461,14 +455,9 @@ public:
     // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv4/station");
   }
 
-<<<<<<< HEAD
   kitting kitt;
   assembly asmb;
 
-=======
-    kitting kitt;
-    assembly asmb;
->>>>>>> 851d4067dc520a7a76c239310cc2e69d7063d1d4
 private:
   std::string competition_state_;
   double current_score_;
@@ -630,15 +619,12 @@ int main(int argc, char ** argv)
   start_competition(node);
   Agv agv(comp_class.kitt.station_id, comp_class.kitt.agv_id);
   
-<<<<<<< HEAD
   std::string kagv_id = comp_class.get_kitt_agv_id();
   std::string aagv_id = comp_class.get_asmb_agv_id();
 
   agv.agv_submit_shipment(node, kagv_id);
   as_submit_assembly(node, aagv_id);
   
-=======
->>>>>>> 851d4067dc520a7a76c239310cc2e69d7063d1d4
   if (comp_class.get_state() == "done"){
     end_competition(node);
   }
