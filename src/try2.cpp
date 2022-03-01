@@ -68,7 +68,7 @@ typedef struct Kitting
     std::string shipment_type;
     std::string agv_id;
     std::string station_id;
-    Product products;
+    std::vector<Product> products;
 }
 kitting;
 
@@ -80,7 +80,7 @@ typedef struct Assembly
 {
     std::string shipment_type;
     std::string stations;
-    Product products;
+    std::vector<Product> products;
 }
 assembly;
 
@@ -95,61 +95,94 @@ typedef struct Order
     unsigned short int assembly_robot_health;
     std::string announcement_condition;
     double announcement_condition_value;
-    Kitting kitting;
-    Assembly assembly;
+    std::vector<Kitting> kitting;
+    std::vector<Assembly> assembly;
 }
 order;
 
-
-// typedef struct Agv
-// {
-//     std::string station;
-//     std::string shipment_id;
-
-// }agv;
-
-
-class Agv
+class Agv 
 {
   public:
-<<<<<<< HEAD
-    Agv(std::string stat, std::string ship_id){
-        station = stat;
-        shipment_id = ship_id;
+    explicit Agv(ros::NodeHandle & node){
+        client1 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv1/submit_shipment");
+        client2 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv2/submit_shipment");
+        client3 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv3/submit_shipment");
+        client4 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv4/submit_shipment");
+        
+
+        // Subscribe to the '/ariac/agv1/state' topic.
+        agv1_state_subscriber = node.subscribe("/ariac/agv1/state", 10, &Agv::agv1_state_callback, this);
+
+        // Subscribe to the '/ariac/agv2/state' topic.
+        agv2_state_subscriber = node.subscribe("/ariac/agv2/state", 10,&Agv::agv2_state_callback, this);
+
+        // Subscribe to the '/ariac/agv3/state' topic.
+        agv3_state_subscriber = node.subscribe("/ariac/agv3/state", 10, &Agv::agv3_state_callback, this);
+
+        // Subscribe to the '/ariac/agv4/state' topic.
+        agv4_state_subscriber = node.subscribe("/ariac/agv4/state", 10, &Agv::agv4_state_callback, this);    
+    }
+
+    /// Called when a new LogicalCameraImage message is received.
+    void agv1_state_callback(const std_msgs::String::ConstPtr & msg)
+    {
+        msg->data;
+        // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv1/state");
+    }
+
+    void agv2_state_callback(const std_msgs::String::ConstPtr & msg)
+    {
+        msg->data;
+        // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv2/state");
+    }
+
+    void agv3_state_callback(const std_msgs::String::ConstPtr & msg)
+    {
+        msg->data;
+        // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv3/state");
+    }
+
+    void agv4_state_callback(const std_msgs::String::ConstPtr & msg)
+    {
+        msg->data;
+        // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv4/state");
+    }
+
+    void submit_shipment(std::string agv_id_){
+        nist_gear::AGVToAssemblyStation srv;
+
+        if (agv_id_ == "agv1"){
+            client1.call(srv);
+        }
+        if (agv_id_ == "agv2"){
+            client2.call(srv);
+        }
+        if (agv_id_ == "agv3"){
+            client3.call(srv);
+        }
+        if (agv_id_ == "agv4"){
+            client4.call(srv);
+        }
+
+        
+    }
+
+    std::string get_agv_id(){
+        return agv_id_;
     }
  
-=======
-    Agv(std::string sta, std::string ship_id){
-        station = sta;
-        shipment_id = ship_id;
-    }
->>>>>>> 851d4067dc520a7a76c239310cc2e69d7063d1d4
-  void agv_submit_shipment(ros::NodeHandle & node, std::string agvid)
-{
-  ros::ServiceClient client1 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv1/submit_shipment");
-  ros::ServiceClient client2 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv2/submit_shipment");
-  ros::ServiceClient client3 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv3/submit_shipment");
-  ros::ServiceClient client4 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv4/submit_shipment");
-   
-  nist_gear::AGVToAssemblyStation srv;
-  
-  if(agvid == "agv1"){
-    client1.call(srv);
-  }
-  if(agvid == "agv2"){
-    client2.call(srv);
-  }
-  if(agvid == "agv3"){
-    client3.call(srv);
-  }
-  if(agvid == "agv4"){
-    client4.call(srv);
-}}
-
   private:
     std::string station;
     std::string shipment_id;
-
+    ros::Subscriber agv1_state_subscriber;
+    ros::Subscriber agv2_state_subscriber;
+    ros::Subscriber agv3_state_subscriber;
+    ros::Subscriber agv4_state_subscriber;
+    ros::ServiceClient client1;
+    ros::ServiceClient client2;
+    ros::ServiceClient client3;
+    ros::ServiceClient client4;
+    std::string agv_id_;
 };
 
 
@@ -266,55 +299,79 @@ public:
 
   }
 
-  std::string get_state(){
-    return competition_state_;
-  }
+  std::string getCompetitionState(){
+      return competition_state_;
+  }  
 
-<<<<<<< HEAD
-  std::string get_kitt_agv_id(){
-    return kitt.agv_id;
-  }
-
-  std::string get_asmb_agv_id(){
-    return asmb.stations;
-  }
-
-=======
->>>>>>> 851d4067dc520a7a76c239310cc2e69d7063d1d4
   /// Called when a new Order message is received.
   void order_callback(const nist_gear::Order::ConstPtr & order_msg)
   {
        
     ROS_INFO_STREAM("Received order:\n" << *order_msg);
     
-    order_msg->order_id;
     received_orders_.push_back(*order_msg);
+    
+    ROS_INFO_STREAM("" << received_orders_.at(0).order_id);
+    Order new_order;
+    new_order.order_id = order_msg->order_id;
+
     for (const auto &kit: order_msg->kitting_shipments){
-      // std::string agv_id = kit.agv_id;
-      // if (agv_id == "agv1"){
-        
-      // }
-      kitt.agv_id = kit.agv_id;
-      for (const auto &Pr: kit.products){
-        kitt.products.frame_pose = Pr.pose;
-        kitt.products.type = Pr.type;
-      }
-      
-      kitt.shipment_type = kit.shipment_type;
-      kitt.station_id = kit.station_id;
+        Kitting new_kitting;
+        new_kitting.agv_id = kit.agv_id;
+        new_kitting.shipment_type = kit.shipment_type;
+        new_kitting.station_id = kit.station_id;
+        for (const auto &Prod: kit.products){
+            Product new_kproduct;
+            new_kproduct.type = Prod.type;
+            new_kproduct.frame_pose = Prod.pose;
+            new_kitting.products.push_back(new_kproduct);
+        }
+        new_order.kitting.push_back(new_kitting);
     }
 
-    for (const auto &a: order_msg->assembly_shipments){
-      asmb.stations = a.station_id;
-      asmb.shipment_type = a.shipment_type;
-      for (const auto &Pr: a.products){
-        asmb.products.frame_pose = Pr.pose;
-        asmb.products.type = Pr.type;
-      }
+    for (const auto &asmb: order_msg->assembly_shipments){
+        Assembly new_assembly;
+        new_assembly.shipment_type = asmb.shipment_type;
+        new_assembly.stations = asmb.station_id;
+        for (const auto &Prod: asmb.products){
+            Product new_aproduct;
+            new_aproduct.type = Prod.type;
+            new_aproduct.frame_pose = Prod.pose;
+            new_assembly.products.push_back(new_aproduct);
+        }
+        new_order.assembly.push_back(new_assembly);
     }
-    
+   
+    order_list_.push_back(new_order);
     
   }
+
+  void process_order(){
+      auto current_order = order_list_.front();
+      auto current_kitting = current_order.kitting.front();
+      auto kproduct_list = current_kitting.products;
+      auto current_assembly = current_order.assembly.front();
+      auto aproduct_list = current_assembly.products;
+
+      for (const auto &kp: kproduct_list){
+          kproduct_list.push_back(kp);
+      }
+      kproduct_list_ = kproduct_list;
+
+      for (const auto &ap: aproduct_list){
+          aproduct_list.push_back(ap);
+      }
+      aproduct_list_ = aproduct_list;
+  }
+
+  std::vector<Order> get_order_list(){
+      return order_list_;
+  }
+
+  std::vector<Product> get_product_list(){
+      return kproduct_list_, aproduct_list_;
+  }
+
 
   /// Called when a new LogicalCameraImage message from /ariac/logical_camera_station1 is received.
   void logical_camera_station1_callback(
@@ -412,32 +469,7 @@ public:
 
     }
 
-  /// Called when a new LogicalCameraImage message is received.
-  void agv1_state_callback(const std_msgs::String::ConstPtr & msg)
-  {
-    msg->data;
-    // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv1/state");
-  }
-
-  void agv2_state_callback(const std_msgs::String::ConstPtr & msg)
-  {
-    msg->data;
-    // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv2/state");
-  }
-
-  void agv3_state_callback(const std_msgs::String::ConstPtr & msg)
-  {
-    msg->data;
-    // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv3/state");
-  }
-
-  void agv4_state_callback(const std_msgs::String::ConstPtr & msg)
-  {
-    msg->data;
-    // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv4/state");
-  }
-
-  void agv1_station_callback(const std_msgs::String::ConstPtr & msg)
+    void agv1_station_callback(const std_msgs::String::ConstPtr & msg)
   {
     msg->data;
     // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv1/station");
@@ -461,14 +493,9 @@ public:
     // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv4/station");
   }
 
-<<<<<<< HEAD
   kitting kitt;
   assembly asmb;
 
-=======
-    kitting kitt;
-    assembly asmb;
->>>>>>> 851d4067dc520a7a76c239310cc2e69d7063d1d4
 private:
   std::string competition_state_;
   double current_score_;
@@ -477,6 +504,10 @@ private:
   std::vector<nist_gear::Order> received_orders_;
   sensor_msgs::JointState gantry_arm_current_joint_states_;
   sensor_msgs::JointState kitting_arm_current_joint_states_;
+  std::vector<Order> order_list_;
+  std::vector<Product> kproduct_list_;
+  std::vector<Product> aproduct_list_;
+
 };
 
 void proximity_sensor_callback(const sensor_msgs::Range::ConstPtr & msg)
@@ -510,6 +541,7 @@ int main(int argc, char ** argv)
 
   // Instance of custom class from above.
   MyCompetitionClass comp_class(node);
+
 
   // Subscribe to the '/ariac/current_score' topic.
   ros::Subscriber current_score_subscriber = node.subscribe(
@@ -584,27 +616,7 @@ int main(int argc, char ** argv)
   // Subscribe to the '/ariac/quality_control_sensor_4' topic.
   ros::Subscriber quality_control_sensor4_subscriber = node.subscribe(
     "/ariac/quality_control_sensor_4", 10,
-    &MyCompetitionClass::quality_control_sensor4_callback, &comp_class); 
-
-  // Subscribe to the '/ariac/agv1/state' topic.
-  ros::Subscriber agv1_state_subscriber = node.subscribe(
-    "/ariac/agv1/state", 10,
-    &MyCompetitionClass::agv1_state_callback, &comp_class);
-
-  // Subscribe to the '/ariac/agv2/state' topic.
-  ros::Subscriber agv2_state_subscriber = node.subscribe(
-    "/ariac/agv2/state", 10,
-    &MyCompetitionClass::agv2_state_callback, &comp_class);
-
-  // Subscribe to the '/ariac/agv3/state' topic.
-  ros::Subscriber agv3_state_subscriber = node.subscribe(
-    "/ariac/agv3/state", 10,
-    &MyCompetitionClass::agv3_state_callback, &comp_class);
-
-  // Subscribe to the '/ariac/agv4/state' topic.
-  ros::Subscriber agv4_state_subscriber = node.subscribe(
-    "/ariac/agv4/state", 10,
-    &MyCompetitionClass::agv4_state_callback, &comp_class);  
+    &MyCompetitionClass::quality_control_sensor4_callback, &comp_class);   
 
   // Subscribe to the '/ariac/agv1/station' topic.
   ros::Subscriber agv1_station_subscriber = node.subscribe(
@@ -628,22 +640,32 @@ int main(int argc, char ** argv)
 
   ROS_INFO("Setup complete.");
   start_competition(node);
-  Agv agv(comp_class.kitt.station_id, comp_class.kitt.agv_id);
-  
-<<<<<<< HEAD
-  std::string kagv_id = comp_class.get_kitt_agv_id();
-  std::string aagv_id = comp_class.get_asmb_agv_id();
+  Agv agv(node);
+  std::string state = comp_class.getCompetitionState();
 
-  agv.agv_submit_shipment(node, kagv_id);
-  as_submit_assembly(node, aagv_id);
+
+  // ros::Duration(10);
+  std::vector<Order> orders;
+  std::vector<Kitting> kittings;
+  std::string agv_id;
   
-=======
->>>>>>> 851d4067dc520a7a76c239310cc2e69d7063d1d4
-  if (comp_class.get_state() == "done"){
-    end_competition(node);
-  }
+  do{
+  orders = comp_class.get_order_list();
+  }while(orders.size() == 0);
+
+  kittings = orders.at(0).kitting;
+  agv_id = kittings.at(0).agv_id;
+
+  ROS_INFO_STREAM("AGV ID : " << agv_id);
+
+  // ROS_INFO_STREAM("Current order is: " << orders.at(0).order_id);
   
-  ros::spin();  // This executes callbacks on new data until ctrl-c.
+  // Order cur_order = orders.at(0);
+  // Kitting cur_kit = cur_order.kitting.at(0);
+  // agv.submit_shipment(cur_kit.agv_id);
+  // std::cout << cur_kit.agv_id << '\n';  
+
+  ros::spinOnce();  // This executes callbacks on new data until ctrl-c.
 
   return 0;
 }
