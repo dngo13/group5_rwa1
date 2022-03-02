@@ -88,6 +88,11 @@ public:
 
   /// Called when a new String message from /ariac/agv4/station is received.
   void agv4_station_callback(const std_msgs::String::ConstPtr & msg);
+
+  void callback60(const ros::TimerEvent& event);
+ 
+  bool get_timer();
+
   
   /**
    * @brief Gets the agv id object
@@ -107,6 +112,7 @@ private:
   std::vector<Order> order_list_;
   std::vector<Product> kproduct_list_;
   std::vector<Product> aproduct_list_;
+  bool wait60{false};
 };
 
 

@@ -179,25 +179,25 @@ int main(int argc, char ** argv)
     "/ariac/quality_control_sensor_4", 10,
     &MyCompetitionClass::quality_control_sensor4_callback, &comp_class);   
 
-  // Subscribe to the '/ariac/agv1/station' topic.
-  ros::Subscriber agv1_station_subscriber = node.subscribe(
-    "/ariac/agv1/station", 10,
-    &MyCompetitionClass::agv1_station_callback, &comp_class);
+  // // Subscribe to the '/ariac/agv1/station' topic.
+  // ros::Subscriber agv1_station_subscriber = node.subscribe(
+  //   "/ariac/agv1/station", 10,
+  //   &MyCompetitionClass::agv1_station_callback, &comp_class);
 
-  // Subscribe to the '/ariac/agv2/station' topic.
-  ros::Subscriber agv2_station_subscriber = node.subscribe(
-    "/ariac/agv2/station", 10,
-    &MyCompetitionClass::agv2_station_callback, &comp_class);
+  // // Subscribe to the '/ariac/agv2/station' topic.
+  // ros::Subscriber agv2_station_subscriber = node.subscribe(
+  //   "/ariac/agv2/station", 10,
+  //   &MyCompetitionClass::agv2_station_callback, &comp_class);
 
-  // Subscribe to the '/ariac/agv3/station' topic.
-  ros::Subscriber agv3_station_subscriber = node.subscribe(
-    "/ariac/agv3/station", 10,
-    &MyCompetitionClass::agv3_station_callback, &comp_class);
+  // // Subscribe to the '/ariac/agv3/station' topic.
+  // ros::Subscriber agv3_station_subscriber = node.subscribe(
+  //   "/ariac/agv3/station", 10,
+  //   &MyCompetitionClass::agv3_station_callback, &comp_class);
 
-  // Subscribe to the '/ariac/agv4/station' topic.
-  ros::Subscriber agv4_station_subscriber = node.subscribe(
-    "/ariac/agv4/station", 10,
-    &MyCompetitionClass::agv4_station_callback, &comp_class);
+  // // Subscribe to the '/ariac/agv4/station' topic.
+  // ros::Subscriber agv4_station_subscriber = node.subscribe(
+  //   "/ariac/agv4/station", 10,
+  //   &MyCompetitionClass::agv4_station_callback, &comp_class);
 
   ROS_INFO("Setup complete.");
   start_competition(node);
@@ -222,6 +222,7 @@ int main(int argc, char ** argv)
 
   bool ship1 = false;
   bool ship2 = false;
+  ros::Timer timer = node.createTimer(ros::Duration(60), &MyCompetitionClass::callback60, &comp_class);
 
   while(ros::ok())
   {
@@ -229,7 +230,7 @@ int main(int argc, char ** argv)
     comp_state = comp_class.getCompetitionState();
 
 
-    if(orders.size() !=0)
+    if(orders.size() !=0 && comp_class.get_timer())
     {
       agv_id = comp_class.get_agv_id();
       kstation_id = orders.at(0).kitting.at(0).station_id;

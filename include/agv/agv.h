@@ -99,8 +99,8 @@ class Agv
 
  
   private:
-    std::string station;
-    std::string shipment_id;
+    std::string station_;
+    std::string shipment_id_;
     ros::Subscriber agv1_state_subscriber;
     ros::Subscriber agv2_state_subscriber;
     ros::Subscriber agv3_state_subscriber;

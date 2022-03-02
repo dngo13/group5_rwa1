@@ -53,6 +53,7 @@ void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order
         new_assembly.shipment_type = asmb.shipment_type;
         new_assembly.stations = asmb.station_id;
         for (const auto &Prod: asmb.products){
+            // Creating instance of struct Product.
             Product new_aproduct;
             new_aproduct.type = Prod.type;
             new_aproduct.frame_pose = Prod.pose;
@@ -187,4 +188,12 @@ void MyCompetitionClass::agv4_station_callback(const std_msgs::String::ConstPtr 
 std::string MyCompetitionClass::get_agv_id()
 {
   return order_list_.at(0).kitting.at(0).agv_id;
+}
+
+void MyCompetitionClass::callback60(const ros::TimerEvent& event){
+  wait60 = true;
+}
+
+bool MyCompetitionClass::get_timer(){
+  return wait60;
 }
