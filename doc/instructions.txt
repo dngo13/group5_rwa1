@@ -1,14 +1,15 @@
 ENPM 663 Group 5 RWA1 Instructions
 
 Authors:
-Diane Ngo, Darshan Jain, Pulkit Mehta, Jeffin Kachappilly
+Darshan Jain, Pulkit Mehta, Jeffin Kachappilly
 
 This package requires:
 * ROS Melodic
 * Gazebo 9.15+
 * ARIAC and its dependencies 
 * C++
-
-
 --
-Note: UML's are placed in the /doc directory
+
+Instructions to run the package:
+
+rosrun group5_rwa1 My_node
