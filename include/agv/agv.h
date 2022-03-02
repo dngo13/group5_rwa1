@@ -22,7 +22,16 @@ class Agv
         agv3_state_subscriber = node.subscribe("/ariac/agv3/state", 10, &Agv::agv3_state_callback, this);
 
         // Subscribe to the '/ariac/agv4/state' topic.
-        agv4_state_subscriber = node.subscribe("/ariac/agv4/state", 10, &Agv::agv4_state_callback, this);    
+        agv4_state_subscriber = node.subscribe("/ariac/agv4/state", 10, &Agv::agv4_state_callback, this);   
+
+        agv1_station_subscriber = node.subscribe("ariac/agv1/station", 10, &Agv::agv1_station_callback, this);
+
+        agv2_station_subscriber = node.subscribe("ariac/agv2/station", 10, &Agv::agv2_station_callback, this);
+
+        agv3_station_subscriber = node.subscribe("ariac/agv3/station", 10, &Agv::agv3_station_callback, this);
+
+        agv4_station_subscriber = node.subscribe("ariac/agv4/station", 10, &Agv::agv4_station_callback, this);
+
     }
 
     /// Called when a new LogicalCameraImage message is received.
@@ -34,9 +43,25 @@ class Agv
 
     void agv4_state_callback(const std_msgs::String::ConstPtr & msg);
 
-    void submit_shipment(std::string agv_id_);
+    void agv1_station_callback(const std_msgs::String::ConstPtr & msg);
 
-    std::string get_agv_id();
+    void agv2_station_callback(const std_msgs::String::ConstPtr & msg);
+
+    void agv3_station_callback(const std_msgs::String::ConstPtr & msg);
+
+    void agv4_station_callback(const std_msgs::String::ConstPtr & msg);
+
+    std::string get_agv1_station();
+
+    std::string get_agv2_station();
+
+    std::string get_agv3_station();
+
+    std::string get_agv4_station();
+
+
+    void submit_shipment(std::string, std::string, std::string);
+
  
   private:
     std::string station;
@@ -45,11 +70,19 @@ class Agv
     ros::Subscriber agv2_state_subscriber;
     ros::Subscriber agv3_state_subscriber;
     ros::Subscriber agv4_state_subscriber;
+    ros::Subscriber agv1_station_subscriber;
+    ros::Subscriber agv2_station_subscriber;
+    ros::Subscriber agv3_station_subscriber;
+    ros::Subscriber agv4_station_subscriber;
     ros::ServiceClient client1;
     ros::ServiceClient client2;
     ros::ServiceClient client3;
     ros::ServiceClient client4;
-    std::string agv_id_;
+    std::string agv1_station_;
+    std::string agv2_station_;
+    std::string agv3_station_;
+    std::string agv4_station_;
+
 };
 
 

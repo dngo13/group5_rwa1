@@ -47,9 +47,9 @@
 #include <nist_gear/AssemblyStationSubmitShipment.h>
 
 
-#include "/home/darshan/ariac_ws/src/group5_rwa1/include/comp/comp_class.h"
-#include "/home/darshan/ariac_ws/src/group5_rwa1/include/agv/agv.h"
-#include "/home/darshan/ariac_ws/src/group5_rwa1/include/util/util.h"
+#include "../include/comp/comp_class.h"
+#include "../include/agv/agv.h"
+#include "../include/util/util.h"
 /**
  * @brief Start the competition by waiting for and then calling the start ROS Service.
  * 
@@ -99,7 +99,7 @@ void end_competition(ros::NodeHandle & node)
   ros::shutdown();
 }
 
-void as_submit_assembly(ros::NodeHandle & node, std::string as)
+void as_submit_assembly(ros::NodeHandle & node, std::string s_id, std::string st)
 {
   ros::ServiceClient client1 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as1/submit_shipment");
   ros::ServiceClient client2 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as2/submit_shipment");
@@ -107,18 +107,13 @@ void as_submit_assembly(ros::NodeHandle & node, std::string as)
   ros::ServiceClient client4 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as4/submit_shipment");
    
   nist_gear::AssemblyStationSubmitShipment srv;
-  
-  if(as == "as1"){
+  srv.request.shipment_type = st;
+
+  if(s_id == "as1"){
     client1.call(srv);
     }
-  if(as == "as2"){
+  if(s_id == "as2"){
     client2.call(srv);
-    }
-  if(as == "as3"){
-    client3.call(srv);
-    }
-  if(as == "as4"){
-    client4.call(srv);
     }
 }
 
@@ -211,6 +206,11 @@ int main(int argc, char ** argv)
   std::vector<Order> orders;
   std::vector<Kitting> kittings;
   std::string agv_id;
+  std::string kshipment_type;
+  std::string ashipment_type;
+  std::string kstation_id;
+  std::string astation_id;
+
   int counter = 0;
   
   while(ros::ok())
@@ -219,7 +219,19 @@ int main(int argc, char ** argv)
     if(orders.size() !=0 && counter!=1)
     {
       agv_id = comp_class.get_agv_id();
-      ROS_INFO_STREAM("AGV ID : " << agv_id);
+      kstation_id = orders.at(0).kitting.at(0).station_id;
+      kshipment_type = orders.at(0).kitting.at(0).shipment_type;
+      ashipment_type = orders.at(0).assembly.at(0).shipment_type;
+
+      agv.submit_shipment(agv_id,kshipment_type,kstation_id);
+      if (agv.get_agv2_station() == kstation_id){
+        as_submit_assembly(node, astation_id, ashipment_type);
+      }
+
+      
+      
+
+      // ROS_INFO_STREAM("AGV ID : " << agv_id);
       counter++;
     }
     ros::spinOnce();

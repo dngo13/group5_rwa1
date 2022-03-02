@@ -1,4 +1,4 @@
-#include "/home/darshan/ariac_ws/src/group5_rwa1/include/comp/comp_class.h"
+#include "../include/comp/comp_class.h"
 
 /// Called when a new message is received.
 void MyCompetitionClass::current_score_callback(const std_msgs::Float32::ConstPtr & msg)

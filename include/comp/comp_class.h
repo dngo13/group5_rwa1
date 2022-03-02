@@ -1,6 +1,6 @@
 #ifndef COMP_CLASS_H
 #define COMP_CLASS_H
-#include "/home/darshan/ariac_ws/src/group5_rwa1/include/util/util.h"
+#include "../util/util.h"
 
 class MyCompetitionClass
 {
