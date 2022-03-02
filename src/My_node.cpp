@@ -1,6 +1,8 @@
 /**
- * @file try.cpp
+ * @file My_node.cpp
  * @author Pulkit Mehta (pmehta09@umd.edu)
+ * @author Darshan Jain (djain12@umd.edu)
+ * @author Jeffin J K (jeffinjk@umd.edu)
  * @brief Node for RWA1
  * @version 0.1
  * @date 2022-02-28
@@ -50,6 +52,7 @@
 #include "../include/comp/comp_class.h"
 #include "../include/agv/agv.h"
 #include "../include/util/util.h"
+
 /**
  * @brief Start the competition by waiting for and then calling the start ROS Service.
  * 
@@ -118,10 +121,11 @@ void as_submit_assembly(ros::NodeHandle & node, std::string s_id, std::string st
 }
 
 
+
 int main(int argc, char ** argv)
 {
   // Last argument is the default name of the node.
-  ros::init(argc, argv, "ariac_example_node");
+  ros::init(argc, argv, "My_node");
 
   ros::NodeHandle node;
 
@@ -145,10 +149,9 @@ int main(int argc, char ** argv)
     "/ariac/orders", 10,
     &MyCompetitionClass::order_callback, &comp_class);
 
-  
   // Subscribe to the '/ariac/logical_camera_bins8' topic.
-  ros::Subscriber logical_camera_bins8_subscriber = node.subscribe(
-    "/ariac/logical_camera_station1", 10,
+  ros::Subscriber logical_camera_bins0_subscriber = node.subscribe(
+    "/ariac/logical_camera_bins0", 10,
     &MyCompetitionClass::logical_camera_bins0_callback, &comp_class);
 
   // Subscribe to the '/ariac/logical_camera_station2' topic.
@@ -156,6 +159,22 @@ int main(int argc, char ** argv)
     "/ariac/logical_camera_station2", 10,
     &MyCompetitionClass::logical_camera_station2_callback, &comp_class);
 
+  // ros::Subscriber depth_camera_bins1_subscriber = node.subscribe(
+  //   "/ariac/depth_camera_bins1/depth/image_raw --noarr", 10,
+  //   &MyCompetitionClass::depth_camera_bins1_callback, &comp_class);
+
+  ros::Subscriber proximity_sensor_subscriber = node.subscribe(
+    "/ariac/proximity_sensor_0", 10,
+     &MyCompetitionClass::proximity_sensor0_callback,&comp_class);
+
+  ros::Subscriber break_beam_subscriber = node.subscribe(
+    "/ariac/breakbeam_0_change", 10,
+    &MyCompetitionClass::breakbeam0_callback, &comp_class);
+
+  ros::Subscriber laser_profiler_subscriber = node.subscribe(
+    "/ariac/laser_profiler_0", 10,
+    &MyCompetitionClass::laser_profiler0_callback,&comp_class);
+  
   // Subscribe to the '/ariac/quality_control_sensor_1' topic.
   ros::Subscriber quality_control_sensor1_subscriber = node.subscribe(
     "/ariac/quality_control_sensor_1", 10,
@@ -176,33 +195,31 @@ int main(int argc, char ** argv)
     "/ariac/quality_control_sensor_4", 10,
     &MyCompetitionClass::quality_control_sensor4_callback, &comp_class);   
 
-  // Subscribe to the '/ariac/agv1/station' topic.
-  ros::Subscriber agv1_station_subscriber = node.subscribe(
-    "/ariac/agv1/station", 10,
-    &MyCompetitionClass::agv1_station_callback, &comp_class);
+  // // Subscribe to the '/ariac/agv1/station' topic.
+  // ros::Subscriber agv1_station_subscriber = node.subscribe(
+  //   "/ariac/agv1/station", 10,
+  //   &MyCompetitionClass::agv1_station_callback, &comp_class);
 
-  // Subscribe to the '/ariac/agv2/station' topic.
-  ros::Subscriber agv2_station_subscriber = node.subscribe(
-    "/ariac/agv2/station", 10,
-    &MyCompetitionClass::agv2_station_callback, &comp_class);
+  // // Subscribe to the '/ariac/agv2/station' topic.
+  // ros::Subscriber agv2_station_subscriber = node.subscribe(
+  //   "/ariac/agv2/station", 10,
+  //   &MyCompetitionClass::agv2_station_callback, &comp_class);
 
-  // Subscribe to the '/ariac/agv3/station' topic.
-  ros::Subscriber agv3_station_subscriber = node.subscribe(
-    "/ariac/agv3/station", 10,
-    &MyCompetitionClass::agv3_station_callback, &comp_class);
+  // // Subscribe to the '/ariac/agv3/station' topic.
+  // ros::Subscriber agv3_station_subscriber = node.subscribe(
+  //   "/ariac/agv3/station", 10,
+  //   &MyCompetitionClass::agv3_station_callback, &comp_class);
 
-  // Subscribe to the '/ariac/agv4/station' topic.
-  ros::Subscriber agv4_station_subscriber = node.subscribe(
-    "/ariac/agv4/station", 10,
-    &MyCompetitionClass::agv4_station_callback, &comp_class);
+  // // Subscribe to the '/ariac/agv4/station' topic.
+  // ros::Subscriber agv4_station_subscriber = node.subscribe(
+  //   "/ariac/agv4/station", 10,
+  //   &MyCompetitionClass::agv4_station_callback, &comp_class);
 
   ROS_INFO("Setup complete.");
   start_competition(node);
   Agv agv(node);
-  // std::string state = comp_class.getCompetitionState();
 
-
-  // ros::Duration(10);
+  // ros::Duration(10).sleep();
   std::vector<Order> orders;
   std::vector<Kitting> kittings;
   std::string agv_id;
@@ -210,43 +227,64 @@ int main(int argc, char ** argv)
   std::string ashipment_type;
   std::string kstation_id;
   std::string astation_id;
-
-  int counter = 0;
+  std::string comp_state;
   
+  ros::ServiceClient client1 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as1/submit_shipment");
+  ros::ServiceClient client2 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as2/submit_shipment");
+  ros::ServiceClient client3 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as3/submit_shipment");
+  ros::ServiceClient client4 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as4/submit_shipment");
+   
+  nist_gear::AssemblyStationSubmitShipment asrv;
+
+  bool ship1 = false;
+  bool ship2 = false;
+  ros::Timer timer = node.createTimer(ros::Duration(60), &MyCompetitionClass::callback60, &comp_class);
+
   while(ros::ok())
   {
     orders = comp_class.get_order_list();
-    if(orders.size() !=0 && counter!=1)
+    comp_state = comp_class.getCompetitionState();
+
+
+    if(orders.size() !=0 && comp_class.get_timer())
     {
       agv_id = comp_class.get_agv_id();
       kstation_id = orders.at(0).kitting.at(0).station_id;
       kshipment_type = orders.at(0).kitting.at(0).shipment_type;
       ashipment_type = orders.at(0).assembly.at(0).shipment_type;
+      astation_id = orders.at(0).assembly.at(0).stations;
 
-      agv.submit_shipment(agv_id,kshipment_type,kstation_id);
-      if (agv.get_agv2_station() == kstation_id){
+      asrv.request.shipment_type = ashipment_type;
+
+      if(!ship1){
+        agv.submit_shipment(agv_id,kshipment_type,kstation_id);
+        ship1 = true;
+      } 
+
+      if (agv.get_agv1_station() == kstation_id && !ship2){
         as_submit_assembly(node, astation_id, ashipment_type);
+        ship2 = true; 
+      }
+      if (agv.get_agv2_station() == kstation_id && !ship2){
+        as_submit_assembly(node, astation_id, ashipment_type);
+        ship2 = true; 
+      }
+      if (agv.get_agv3_station() == kstation_id && !ship2){
+        as_submit_assembly(node, astation_id, ashipment_type);
+        ship2 = true; 
+      }
+      if (agv.get_agv4_station() == kstation_id && !ship2){
+        as_submit_assembly(node, astation_id, ashipment_type);
+        ship2 = true; 
       }
 
-      
-      
-
-      // ROS_INFO_STREAM("AGV ID : " << agv_id);
-      counter++;
+      if(comp_state == "done"){
+        end_competition(node);
+      }
     }
     ros::spinOnce();
-  }
-
-
-
-  // ROS_INFO_STREAM("Current order is: " << orders.at(0).order_id);
-  
-  // Order cur_order = orders.at(0);
-  // Kitting cur_kit = cur_order.kitting.at(0);
-  // agv.submit_shipment(cur_kit.agv_id);
-  // std::cout << cur_kit.agv_id << '\n';  
-
-   // This executes callbacks on new data until ctrl-c.
+    } 
 
   return 0;
+  
 }

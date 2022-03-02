@@ -74,8 +74,5 @@ void::Agv::submit_shipment(std::string agv_id, std::string st, std::string asn){
         if (agv_id == "agv4"){
             client4.call(srv);
         }
-
-
-
         
 }

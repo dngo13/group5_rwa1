@@ -35,7 +35,7 @@ product;
  */
 typedef struct Kitting
 {
-    std::string shipment_type;
+    std::string shipment_type;                  
     std::string agv_id;
     std::string station_id;
     std::vector<Product> products;
