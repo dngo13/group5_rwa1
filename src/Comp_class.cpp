@@ -101,6 +101,12 @@ void MyCompetitionClass::logical_camera_station2_callback(const nist_gear::Logic
     "Logical camera station 2: '" << image_msg->models.size() << "' objects.");
 }
 
+void MyCompetitionClass::depth_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
+{
+  ROS_INFO_STREAM_THROTTLE(10,
+    "depth camera bin1 detected something ");
+} 
+
 void MyCompetitionClass::logical_camera_bins0_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
 {
   ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins8: '" << image_msg->models.size() << "' objects.");
@@ -139,6 +145,7 @@ void MyCompetitionClass::quality_control_sensor4_callback(const nist_gear::Logic
 
 void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPtr & msg) 
   {
+    // ROS_INFO("Break beam0 triggered.");
     if (msg->object_detected) {  // If there is an object in proximity.
       ROS_INFO("Break beam triggered.");
     }
@@ -146,6 +153,7 @@ void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPt
 
 void MyCompetitionClass::proximity_sensor0_callback(const sensor_msgs::Range::ConstPtr & msg)
 {
+  // ROS_INFO_THROTTLE(1, "Proximity sensor0 sees something.");
   if ((msg->max_range - msg->range) > 0.01)
   {  // If there is an object in proximity.
     ROS_INFO_THROTTLE(1, "Proximity sensor sees something.");
@@ -154,6 +162,7 @@ void MyCompetitionClass::proximity_sensor0_callback(const sensor_msgs::Range::Co
 
 void MyCompetitionClass::laser_profiler0_callback(const sensor_msgs::LaserScan::ConstPtr & msg)
 {
+  // ROS_INFO_THROTTLE(1, "Laser profiler0 sees something.");
   size_t number_of_valid_ranges = std::count_if(
     msg->ranges.begin(), msg->ranges.end(), [](const float f)
     {

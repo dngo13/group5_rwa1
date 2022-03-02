@@ -53,6 +53,8 @@ public:
   /// Called when a new LogicalCameraImage message from /ariac/logical_camera_bins0 is received.
   void logical_camera_bins0_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
 
+  void depth_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
+
   /// Called when a new LogicalCameraImage message from /ariac/quality_control_sensor1 is received.
   void quality_control_sensor1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
 
@@ -88,12 +90,13 @@ public:
 
   /// Called when a new String message from /ariac/agv4/station is received.
   void agv4_station_callback(const std_msgs::String::ConstPtr & msg);
-
+  
+  /// callback for timer
   void callback60(const ros::TimerEvent& event);
- 
+  
+  /// Accessor for boolean check of timer
   bool get_timer();
 
-  
   /**
    * @brief Gets the agv id object
    * 

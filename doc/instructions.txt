@@ -10,17 +10,17 @@ This package requires:
 * C++
 --
 
-Clone the package into the workspace and build the package using,
+- Clone the package into the workspace and build the package using,
 ```
 $ catkin build group5_rwa1
 ```
-Source the workspace and then run,
+
+- Source the workspace and then run,
 ```
 $ roslaunch nist_gear sample_environment.launch 
 ```
 
-In a seperate terminal run:
-
+- In a seperate terminal run:
 ```
 $ rosrun group5_rwa1 My_node
 ```

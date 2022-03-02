@@ -1,5 +1,5 @@
 /**
- * @file try.cpp
+ * @file My_node.cpp
  * @author Pulkit Mehta (pmehta09@umd.edu)
  * @author Darshan Jain (djain12@umd.edu)
  * @author Jeffin J K (jeffinjk@umd.edu)
@@ -150,8 +150,8 @@ int main(int argc, char ** argv)
     &MyCompetitionClass::order_callback, &comp_class);
 
   // Subscribe to the '/ariac/logical_camera_bins8' topic.
-  ros::Subscriber logical_camera_bins8_subscriber = node.subscribe(
-    "/ariac/logical_camera_station1", 10,
+  ros::Subscriber logical_camera_bins0_subscriber = node.subscribe(
+    "/ariac/logical_camera_bins0", 10,
     &MyCompetitionClass::logical_camera_bins0_callback, &comp_class);
 
   // Subscribe to the '/ariac/logical_camera_station2' topic.
@@ -159,6 +159,22 @@ int main(int argc, char ** argv)
     "/ariac/logical_camera_station2", 10,
     &MyCompetitionClass::logical_camera_station2_callback, &comp_class);
 
+  // ros::Subscriber depth_camera_bins1_subscriber = node.subscribe(
+  //   "/ariac/depth_camera_bins1/depth/image_raw --noarr", 10,
+  //   &MyCompetitionClass::depth_camera_bins1_callback, &comp_class);
+
+  ros::Subscriber proximity_sensor_subscriber = node.subscribe(
+    "/ariac/proximity_sensor_0", 10,
+     &MyCompetitionClass::proximity_sensor0_callback,&comp_class);
+
+  ros::Subscriber break_beam_subscriber = node.subscribe(
+    "/ariac/breakbeam_0", 10,
+    &MyCompetitionClass::breakbeam0_callback, &comp_class);
+
+  ros::Subscriber laser_profiler_subscriber = node.subscribe(
+    "/ariac/laser_profiler_0", 10,
+    &MyCompetitionClass::laser_profiler0_callback,&comp_class);
+  
   // Subscribe to the '/ariac/quality_control_sensor_1' topic.
   ros::Subscriber quality_control_sensor1_subscriber = node.subscribe(
     "/ariac/quality_control_sensor_1", 10,
@@ -178,26 +194,6 @@ int main(int argc, char ** argv)
   ros::Subscriber quality_control_sensor4_subscriber = node.subscribe(
     "/ariac/quality_control_sensor_4", 10,
     &MyCompetitionClass::quality_control_sensor4_callback, &comp_class);   
-
-  // // Subscribe to the '/ariac/agv1/station' topic.
-  // ros::Subscriber agv1_station_subscriber = node.subscribe(
-  //   "/ariac/agv1/station", 10,
-  //   &MyCompetitionClass::agv1_station_callback, &comp_class);
-
-  // // Subscribe to the '/ariac/agv2/station' topic.
-  // ros::Subscriber agv2_station_subscriber = node.subscribe(
-  //   "/ariac/agv2/station", 10,
-  //   &MyCompetitionClass::agv2_station_callback, &comp_class);
-
-  // // Subscribe to the '/ariac/agv3/station' topic.
-  // ros::Subscriber agv3_station_subscriber = node.subscribe(
-  //   "/ariac/agv3/station", 10,
-  //   &MyCompetitionClass::agv3_station_callback, &comp_class);
-
-  // // Subscribe to the '/ariac/agv4/station' topic.
-  // ros::Subscriber agv4_station_subscriber = node.subscribe(
-  //   "/ariac/agv4/station", 10,
-  //   &MyCompetitionClass::agv4_station_callback, &comp_class);
 
   ROS_INFO("Setup complete.");
   start_competition(node);
