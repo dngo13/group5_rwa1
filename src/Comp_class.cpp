@@ -1,6 +1,6 @@
 #include "../include/comp/comp_class.h"
 
-/// Called when a new message is received.
+
 void MyCompetitionClass::current_score_callback(const std_msgs::Float32::ConstPtr & msg)
   {
     if (msg->data != current_score_)
@@ -9,7 +9,6 @@ void MyCompetitionClass::current_score_callback(const std_msgs::Float32::ConstPt
     }
     current_score_ = msg->data;
   }
-/// Called when a new message is received.
 
 void MyCompetitionClass::competition_state_callback(const std_msgs::String::ConstPtr & msg)
   {
@@ -20,24 +19,26 @@ void MyCompetitionClass::competition_state_callback(const std_msgs::String::Cons
     competition_state_ = msg->data;
   }
 
-  /// Called when a new message is received.
 void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order_msg)
   {
-       
     ROS_INFO_STREAM("Received order:\n" << *order_msg);
     
     received_orders_.push_back(*order_msg);
     
     ROS_INFO_STREAM("" << received_orders_.at(0).order_id);
+    
+    // Creating instance of struct Order.
     Order new_order;
     new_order.order_id = order_msg->order_id;
 
     for (const auto &kit: order_msg->kitting_shipments){
+        // Creating instance of struct Kitting.
         Kitting new_kitting;
         new_kitting.agv_id = kit.agv_id;
         new_kitting.shipment_type = kit.shipment_type;
         new_kitting.station_id = kit.station_id;
         for (const auto &Prod: kit.products){
+            // Creating instance of struct Product.
             Product new_kproduct;
             new_kproduct.type = Prod.type;
             new_kproduct.frame_pose = Prod.pose;
@@ -47,6 +48,7 @@ void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order
     }
 
     for (const auto &asmb: order_msg->assembly_shipments){
+        // Creating instance of struct Assembly.
         Assembly new_assembly;
         new_assembly.shipment_type = asmb.shipment_type;
         new_assembly.stations = asmb.station_id;
@@ -60,14 +62,11 @@ void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order
     }
    
     order_list_.push_back(new_order);
-    
   }
 
 std::string MyCompetitionClass::getCompetitionState(){
     return competition_state_;
 }  
-
-  /// Called when a new Order message is received.
 
 void MyCompetitionClass::process_order(){
       auto current_order = order_list_.front();
@@ -95,56 +94,46 @@ std::vector<Product> MyCompetitionClass::get_product_list(){
       return kproduct_list_, aproduct_list_;
   }
 
-  /// Called when a new LogicalCameraImage message from /ariac/logical_camera_station2 is received.
 void MyCompetitionClass::logical_camera_station2_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
 {
   ROS_INFO_STREAM_THROTTLE(10,
     "Logical camera station 2: '" << image_msg->models.size() << "' objects.");
 }
 
-  /// Called when a new LogicalCameraImage message from /ariac/logical_camera_bins8 is received.
 void MyCompetitionClass::logical_camera_bins0_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
 {
   ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins8: '" << image_msg->models.size() << "' objects.");
 }
 
-  /// Called when a new LogicalCameraImage message from /ariac/quality_control_sensor1 is received.
 void MyCompetitionClass::quality_control_sensor1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
 {
   if (!image_msg->models.empty()){
     ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected by Quality sensor 1");
   }
-  // ROS_INFO_STREAM("Callback triggered for Topic /ariac/quality_control_sensor_1");
   
 }
 
-/// Called when a new LogicalCameraImage message from /ariac/quality_control_sensor2 is received.
 void MyCompetitionClass::quality_control_sensor2_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
 {
   if (!image_msg->models.empty()){
     ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected by Quality sensor 2");
   }
-  // ROS_INFO_STREAM("Callback triggered for Topic /ariac/quality_control_sensor_2");
   
 }
 
-/// Called when a new LogicalCameraImage message from /ariac/quality_control_sensor3 is received.
 void MyCompetitionClass::quality_control_sensor3_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
 {
   if (!image_msg->models.empty()){
     ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected by Quality sensor 3");
   }
-  // ROS_INFO_STREAM("Callback triggered for Topic /ariac/quality_control_sensor_3");
 
 }
 
-/// Called when a new LogicalCameraImage message from /ariac/quality_control_sensor4 is received.
 void MyCompetitionClass::quality_control_sensor4_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
 {
   if (!image_msg->models.empty()){
     ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected by Quality sensor 4");
   }
-  // ROS_INFO_STREAM("Callback triggered for Topic /ariac/quality_control_sensor_4");
 }
 
 void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPtr & msg) 
@@ -178,27 +167,22 @@ void MyCompetitionClass::laser_profiler0_callback(const sensor_msgs::LaserScan::
 void MyCompetitionClass::agv1_station_callback(const std_msgs::String::ConstPtr & msg)
 {
   msg->data;
-  // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv1/station");
 }
 
 void MyCompetitionClass::agv2_station_callback(const std_msgs::String::ConstPtr & msg)
 {
   msg->data;
-  // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv2/station");
 }
 
 void MyCompetitionClass::agv3_station_callback(const std_msgs::String::ConstPtr & msg)
 {
   msg->data;
-  // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv3/station");
 }
 
 void MyCompetitionClass::agv4_station_callback(const std_msgs::String::ConstPtr & msg)
 {
   msg->data;
-  // ROS_INFO_STREAM("Callback triggered for Topic /ariac/agv4/station");
 }
-
 
 std::string MyCompetitionClass::get_agv_id()
 {

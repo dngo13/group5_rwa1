@@ -1,6 +1,8 @@
 /**
  * @file try.cpp
  * @author Pulkit Mehta (pmehta09@umd.edu)
+ * @author Darshan Jain (djain12@umd.edu)
+ * @author Jeffin J K (jeffinjk@umd.edu)
  * @brief Node for RWA1
  * @version 0.1
  * @date 2022-02-28
@@ -50,6 +52,7 @@
 #include "../include/comp/comp_class.h"
 #include "../include/agv/agv.h"
 #include "../include/util/util.h"
+
 /**
  * @brief Start the competition by waiting for and then calling the start ROS Service.
  * 
@@ -117,6 +120,45 @@ void as_submit_assembly(ros::NodeHandle & node, std::string s_id, std::string st
     }
 }
 
+// class AssemblyStation{
+//   public:
+//   explicit AssemblyStation(ros::NodeHandle & node){
+
+//     client1 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as1/submit_shipment");
+//     client2 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as2/submit_shipment");
+//     client3 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as3/submit_shipment");
+//     client4 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as4/submit_shipment");
+  
+//   }
+
+//   void submit_assembly(std::string as, std::string st){
+
+//     nist_gear::AssemblyStationSubmitShipment assrv;
+//     assrv.request.shipment_type = st;
+
+//     if (as == "as1"){
+//         client1.call(assrv);
+//     }
+//     if (as == "as2"){
+//         client2.call(assrv);
+//     }
+//     if (as == "as3"){
+//         client3.call(assrv);
+//     }
+//     if (as == "as4"){
+//         client4.call(assrv);
+//     }
+    
+// }
+
+//   private:
+//   ros::ServiceClient client1;
+//   ros::ServiceClient client2;
+//   ros::ServiceClient client3;
+//   ros::ServiceClient client4;
+
+// };
+
 
 int main(int argc, char ** argv)
 {
@@ -145,7 +187,6 @@ int main(int argc, char ** argv)
     "/ariac/orders", 10,
     &MyCompetitionClass::order_callback, &comp_class);
 
-  
   // Subscribe to the '/ariac/logical_camera_bins8' topic.
   ros::Subscriber logical_camera_bins8_subscriber = node.subscribe(
     "/ariac/logical_camera_station1", 10,
@@ -199,8 +240,6 @@ int main(int argc, char ** argv)
   ROS_INFO("Setup complete.");
   start_competition(node);
   Agv agv(node);
-  // std::string state = comp_class.getCompetitionState();
-
 
   // ros::Duration(10);
   std::vector<Order> orders;
@@ -210,43 +249,96 @@ int main(int argc, char ** argv)
   std::string ashipment_type;
   std::string kstation_id;
   std::string astation_id;
+  std::string comp_state;
 
   int counter = 0;
   
+  ros::ServiceClient client1 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as1/submit_shipment");
+  ros::ServiceClient client2 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as2/submit_shipment");
+  ros::ServiceClient client3 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as3/submit_shipment");
+  ros::ServiceClient client4 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as4/submit_shipment");
+   
+  nist_gear::AssemblyStationSubmitShipment asrv;
+
+  bool ship1 = false;
+  bool ship2 = false;
+
   while(ros::ok())
   {
     orders = comp_class.get_order_list();
-    if(orders.size() !=0 && counter!=1)
+    comp_state = comp_class.getCompetitionState();
+
+
+    if(orders.size() !=0)
     {
       agv_id = comp_class.get_agv_id();
       kstation_id = orders.at(0).kitting.at(0).station_id;
       kshipment_type = orders.at(0).kitting.at(0).shipment_type;
       ashipment_type = orders.at(0).assembly.at(0).shipment_type;
+      astation_id = orders.at(0).assembly.at(0).stations;
 
-      agv.submit_shipment(agv_id,kshipment_type,kstation_id);
-      if (agv.get_agv2_station() == kstation_id){
+      asrv.request.shipment_type = ashipment_type;
+
+      if(!ship1){
+        agv.submit_shipment(agv_id,kshipment_type,kstation_id);
+        ship1 = true;
+      } 
+
+      // ROS_INFO_STREAM((agv.get_agv2_station() == std::string("as1")) << '\t' << (agv.get_agv2_station() == astation_id));
+
+      // if (agv.get_agv1_station() == astation_id && agv_id == "agv1"){
+      //    as_submit_assembly(node, astation_id, ashipment_type);
+       
+      // }
+
+      if ((agv.get_agv2_station() == kstation_id && !ship2) /*&& (agv_id == std::string("agv2"))*/){
+        ROS_INFO_STREAM("submit assembly");
         as_submit_assembly(node, astation_id, ashipment_type);
+        ship2 = true;
+       
       }
 
-      
-      
+      if(comp_state == "done"){
+        end_competition(node);
+      }
+      // as_submit_assembly(node, "as1", "order_0_assembly_shipment_0");
+      // if (agv.get_agv1_station() == astation_id && agv_id == "agv1"){
 
-      // ROS_INFO_STREAM("AGV ID : " << agv_id);
-      counter++;
+      // if (astation_id == "as1"){
+      //   client1.call(asrv);
+      // }
+      // if (astation_id == "as2"){
+      //   client2.call(asrv);
+      // }}
+
+      // if (agv.get_agv2_station() == astation_id && agv_id == "agv2"){
+
+      // if (astation_id == "as1"){
+      //   client1.call(asrv);
+      // }
+      // if (astation_id == "as2"){
+      //   client2.call(asrv);
+      // }}
+
+      // if (agv_id == "agv1" && agv.get_agv1_station() == kstation_id){
+      //   as_submit_assembly(node,astation_id, ashipment_type);
+      // }
+      // if (agv_id == "agv2" && agv.get_agv2_station() == kstation_id){
+      //   as_submit_assembly(node,astation_id, ashipment_type);
+      // }
+      // if (agv_id == "agv3" && agv.get_agv3_station() == kstation_id){
+      //   as_submit_assembly(node,astation_id, ashipment_type);
+      // }
+      // if (agv_id == "agv4" && agv.get_agv4_station() == kstation_id){
+      //   as_submit_assembly(node,astation_id, ashipment_type);
+      // }
     }
+
+    // if (agv.get_agv2_station() == kstation_id){
+    //   as_submit_assembly(node, astation_id, ashipment_type);
+    // }
     ros::spinOnce();
   }
-
-
-
-  // ROS_INFO_STREAM("Current order is: " << orders.at(0).order_id);
-  
-  // Order cur_order = orders.at(0);
-  // Kitting cur_kit = cur_order.kitting.at(0);
-  // agv.submit_shipment(cur_kit.agv_id);
-  // std::cout << cur_kit.agv_id << '\n';  
-
-   // This executes callbacks on new data until ctrl-c.
 
   return 0;
 }
