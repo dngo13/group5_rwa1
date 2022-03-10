@@ -6,38 +6,7 @@
 class Agv 
 {
   public:
-     explicit Agv(ros::NodeHandle & node){
-        client1 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv1/submit_shipment");
-        client2 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv2/submit_shipment");
-        client3 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv3/submit_shipment");
-        client4 = node.serviceClient<nist_gear::AGVToAssemblyStation>("/ariac/agv4/submit_shipment");
-        
-
-        // Subscribe to the '/ariac/agv1/state' topic.
-        agv1_state_subscriber = node.subscribe("/ariac/agv1/state", 10, &Agv::agv1_state_callback, this);
-
-        // Subscribe to the '/ariac/agv2/state' topic.
-        agv2_state_subscriber = node.subscribe("/ariac/agv2/state", 10,&Agv::agv2_state_callback, this);
-
-        // Subscribe to the '/ariac/agv3/state' topic.
-        agv3_state_subscriber = node.subscribe("/ariac/agv3/state", 10, &Agv::agv3_state_callback, this);
-
-        // Subscribe to the '/ariac/agv4/state' topic.
-        agv4_state_subscriber = node.subscribe("/ariac/agv4/state", 10, &Agv::agv4_state_callback, this);   
-
-        // Subscribe to the '/ariac/agv1/station' topic.
-        agv1_station_subscriber = node.subscribe("ariac/agv1/station", 1, &Agv::agv1_station_callback, this);
-
-        // Subscribe to the '/ariac/agv2/station' topic.
-        agv2_station_subscriber = node.subscribe("ariac/agv2/station", 1, &Agv::agv2_station_callback, this);
-
-        // Subscribe to the '/ariac/agv3/station' topic.
-        agv3_station_subscriber = node.subscribe("ariac/agv3/station", 1, &Agv::agv3_station_callback, this);
-
-        // Subscribe to the '/ariac/agv4/station' topic.
-        agv4_station_subscriber = node.subscribe("ariac/agv4/station", 1, &Agv::agv4_station_callback, this);
-
-    }
+     explicit Agv(ros::NodeHandle &);
 
     /// Called when a new String message from /ariac/agv1/state is received.
     void agv1_state_callback(const std_msgs::String::ConstPtr & msg);
@@ -95,7 +64,7 @@ class Agv
      * @brief Ships the shipment from agv to assembly station.
      * 
      */
-    void submit_shipment(std::string, std::string, std::string);
+    bool shipAGV(std::string, std::string, std::string);
 
  
   private:
@@ -109,10 +78,10 @@ class Agv
     ros::Subscriber agv2_station_subscriber;
     ros::Subscriber agv3_station_subscriber;
     ros::Subscriber agv4_station_subscriber;
-    ros::ServiceClient client1;
-    ros::ServiceClient client2;
-    ros::ServiceClient client3;
-    ros::ServiceClient client4;
+    ros::ServiceClient agv1_client_;
+    ros::ServiceClient agv2_client_;
+    ros::ServiceClient agv3_client_;
+    ros::ServiceClient agv4_client_;
     std::string agv1_station_;
     std::string agv2_station_;
     std::string agv3_station_;

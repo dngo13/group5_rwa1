@@ -19,6 +19,8 @@
 #include <trajectory_msgs/JointTrajectory.h>
 #include <nist_gear/AGVToAssemblyStation.h>
 #include <nist_gear/AssemblyStationSubmitShipment.h>
+#include <rosgraph_msgs/Clock.h>
+
 
 typedef struct Product
 {
@@ -39,6 +41,7 @@ typedef struct Kitting
     std::string agv_id;
     std::string station_id;
     std::vector<Product> products;
+    bool kitting_done;
 }
 kitting;
 
@@ -51,6 +54,7 @@ typedef struct Assembly
     std::string shipment_type;
     std::string stations;
     std::vector<Product> products;
+    bool asssembly_done;
 }
 assembly;
 
@@ -67,6 +71,7 @@ typedef struct Order
     double announcement_condition_value;
     std::vector<Kitting> kitting;
     std::vector<Assembly> assembly;
+    bool order_processed;
 }
 order;
 

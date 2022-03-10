@@ -84,10 +84,6 @@ sensors:
       xyz: [-10.490274, -4.696062, 1.506952]
       rpy: [3.141593, 1.570792, 0.000000]
 
-
-
-
-
   logical_camera_station1:
     type: logical_camera
     pose:

@@ -5,15 +5,13 @@
 class MyCompetitionClass
 {
 public:
-  explicit MyCompetitionClass(ros::NodeHandle & node)
-  : current_score_(0)
-  {
-    gantry_arm_joint_trajectory_publisher_ = node.advertise<trajectory_msgs::JointTrajectory>(
-      "/ariac/arm1/arm/command", 10);
+  explicit MyCompetitionClass(ros::NodeHandle & node);
 
-    kitting_arm_joint_trajectory_publisher_ = node.advertise<trajectory_msgs::JointTrajectory>(
-      "/ariac/arm2/arm/command", 10);
-  }
+  void init();
+
+  void startCompetition();
+
+  void endCompetition();
 
   /// Called when a new message is received.
   void current_score_callback(const std_msgs::Float32::ConstPtr & msg);
@@ -21,6 +19,26 @@ public:
   /// Called when a new message is received.
   void competition_state_callback(const std_msgs::String::ConstPtr & msg);
 
+  /**
+     * @brief Time since the competition started
+     *
+     * @param msg
+     */
+  void competition_clock_callback(const rosgraph_msgs::Clock::ConstPtr& msg);
+  /**
+   * @brief Get the Clock objectGet
+   *
+   * @return double
+   */
+  double getClock();
+  /**
+   * @brief Get the Start Time object
+   *
+   * @return double
+   */
+  double getStartTime();
+
+  
   /// Accessor for competition state.
   std::string getCompetitionState();
 
@@ -92,10 +110,12 @@ public:
   void agv4_station_callback(const std_msgs::String::ConstPtr & msg);
   
   /// callback for timer
-  void callback60(const ros::TimerEvent& event);
+  void callback(const ros::TimerEvent& event);
   
   /// Accessor for boolean check of timer
   bool get_timer();
+
+  bool change_order_status(bool);
 
   /**
    * @brief Gets the agv id object
@@ -105,17 +125,22 @@ public:
   std::string get_agv_id();
 
 private:
+  ros::NodeHandle node_;
   std::string competition_state_;
   double current_score_;
+  ros::Time competition_clock_;
+  double competition_start_time_;
   ros::Publisher gantry_arm_joint_trajectory_publisher_;
   ros::Publisher kitting_arm_joint_trajectory_publisher_;
   std::vector<nist_gear::Order> received_orders_;
   sensor_msgs::JointState gantry_arm_current_joint_states_;
   sensor_msgs::JointState kitting_arm_current_joint_states_;
+  ros::Subscriber current_score_subscriber_;
+  ros::Subscriber competition_state_subscriber_;
+  ros::Subscriber competition_clock_subscriber_;
   std::vector<Order> order_list_;
-  std::vector<Product> kproduct_list_;
-  std::vector<Product> aproduct_list_;
-  bool wait60{false};
+  bool order_processed_;
+  bool wait{false};
 };
 
 

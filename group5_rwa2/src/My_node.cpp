@@ -53,54 +53,6 @@
 #include "../include/agv/agv.h"
 #include "../include/util/util.h"
 
-/**
- * @brief Start the competition by waiting for and then calling the start ROS Service.
- * 
- * @param node Nodehandle
- */
-void start_competition(ros::NodeHandle & node)
-{
-  // create a Service client for the correct service, i.e. '/ariac/start_competition'.
-  ros::ServiceClient start_client =
-    node.serviceClient<std_srvs::Trigger>("/ariac/start_competition");
-  // if it's not already ready, wait for it to be ready.
-  // calling the Service using the client before the server is ready would fail.
-  if (!start_client.exists())
-  {
-    ROS_INFO("Waiting for the competition to be ready...");
-    start_client.waitForExistence();
-    ROS_INFO("Competition is now ready.");
-  }
-  ROS_INFO("Requesting competition start...");
-  std_srvs::Trigger srv;  // combination of the "request" and the "response".
-  start_client.call(srv);  // call the start Service.
-  // if not successful, print out why.
-  if (!srv.response.success)
-  {
-    ROS_ERROR_STREAM("Failed to start the competition: " << srv.response.message);
-  }
-  else
-  {
-    ROS_INFO("Competition started!");
-  }
-}
- 
-void end_competition(ros::NodeHandle & node)
-{
-  ros::ServiceClient end_client = node.serviceClient<std_srvs::Trigger>("/ariac/end_competition");
-
-  std_srvs::Trigger srv;
-  end_client.call(srv);
-  if (!srv.response.success)
-  {
-    ROS_ERROR_STREAM("Failed to end the competition: " << srv.response.message);
-  }
-  else
-  {
-    ROS_INFO("Competition ended!");
-  }
-  ros::shutdown();
-}
 
 void as_submit_assembly(ros::NodeHandle & node, std::string s_id, std::string st)
 {
@@ -128,20 +80,12 @@ int main(int argc, char ** argv)
   ros::init(argc, argv, "My_node");
 
   ros::NodeHandle node;
+  // ros::AsyncSpinner spinner(2);
+  // spinner.start();
 
   // Instance of custom class from above.
   MyCompetitionClass comp_class(node);
-
-
-  // Subscribe to the '/ariac/current_score' topic.
-  ros::Subscriber current_score_subscriber = node.subscribe(
-    "/ariac/current_score", 10,
-    &MyCompetitionClass::current_score_callback, &comp_class);
-
-  // Subscribe to the '/ariac/competition_state' topic.
-  ros::Subscriber competition_state_subscriber = node.subscribe(
-    "/ariac/competition_state", 10,
-    &MyCompetitionClass::competition_state_callback, &comp_class);
+  comp_class.init();
 
   // %Tag(SUB_CLASS)%
   // Subscribe to the '/ariac/orders' topic.
@@ -196,7 +140,7 @@ int main(int argc, char ** argv)
     &MyCompetitionClass::quality_control_sensor4_callback, &comp_class);   
 
   ROS_INFO("Setup complete.");
-  start_competition(node);
+  
   Agv agv(node);
 
   // ros::Duration(10).sleep();
@@ -208,6 +152,7 @@ int main(int argc, char ** argv)
   std::string kstation_id;
   std::string astation_id;
   std::string comp_state;
+  unsigned short int cur_order_index{0};
   
   ros::ServiceClient client1 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as1/submit_shipment");
   ros::ServiceClient client2 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as2/submit_shipment");
@@ -218,53 +163,69 @@ int main(int argc, char ** argv)
 
   bool ship1 = false;
   bool ship2 = false;
-  ros::Timer timer = node.createTimer(ros::Duration(60), &MyCompetitionClass::callback60, &comp_class);
+  ros::Timer timer = node.createTimer(ros::Duration(1), &MyCompetitionClass::callback, &comp_class);
 
   while(ros::ok())
   {
+  // do{
+  //   orders = comp_class.get_order_list();
+  // }while (orders.size() == 0);
+
     orders = comp_class.get_order_list();
     comp_state = comp_class.getCompetitionState();
-
-
+    auto competition_start_time = comp_class.getClock();
+  
     if(orders.size() !=0 && comp_class.get_timer())
+    // if(comp_class.get_timer())
+    
     {
-      agv_id = comp_class.get_agv_id();
-      kstation_id = orders.at(0).kitting.at(0).station_id;
-      kshipment_type = orders.at(0).kitting.at(0).shipment_type;
-      ashipment_type = orders.at(0).assembly.at(0).shipment_type;
-      astation_id = orders.at(0).assembly.at(0).stations;
+      // && !orders.at(cur_order_index).order_processed Do this inside this loop as it accesses it before asssignment otherwise.
+      // if (!orders.at(cur_order_index).order_processed){
+        agv_id = comp_class.get_agv_id();
+        kstation_id = orders.at(cur_order_index).kitting.at(cur_order_index).station_id;
+        kshipment_type = orders.at(cur_order_index).kitting.at(cur_order_index).shipment_type;
+        ashipment_type = orders.at(cur_order_index).assembly.at(cur_order_index).shipment_type;
+        astation_id = orders.at(cur_order_index).assembly.at(cur_order_index).stations;
 
-      asrv.request.shipment_type = ashipment_type;
+        asrv.request.shipment_type = ashipment_type;
 
-      if(!ship1){
-        agv.submit_shipment(agv_id,kshipment_type,kstation_id);
-        ship1 = true;
-      } 
+        if(!ship1){
+          agv.shipAGV(agv_id,kshipment_type,kstation_id);
+          ship1 = true;
 
-      if (agv.get_agv1_station() == kstation_id && !ship2){
-        as_submit_assembly(node, astation_id, ashipment_type);
-        ship2 = true; 
-      }
-      if (agv.get_agv2_station() == kstation_id && !ship2){
-        as_submit_assembly(node, astation_id, ashipment_type);
-        ship2 = true; 
-      }
-      if (agv.get_agv3_station() == kstation_id && !ship2){
-        as_submit_assembly(node, astation_id, ashipment_type);
-        ship2 = true; 
-      }
-      if (agv.get_agv4_station() == kstation_id && !ship2){
-        as_submit_assembly(node, astation_id, ashipment_type);
-        ship2 = true; 
-      }
+        } 
 
-      if(comp_state == "done"){
-        end_competition(node);
-      }
+        if (agv.get_agv1_station() == kstation_id && !ship2){
+          as_submit_assembly(node, astation_id, ashipment_type);
+          ship2 = true; 
+        }
+        if (agv.get_agv2_station() == kstation_id && !ship2){
+          as_submit_assembly(node, astation_id, ashipment_type);
+          ship2 = true; 
+        }
+        if (agv.get_agv3_station() == kstation_id && !ship2){
+          as_submit_assembly(node, astation_id, ashipment_type);
+          ship2 = true; 
+        }
+        if (agv.get_agv4_station() == kstation_id && !ship2){
+          as_submit_assembly(node, astation_id, ashipment_type);
+          ship2 = true; 
+        }
+
+        // orders.at(cur_order_index).order_processed = true;
+
+        if(comp_state == "done"){
+          comp_class.endCompetition();
+        }
+
+        // cur_order_index += 1;
+      // }
+
     }
+    
     ros::spinOnce();
     } 
-
+  // ros::waitForShutdown();
   return 0;
   
 }
