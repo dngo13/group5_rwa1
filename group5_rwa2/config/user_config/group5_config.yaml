@@ -115,7 +115,7 @@ sensors:
       xyz: [-12.26217, -2.963994, 2.285697]
       rpy: [3.141593, 1.570792, 0.000000]
 
-  logical_camera_station4:
+  logical_camera_belt:
     type: logical_camera
     pose:
       xyz: [-0.530616, 3.130324, 1.835210]
