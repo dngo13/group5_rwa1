@@ -20,15 +20,22 @@
 #include <nist_gear/AGVToAssemblyStation.h>
 #include <nist_gear/AssemblyStationSubmitShipment.h>
 #include <rosgraph_msgs/Clock.h>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/TransformStamped.h>
 
 
 typedef struct Product
 {
-    std::string type;
-    geometry_msgs::Pose frame_pose;
+    std::string type; // model type
+    geometry_msgs::Pose frame_pose; // model pose (in frame)
+    std::string frame; // model frame (e.g., "logical_camera_1_frame")
+    ros::Time time_stamp;
+    std::string id;
+    bool faulty;
+    geometry_msgs::Pose world_pose;
+    geometry_msgs::TransformStamped transformStamped;
 }
 product;
-
 
 
 /**
