@@ -37,9 +37,8 @@ class LogicalCamera
     // Subscribe to the '/ariac/quality_control_sensor_4' topic.
     void quality_control_sensor4_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
     
-    std::vector<Product> get_product_list0();
+    std::vector<Product> get_product_list();
 
-    std::vector<Product> get_product_list1();
 
     private:
     ros::Subscriber logical_camera_bins0_subscriber;
@@ -52,9 +51,7 @@ class LogicalCamera
     ros::Subscriber quality_control_sensor2_subscriber;
     ros::Subscriber quality_control_sensor3_subscriber;
     ros::Subscriber quality_control_sensor4_subscriber;
-    std::vector<Product> product_list0_;
-    std::vector<Product> product_list1_;
-
+    std::vector<Product> product_list_;
 
 
 

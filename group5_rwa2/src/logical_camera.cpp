@@ -4,7 +4,7 @@ LogicalCamera::LogicalCamera(ros::NodeHandle & node){
 
     logical_camera_bins0_subscriber = node.subscribe("/ariac/logical_camera_bins0", 10, &LogicalCamera::logical_camera_bins0_callback, this);
 
-    logical_camera_bins1_subscriber = node.subscribe("/ariac/logical_camera_bins1", 10, &LogicalCamera::logical_camera_bins0_callback, this);
+    logical_camera_bins1_subscriber = node.subscribe("/ariac/logical_camera_bins1", 10, &LogicalCamera::logical_camera_bins1_callback, this);
 
     logical_camera_station1_subscriber = node.subscribe("/ariac/logical_camera_station1", 10, &LogicalCamera::logical_camera_station1_callback, this);
 
@@ -32,32 +32,38 @@ void LogicalCamera::logical_camera_bins0_callback(const nist_gear::LogicalCamera
        product.type = model.type; 
        product.frame_pose = model.pose; 
        product.frame = "logical_camera_bins0_" + model.type + "_frame";
-       product_list0_.push_back(product);
+       product_list_.push_back(product);
      }
      
 }
 
 
-std::vector<Product> LogicalCamera::get_product_list0(){
-  return product_list0_;
-}
+
 
 
 void LogicalCamera::logical_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
      ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins1: '" << image_msg->models.size() << "' objects.");
-     for (const auto &model: image_msg->models){
+    //  ROS_INFO_STREAM(image_msg->models.at(0).type);
+     
+    //  for (const auto &model: image_msg->models){
+      for(int i=0; i< image_msg->models.size(); i++){
+      //  ROS_INFO("hello");
+      // ROS_INFO_STREAM(image_msg->models.at(i).type);
+
        Product product;
-       product.type = model.type; 
-       product.frame_pose = model.pose; 
-       product.frame = "logical_camera_bins0_" + model.type + "_frame";
-       product_list1_.push_back(product);
-      
+       product.type = image_msg->models.at(i).type; 
+       product.frame_pose = image_msg->models.at(i).pose; 
+       product.frame = "logical_camera_bins0_" + image_msg->models.at(i).type + "_frame";
+       product_list_.push_back(product);
+      //  ROS_INFO("part: ", product.type); 
+        // ROS_INFO_STREAM(product.type);
+
      } 
+
 }
 
-
-std::vector<Product> LogicalCamera::get_product_list1(){
-  return product_list1_;
+std::vector<Product> LogicalCamera::get_product_list(){
+  return product_list_;
 }
 
 

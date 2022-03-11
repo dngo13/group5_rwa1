@@ -214,7 +214,7 @@ void MyCompetitionClass::laser_profiler0_callback(const sensor_msgs::LaserScan::
       });
   if (number_of_valid_ranges > 0)
   {
-    ROS_INFO_THROTTLE(1, "Laser profiler sees something.");
+    ROS_INFO_THROTTLE(10, "Laser profiler sees something.");
   }
 }
 

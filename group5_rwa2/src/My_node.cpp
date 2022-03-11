@@ -75,7 +75,6 @@ void as_submit_assembly(ros::NodeHandle & node, std::string s_id, std::string st
 }
 
 
-
 int main(int argc, char ** argv)
 {
   // Last argument is the default name of the node.
@@ -143,34 +142,32 @@ int main(int argc, char ** argv)
 
  
   // ros::Timer timer = node.createTimer(ros::Duration(1), &MyCompetitionClass::callback, &comp_class);
+  bool demo = true;
   
-    
+  
   do{
     orders = comp_class.get_order_list();
+    ROS_INFO("order: ", orders.at(0).kitting.at(0).agv_id);
   }while (orders.size() == 0);
 
-  // do{
-  //   products = cam.get_product_list0();
-  // }while (products.size() == 0);
+  products = cam.get_product_list();
   
   // ROS_INFO("Out First product: ",products.at(0).type);
   
   // if(orders.size() !=0 && comp_class.get_timer())
   if(orders.size() !=0)
   {
-    ROS_INFO("order: ", orders.at(0).kitting.at(0).agv_id);
+    // ROS_INFO("order: ", orders.at(0).kitting.at(0).agv_id);
   //   // ROS_INFO("First product: ",products.at(0).type);
   //   // ROS_INFO("Second product: ",products.at(1).type);
   //   // ROS_INFO("First product: ",products.at(2).type);
   //   // ROS_INFO("First product: ",products.at(3).type);
+  }
 
-  
- 
-
+  if(products.size() != 0){
+    ROS_INFO_STREAM(products.at(0).type);
   }
   
   ros::waitForShutdown();
-  
-  return 0;
   
 }
