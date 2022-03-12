@@ -28,6 +28,12 @@ void MyCompetitionClass::init() {
     "/ariac/current_score", 10,
     &MyCompetitionClass::current_score_callback, this);
 
+    // Subscribe to the '/ariac/orders' topic.
+    orders_subscriber = node_.subscribe(
+    "/ariac/orders", 10,
+    &MyCompetitionClass::order_callback, this);
+    
+    
     // start the competition
     startCompetition();
 }
@@ -174,53 +180,12 @@ std::vector<Order> MyCompetitionClass::get_order_list(){
       return order_list_;
   }
 
-void MyCompetitionClass::logical_camera_station2_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
-{
-  ROS_INFO_STREAM_THROTTLE(10,
-    "Logical camera station 2: '" << image_msg->models.size() << "' objects.");
-}
+// void MyCompetitionClass::depth_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
+// {
+//   ROS_INFO_STREAM_THROTTLE(10,
+//     "depth camera bin1 detected something ");
+// } 
 
-void MyCompetitionClass::depth_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
-{
-  ROS_INFO_STREAM_THROTTLE(10,
-    "depth camera bin1 detected something ");
-} 
-
-void MyCompetitionClass::logical_camera_bins0_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
-{
-  ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins8: '" << image_msg->models.size() << "' objects.");
-}
-
-void MyCompetitionClass::quality_control_sensor1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
-{
-  if (!image_msg->models.empty()){
-    ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected by Quality sensor 1");
-  }
-  
-}
-
-void MyCompetitionClass::quality_control_sensor2_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
-{
-  if (!image_msg->models.empty()){
-    ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected by Quality sensor 2");
-  }
-  
-}
-
-void MyCompetitionClass::quality_control_sensor3_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
-{
-  if (!image_msg->models.empty()){
-    ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected by Quality sensor 3");
-  }
-
-}
-
-void MyCompetitionClass::quality_control_sensor4_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
-{
-  if (!image_msg->models.empty()){
-    ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected by Quality sensor 4");
-  }
-}
 
 void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPtr & msg) 
   {
@@ -249,7 +214,7 @@ void MyCompetitionClass::laser_profiler0_callback(const sensor_msgs::LaserScan::
       });
   if (number_of_valid_ranges > 0)
   {
-    ROS_INFO_THROTTLE(1, "Laser profiler sees something.");
+    ROS_INFO_THROTTLE(10, "Laser profiler sees something.");
   }
 }
 

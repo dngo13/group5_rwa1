@@ -70,6 +70,9 @@ public:
 
   /// Called when a new LogicalCameraImage message from /ariac/logical_camera_bins0 is received.
   void logical_camera_bins0_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
+  
+  /// Called when a new LogicalCameraImage message from /ariac/logical_camera_bins1 is received.
+  void logical_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
 
   void depth_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
 
@@ -111,7 +114,7 @@ public:
   
   /// callback for timer
   void callback(const ros::TimerEvent& event);
-  
+
   /// Accessor for boolean check of timer
   bool get_timer();
 
@@ -138,6 +141,7 @@ private:
   ros::Subscriber current_score_subscriber_;
   ros::Subscriber competition_state_subscriber_;
   ros::Subscriber competition_clock_subscriber_;
+  ros::Subscriber orders_subscriber;
   std::vector<Order> order_list_;
   bool order_processed_;
   bool wait{false};

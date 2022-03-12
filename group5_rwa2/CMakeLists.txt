@@ -140,6 +140,7 @@ add_executable(My_node src/My_node.cpp
                   src/Comp_class.cpp
                   src/Agv.cpp
                   src/util.cpp
+                  src/logical_camera.cpp
                   )
 
 ## Rename C++ executable without prefix
