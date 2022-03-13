@@ -149,6 +149,7 @@ int main(int argc, char ** argv)
   bool order1_models_found = false;
   bool not_found = false;
   bool is_insufficient = false;
+  bool blackout = true;
   ros::Time time;
   
   while(ros::ok){
@@ -180,7 +181,7 @@ int main(int argc, char ** argv)
             }
             for (auto model: logcam){
               if(product.type == model.type){
-                ROS_INFO_STREAM("Pose in \world frame: " << '\n' << model.world_pose);
+                ROS_INFO_STREAM("Pose in world frame: " << '\n' << model.world_pose);
               }
             }
           }
@@ -245,7 +246,6 @@ int main(int argc, char ** argv)
   // }
 
   if (!parts_not_found.empty() && !not_found){
-    // ROS_INFO("Aa gaya");
     not_found = true;
     time = ros::Time::now();
     is_insufficient = true;
@@ -262,7 +262,17 @@ int main(int argc, char ** argv)
       ROS_INFO("Insufficient parts");
       is_insufficient = false;
     }
-
+  
+  // if(!cam.get_blackout()){
+  //   ROS_INFO_STREAM_THROTTLE(1,"Sensor_Blackout");
+  // }
+  // cam.setter_blackout(false);
+  // ros::spinOnce();
+  // blackout = cam.CheckBlackout();
+  // cam.logflag1 = 0;
+  // cam.logflag2 = 0;
+  // cam.logflag1 = false;
+  // cam.logflag2 = false;
 
   }
   // if(products.size() != 0){
@@ -270,5 +280,6 @@ int main(int argc, char ** argv)
   // }
   
   ros::waitForShutdown();
+  comp_class.endCompetition();
   
 }

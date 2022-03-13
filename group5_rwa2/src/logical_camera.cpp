@@ -24,8 +24,11 @@ LogicalCamera::LogicalCamera(ros::NodeHandle & node)
 }
 
 void LogicalCamera::logical_camera_bins0_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-     ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins0: '" << image_msg->models.size() << "' objects.");
-  
+    //  ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins0: '" << image_msg->models.size() << "' objects.");
+    //  if(image_msg->models.empty()){
+    //    logflag1 = false;
+    //  } 
+    logflag_ = true;
      if (get_bins0)
      { 
 
@@ -69,13 +72,6 @@ void LogicalCamera::logical_camera_bins0_callback(const nist_gear::LogicalCamera
         product_list0_.push_back(product);
         camera_parts_list.at(0).push_back(product);
 
-        // ROS_INFO_STREAM("shera :" << product_list0_.at(i).frame);
-
-        // if (order_list_.at(0).kitting.at(0).shipment_type == product.type){
-        //  find_part(product.type);
-        // ROS_INFO_STREAM("hai" << i);
-        // }
-
         i++;
         part_index++; 
       }
@@ -104,13 +100,24 @@ std::vector<Product> LogicalCamera::get_product_list0(){
   return product_list0_;
 }
 
+bool LogicalCamera::get_blackout(){
+  ROS_INFO_STREAM_THROTTLE(1, logflag_);
+  return logflag_;
+}
+
+void LogicalCamera::setter_blackout(bool flag){
+  logflag_ = flag;
+}
 
 void LogicalCamera::logical_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-     ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins1: '" << image_msg->models.size() << "' objects.");
-    
+    //  ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins1: '" << image_msg->models.size() << "' objects.");
+    // if(image_msg->models.empty()){
+    //    logflag2 = false;
+    //  } 
+    logflag_ = true;
+
     if (get_bins1)
      { 
-
       // tf2_ros::Buffer tfBuffer;
       // tf2_ros::TransformListener tfListener(tfBuffer);
 
@@ -210,28 +217,53 @@ void LogicalCamera::quality_control_sensor4_callback(const nist_gear::LogicalCam
   }
 }
 
+// bool LogicalCamera::CheckBlackout(){
+//   return (logflag1 & logflag2);
+// }
 
+// void LogicalCamera::setter()
+// {
+//   logflag1 = 0;
+// }
+
+// void LogicalCamera::setter1()
+// {
+//   logflag1 = 1;
+// }
 // SENSOR BLACKOUT
-// std::string LogicalCamera::CheckBlackout(){
-//   flag1 = "yes";
-//   flag2 = "yes";
+// bool LogicalCamera::CheckBlackout(){
+//   // logflag1 = false;
+//   // logflag2 = false;
+//   setter();
+//   ROS_INFO_STREAM_THROTTLE(1,"before");
+//   ROS_INFO_STREAM_THROTTLE(1,(logflag1));
 
-//   quality_control_sensor1_subscriber_b1 = node_.subscribe("/ariac/quality_control_sensor_1", 2, &LogicalCamera::callback_b1, this);
+//   quality_control_sensor1_subscriber_b1 = node_.subscribe("/ariac/logical_camera_bins0", 2, &LogicalCamera::callback_b1, this);
 
-//   quality_control_sensor2_subscriber_b2 = node_.subscribe("/ariac/quality_control_sensor_2", 2, &LogicalCamera::callback_b2, this);
+//   // quality_control_sensor2_subscriber_b2 = node_.subscribe("/ariac/quality_control_sensor_2", 2, &LogicalCamera::callback_b2, this);
+  
+//   ROS_INFO_STREAM_THROTTLE(1,"after");
 
-//   if(flag1 == "no" && flag2 == "no"){
-//     return "no";
+//   ROS_INFO_STREAM_THROTTLE(1,(logflag1));
+//   if((logflag1) == 0)
+//   {
+//     return true;
 //   }
-//   else{
-//     return "yes";
+//   else
+//   {
+//     return false;
 //   }
+//   // return (logflag1 + logflag2);
 //   }
 
 // void LogicalCamera::callback_b1(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-//   flag1 = "no";
+//   ROS_INFO_STREAM_THROTTLE(1,"in b1");
+//   setter1();
+//   ROS_INFO_STREAM_THROTTLE(1,(logflag1));
 // }
+// // void LogicalCamera::callback_b2(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
+// //   ROS_INFO_STREAM_THROTTLE(1,"b2");
+// //   logflag2 = 1;
+// //   ROS_INFO_STREAM_THROTTLE(1,logflag2);
+// // }
 
-// void LogicalCamera::callback_b2(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-//   flag2 = "no";
-// }
