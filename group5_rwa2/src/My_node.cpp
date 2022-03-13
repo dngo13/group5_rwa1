@@ -147,6 +147,9 @@ int main(int argc, char ** argv)
  
   bool order0_models_found = false;
   bool order1_models_found = false;
+  bool not_found = false;
+  bool is_insufficient = false;
+  ros::Time time;
   
   while(ros::ok){
   // do{
@@ -215,11 +218,11 @@ int main(int argc, char ** argv)
             }
             for (auto model: logcam){
               if(product.type == model.type){
-                ROS_INFO_STREAM("Pose in \world frame: " << '\n' << model.world_pose);
+                ROS_INFO_STREAM("Pose of " << model.type <<  " in \world frame: " << '\n' << model.world_pose);
               }
-              if(product.type != model.type){
-                parts_not_found.push_back(model.type);                
-                
+              else{
+                parts_not_found.push_back(model.type); 
+                // ROS_INFO_STREAM(product.type << "not found");               
               }
             }
           }
@@ -241,13 +244,25 @@ int main(int argc, char ** argv)
   //   ROS_INFO_STREAM_THROTTLE(2,"Sensor Blackout");
   // }
 
-  if (!parts_not_found.empty()){
-    ros::Timer timer = node.createTimer(ros::Duration(3), &MyCompetitionClass::callback, &comp_class);
-    if(comp_class.get_timer()){
+  if (!parts_not_found.empty() && !not_found){
+    // ROS_INFO("Aa gaya");
+    not_found = true;
+    time = ros::Time::now();
+    is_insufficient = true;
+
+    // ros::Timer timer = node.createTimer(ros::Duration(3), &MyCompetitionClass::callback, &comp_class);
+    ROS_INFO_STREAM("Timer started");
+  }
+  ros::Time cur_time = ros::Time::now();
+
+  ros::Duration dt = cur_time - time;
+
+  if(dt.toSec() > 20 && is_insufficient){
+
       ROS_INFO("Insufficient parts");
+      is_insufficient = false;
     }
 
-  }
 
   }
   // if(products.size() != 0){

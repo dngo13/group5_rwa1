@@ -263,9 +263,9 @@ models_over_bins:
   #       rpy: [0, 0, 0]
   
 
-sensor_blackout:
-  product_count: 2 #sensor blackout triggered after first product is placed on any AGV
-  duration: 10
+# sensor_blackout:
+#   product_count: 2 #sensor blackout triggered after first product is placed on any AGV
+#   duration: 10
 
 # faulty_products:
 #   - assembly_battery_blue_5
