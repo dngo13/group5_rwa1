@@ -1,5 +1,5 @@
 # group5_rwa2
-# Package for ENPM 663-RWA1. 
+# Package for ENPM 663-RWA2. 
 
 Authors:
 Darshan Jain, Pulkit Mehta, Jeffin Kachappilly
