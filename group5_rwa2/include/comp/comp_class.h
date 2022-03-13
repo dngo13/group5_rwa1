@@ -127,6 +127,35 @@ public:
    */
   std::string get_agv_id();
 
+  std::vector<Product> get_product_list0();
+
+  std::vector<Product> get_product_list1();
+
+  bool find_part(std::string);
+
+  bool get_bins0{true};
+
+  bool get_bins1{true};
+
+  std::vector<Product> product_list0_;
+  
+  std::vector<Product> product_list1_;
+
+  //  ----------------------------------
+
+  void performTransform(Product &);
+
+  void checkFaulty(ros::NodeHandle &, std::string);
+
+  std::array<std::vector<Product>,2> fetchParts();
+
+  std::array<std::vector<Product>,2> camera_parts_list;
+
+  // tf2_ros::Buffer tfBuffer;
+
+  // tf2_ros::TransformListener tfListener;
+
+
 private:
   ros::NodeHandle node_;
   std::string competition_state_;
@@ -145,6 +174,7 @@ private:
   std::vector<Order> order_list_;
   bool order_processed_;
   bool wait{false};
+  
 };
 
 
