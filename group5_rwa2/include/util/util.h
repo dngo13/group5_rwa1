@@ -26,7 +26,6 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h> //--needed for tf2::Matrix3x3
 
 
-
 typedef struct Product
 {
     std::string type; // model type

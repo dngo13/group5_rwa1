@@ -61,10 +61,7 @@ void MyCompetitionClass::competition_clock_callback(const rosgraph_msgs::Clock::
     competition_clock_ = msg->clock;
 }
 
-/**
- * @brief Start the competition by waiting for and then calling the start ROS Service.
- * 
- */
+
 void MyCompetitionClass::startCompetition()
 {
   // create a Service client for the correct service, i.e. '/ariac/start_competition'.
@@ -130,8 +127,6 @@ void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order
     ROS_INFO_STREAM("Received order:\n" << *order_msg);
     
     received_orders_.push_back(*order_msg);
-    
-    // ROS_INFO_STREAM("" << received_orders_.at(0).order_id);
     
     // Creating instance of struct Order.
     Order new_order;
@@ -224,180 +219,6 @@ void MyCompetitionClass::laser_profiler0_callback(const sensor_msgs::LaserScan::
   }
 }
 
-// void MyCompetitionClass::logical_camera_bins0_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-//      ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins0: '" << image_msg->models.size() << "' objects.");
-  
-//      if (get_bins0)
-//      { 
-
-//       tf2_ros::Buffer tfBuffer;
-//       tf2_ros::TransformListener tfListener(tfBuffer);
-
-//       //  ros::Rate rate(10);
-//       ros::Duration timeout(5.0);
-
-//       unsigned short int i{0};
-//       unsigned short int part_index{1}; 
-//       while(i < image_msg->models.size())
-//       {
-  
-//         std::string product_type = image_msg->models.at(i).type;
-//         if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-//           part_index = 1;
-//         }
-//         Product product;
-//         product.type = product_type;
-//         product.frame_pose = image_msg->models.at(i).pose;
-//         product.id = std::to_string(part_index);
-        
-//         std::string frame_name = "logical_camera_bins0_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-//         product.frame = frame_name;        
-        
-//         geometry_msgs::TransformStamped transformStamped;
-
-//         transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-//         product.time_stamp = ros::Time(0);
-//         product.world_pose.position.x = transformStamped.transform.translation.x;
-//         product.world_pose.position.y = transformStamped.transform.translation.y;
-//         product.world_pose.position.z = transformStamped.transform.translation.z;
-
-//         product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-//         product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-//         product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-//         product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
-//         product_list0_.push_back(product);
-//         camera_parts_list.at(0).push_back(product);
-
-//         // ROS_INFO_STREAM("shera :" << product_list0_.at(i).frame);
-
-//         // if (order_list_.at(0).kitting.at(0).shipment_type == product.type){
-//         //  find_part(product.type);
-//         // ROS_INFO_STREAM("hai" << i);
-//         // }
-
-//         i++;
-//         part_index++; 
-//       }
-      
-//      get_bins0 = false; 
-//      }
-
-// }
-
-// std::array<std::vector<Product>,2> MyCompetitionClass::fetchParts(){
-//   ros::Subscriber logical_camera_bins0_subscriber = node_.subscribe(
-//     "/ariac/logical_camera_bins0", 10, 
-//     &MyCompetitionClass::logical_camera_bins0_callback, this);
-
-//   ros::Subscriber logical_camera_bins1_subscriber = node_.subscribe(
-//     "/ariac/logical_camera_bins1", 10, 
-//     &MyCompetitionClass::logical_camera_bins1_callback, this);
-
-//   ros::Duration(0.5).sleep();
-//   return camera_parts_list;  
-
-// }
-
-
-
-// std::vector<Product> MyCompetitionClass::get_product_list0(){
-//   return product_list0_;
-// }
-
-
-// bool MyCompetitionClass::find_part(std::string type){
-  
-//   // ROS_INFO("find_part called");
-//   // ROS_INFO("Size of list: ", product_list0_.size());
-//   for (int i = 0; i < product_list0_.size(); i++){
-//     // ROS_INFO("in list: ",i);
-//     if (type == product_list0_.at(i).type){
-//       ROS_INFO("Pose in /world frame: [%f,%f,%f] [%f,%f,%f,%f]",
-//       product_list0_.at(i).world_pose.position.x,
-//       product_list0_.at(i).world_pose.position.y,
-//       product_list0_.at(i).world_pose.position.z,
-//       product_list0_.at(i).world_pose.orientation.x,
-//       product_list0_.at(i).world_pose.orientation.y,
-//       product_list0_.at(i).world_pose.orientation.z,
-//       product_list0_.at(i).world_pose.orientation.w
-//       );
-//       return true;
-//     }
-
-//   }
-
-
-// }
-
-// void MyCompetitionClass::logical_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-//      ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins1: '" << image_msg->models.size() << "' objects.");
-    
-//     if (get_bins1)
-//      { 
-
-//       tf2_ros::Buffer tfBuffer;
-//       tf2_ros::TransformListener tfListener(tfBuffer);
-
-//       //  ros::Rate rate(10);
-//       ros::Duration timeout(5.0);
-
-//       unsigned short int i{0};
-//       unsigned short int part_index{1}; 
-//       while(i < image_msg->models.size())
-//       {
-  
-//         std::string product_type = image_msg->models.at(i).type;
-//         if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-//           part_index = 1;
-//         }
-//         Product product;
-//         product.type = product_type;
-//         product.frame_pose = image_msg->models.at(i).pose;
-//         product.id = std::to_string(part_index);
-        
-//         std::string frame_name = "logical_camera_bins1_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-//         product.frame = frame_name;        
-        
-//         geometry_msgs::TransformStamped transformStamped;
-
-//         transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-//         product.time_stamp = ros::Time(0);
-//         product.world_pose.position.x = transformStamped.transform.translation.x;
-//         product.world_pose.position.y = transformStamped.transform.translation.y;
-//         product.world_pose.position.z = transformStamped.transform.translation.z;
-
-//         product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-//         product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-//         product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-//         product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
-//         product_list1_.push_back(product);
-//         camera_parts_list.at(1).push_back(product);
-
-//         // ROS_INFO_STREAM("shera :" << product_list0_.at(i).frame);
-
-//         // if (order_list_.at(0).kitting.at(0).shipment_type == product.type){
-//         //  find_part(product.type);
-//         // ROS_INFO_STREAM("hai" << i);
-//         // }
-
-//         i++;
-//         part_index++; 
-//       }
-      
-//      get_bins1 = false; 
-//      }
-
-// }
-
-
-std::vector<Product> MyCompetitionClass::get_product_list1(){
-  return product_list1_;
-}
-
 void MyCompetitionClass::agv1_station_callback(const std_msgs::String::ConstPtr & msg)
 {
   msg->data;
@@ -431,6 +252,3 @@ bool MyCompetitionClass::get_timer(){
   return wait;
 }
 
-bool MyCompetitionClass::change_order_status(bool value){
-  order_processed_ = value;
-} 

@@ -3,9 +3,9 @@
  * @author Pulkit Mehta (pmehta09@umd.edu)
  * @author Darshan Jain (djain12@umd.edu)
  * @author Jeffin J K (jeffinjk@umd.edu)
- * @brief Node for RWA1
+ * @brief Node for RWA2
  * @version 0.1
- * @date 2022-02-28
+ * @date 2022-03-05
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -53,7 +53,6 @@
 #include "../include/agv/agv.h"
 #include "../include/util/util.h"
 #include "../include/camera/logical_camera.h"
-
 
 
 void as_submit_assembly(ros::NodeHandle & node, std::string s_id, std::string st)
@@ -106,20 +105,9 @@ int main(int argc, char ** argv)
     "/ariac/laser_profiler_0", 10,
     &MyCompetitionClass::laser_profiler0_callback,&comp_class);
   
-  // ros::Subscriber logical_camera_bins0_subscriber = node.subscribe(
-  //   "/ariac/logical_camera_bins0", 10, 
-  //   &MyCompetitionClass::logical_camera_bins0_callback, &comp_class);
-
-  // ros::Subscriber logical_camera_bins1_subscriber = node.subscribe(
-  //   "/ariac/logical_camera_bins1", 10, 
-  //   &MyCompetitionClass::logical_camera_bins1_callback, &comp_class);
-
-  
   ROS_INFO("Setup complete.");
   
   Agv agv(node);
-
-  // ros::Duration(10).sleep();
 
   std::vector<Order> orders;
   std::vector<Kitting> kittings;
@@ -153,15 +141,11 @@ int main(int argc, char ** argv)
   ros::Time time;
   
   while(ros::ok){
-  // do{
-  //   orders = comp_class.get_order_list();
-  // }while (orders.size() == 0);
+
   orders = comp_class.get_order_list();
 
 
-  // if(products.size() !=0 && comp_class.get_timer()){}
   if (!order0_models_found){
-  // for (int i = 0; i < orders.size(); i++){
     kittings = orders.at(0).kitting;
     for(auto &kit: orders.at(0).kitting){
       kshipment_type = kit.shipment_type;
@@ -177,7 +161,6 @@ int main(int argc, char ** argv)
           auto list = cam.findparts();
           for (auto logcam: list){
             if(logcam.empty() == true){
-              ROS_INFO("No part found");
             }
             for (auto model: logcam){
               if(product.type == model.type){
@@ -188,18 +171,11 @@ int main(int argc, char ** argv)
           flag2 = false;
         }
       }
-        // ROS_INFO_STREAM("Shipment type: " << part.type);
-        // products = cam.get_product_list0();
-        // comp_class.find_part(part.type);
-
-      
-      // ROS_INFO("order: ", orders.at(0).kitting.at(0).agv_id);
     }
     order0_models_found = true;
   }
 
   if (orders.size() > 1 && !order1_models_found){
-  // for (int i = 0; i < orders.size(); i++){
     kittings = orders.at(1).kitting;
     for(auto &kit: orders.at(1).kitting){
       kshipment_type = kit.shipment_type;
@@ -215,46 +191,32 @@ int main(int argc, char ** argv)
           auto list = cam.findparts();
           for (auto logcam: list){
             if(logcam.empty() == true){
-              ROS_INFO("No part found");
             }
             for (auto model: logcam){
               if(product.type == model.type){
-                ROS_INFO_STREAM("Pose of " << model.type <<  " in \world frame: " << '\n' << model.world_pose);
+                ROS_INFO_STREAM("Pose in world frame: " << '\n' << model.world_pose);
               }
               else{
-                parts_not_found.push_back(model.type); 
-                // ROS_INFO_STREAM(product.type << "not found");               
+                parts_not_found.push_back(model.type);            
               }
             }
           }
           flag2 = false;
         }
       }
-        // ROS_INFO_STREAM("Shipment type: " << part.type);
-        // products = cam.get_product_list0();
-        // comp_class.find_part(part.type);
-
-      
-      // ROS_INFO("order: ", orders.at(0).kitting.at(0).agv_id);
     }
     order1_models_found = true;
   }
-
-  // SENSOR BLACKOUT
-  // if (cam.CheckBlackout() == "yes"){
-  //   ROS_INFO_STREAM_THROTTLE(2,"Sensor Blackout");
-  // }
 
   if (!parts_not_found.empty() && !not_found){
     not_found = true;
     time = ros::Time::now();
     is_insufficient = true;
 
-    // ros::Timer timer = node.createTimer(ros::Duration(3), &MyCompetitionClass::callback, &comp_class);
-    ROS_INFO_STREAM("Timer started");
+    ROS_INFO_STREAM("Timer started to check if it is an insufficient part challenge.");
   }
-  ros::Time cur_time = ros::Time::now();
 
+  ros::Time cur_time = ros::Time::now();
   ros::Duration dt = cur_time - time;
 
   if(dt.toSec() > 20 && is_insufficient){
@@ -264,22 +226,9 @@ int main(int argc, char ** argv)
     }
   
   // if(!cam.get_blackout()){
-  //   ROS_INFO_STREAM_THROTTLE(1,"Sensor_Blackout");
+  //   ROS_INFO("Sensor_Blackout");
   // }
-  // cam.setter_blackout(false);
-  // ros::spinOnce();
-  // blackout = cam.CheckBlackout();
-  // cam.logflag1 = 0;
-  // cam.logflag2 = 0;
-  // cam.logflag1 = false;
-  // cam.logflag2 = false;
-
   }
-  // if(products.size() != 0){
-  //   ROS_INFO_STREAM(products.at(0).type);
-  // }
   
-  ros::waitForShutdown();
-  comp_class.endCompetition();
-  
+  ros::waitForShutdown();  
 }

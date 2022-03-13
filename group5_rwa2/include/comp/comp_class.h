@@ -7,10 +7,22 @@ class MyCompetitionClass
 public:
   explicit MyCompetitionClass(ros::NodeHandle & node);
 
+  /**
+   * @brief Initialize the competition.
+   * 
+   */
   void init();
 
+  /**
+ * @brief Start the competition by waiting for and then calling the start ROS Service.
+ * 
+ */
   void startCompetition();
 
+  /**
+   * @brief End the competition by calling the service.
+   * 
+   */
   void endCompetition();
 
   /// Called when a new message is received.
@@ -18,7 +30,6 @@ public:
 
   /// Called when a new message is received.
   void competition_state_callback(const std_msgs::String::ConstPtr & msg);
-
   /**
      * @brief Time since the competition started
      *
@@ -38,13 +49,11 @@ public:
    */
   double getStartTime();
 
-  
   /// Accessor for competition state.
   std::string getCompetitionState();
 
   /// Called when a new Order message is received.
   void order_callback(const nist_gear::Order::ConstPtr & order_msg);
-
   /**
    * @brief Stores the kitting and assembly products in seperate lists. 
    * 
@@ -65,28 +74,8 @@ public:
    */
   std::vector<Product> get_product_list();
  
-  /// Called when a new LogicalCameraImage message from /ariac/logical_camera_station2 is received.
-  void logical_camera_station2_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
-
-  /// Called when a new LogicalCameraImage message from /ariac/logical_camera_bins0 is received.
-  void logical_camera_bins0_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
-  
-  /// Called when a new LogicalCameraImage message from /ariac/logical_camera_bins1 is received.
-  void logical_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
-
+  // Called when a new LogicalCameraImage message from /ariac/depth_camera_bins1 is received.
   void depth_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
-
-  /// Called when a new LogicalCameraImage message from /ariac/quality_control_sensor1 is received.
-  void quality_control_sensor1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
-
-  /// Called when a new LogicalCameraImage message from /ariac/quality_control_sensor2 is received.
-  void quality_control_sensor2_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
-
-  /// Called when a new LogicalCameraImage message from /ariac/quality_control_sensor3 is received.
-  void quality_control_sensor3_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
-  
-  /// Called when a new LogicalCameraImage message from /ariac/quality_control_sensor4 is received.
-  void quality_control_sensor4_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
   
   /// Called when a new Proximity message from /ariac/breakbeam0 is received.
   void breakbeam0_callback(const nist_gear::Proximity::ConstPtr & msg);
@@ -118,8 +107,6 @@ public:
   /// Accessor for boolean check of timer
   bool get_timer();
 
-  bool change_order_status(bool);
-
   /**
    * @brief Gets the agv id object
    * 
@@ -127,33 +114,11 @@ public:
    */
   std::string get_agv_id();
 
-  std::vector<Product> get_product_list0();
-
-  std::vector<Product> get_product_list1();
-
-  bool find_part(std::string);
-
-  bool get_bins0{true};
-
-  bool get_bins1{true};
-
-  std::vector<Product> product_list0_;
-  
-  std::vector<Product> product_list1_;
-
-  //  ----------------------------------
-
-  void performTransform(Product &);
-
-  void checkFaulty(ros::NodeHandle &, std::string);
-
-  std::array<std::vector<Product>,2> fetchParts();
-
-  std::array<std::vector<Product>,2> camera_parts_list;
-
-  // tf2_ros::Buffer tfBuffer;
-
-  // tf2_ros::TransformListener tfListener;
+  /**
+   * @brief Get list of prothe product list0 object
+   * 
+   * @return std::vector<Product> 
+   */
 
 
 private:
@@ -176,6 +141,5 @@ private:
   bool wait{false};
   
 };
-
 
 #endif
