@@ -33,6 +33,7 @@ void MyCompetitionClass::init() {
     "/ariac/orders", 10,
     &MyCompetitionClass::order_callback, this);
     
+    timer = node_.createTimer(ros::Duration(2), &MyCompetitionClass::callback, this);
     
     // start the competition
     startCompetition();
@@ -194,6 +195,8 @@ void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPt
     if (msg->object_detected) {  // If there is an object in proximity.
       ROS_INFO("Break beam triggered.");
     }
+    timer.stop();
+    timer.start();
   }
 
 void MyCompetitionClass::proximity_sensor0_callback(const sensor_msgs::Range::ConstPtr & msg)
@@ -203,6 +206,8 @@ void MyCompetitionClass::proximity_sensor0_callback(const sensor_msgs::Range::Co
   {  // If there is an object in proximity.
     ROS_INFO_THROTTLE(1, "Proximity sensor sees something.");
   }
+  timer.stop();
+  timer.start();
 }
 
 void MyCompetitionClass::laser_profiler0_callback(const sensor_msgs::LaserScan::ConstPtr & msg)
@@ -217,6 +222,8 @@ void MyCompetitionClass::laser_profiler0_callback(const sensor_msgs::LaserScan::
   {
     ROS_INFO_THROTTLE(10, "Laser profiler sees something.");
   }
+  timer.stop();
+  timer.start();
 }
 
 void MyCompetitionClass::agv1_station_callback(const std_msgs::String::ConstPtr & msg)

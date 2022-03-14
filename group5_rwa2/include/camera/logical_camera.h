@@ -125,6 +125,12 @@ class LogicalCamera
 
     bool get_bins1{true};
 
+    /// callback for timer
+    void callback(const ros::TimerEvent& event);
+
+    /// Accessor for boolean check of timer
+    bool get_timer();
+
 
     private:
     ros::NodeHandle node_;
@@ -133,6 +139,10 @@ class LogicalCamera
     ros::Subscriber quality_control_sensor3_subscriber;
     ros::Subscriber quality_control_sensor4_subscriber;
     bool logflag_{};
+    ros::Timer timer;
+    bool wait{false};
+
+
 };
 
 

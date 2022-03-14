@@ -139,7 +139,7 @@ private:
   std::vector<Order> order_list_;
   bool order_processed_;
   bool wait{false};
-  
+  ros::Timer timer;
 };
 
 #endif

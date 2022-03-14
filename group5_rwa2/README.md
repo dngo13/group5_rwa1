@@ -25,3 +25,10 @@ $ roslaunch group5_rwa2 ariac.launch
 ```
 $ rosrun group5_rwa2 My_node
 ```
+
+-For spawning new parts, in a seperate terminal run:
+```
+$  rosrun group5_rwa2 part_spawner.sh 
+```
+
+

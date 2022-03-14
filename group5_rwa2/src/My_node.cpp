@@ -225,7 +225,7 @@ int main(int argc, char ** argv)
       is_insufficient = false;
     }
   
-  // if(!cam.get_blackout()){
+  // if(!cam.get_timer()){
   //   ROS_INFO("Sensor_Blackout");
   // }
   }
