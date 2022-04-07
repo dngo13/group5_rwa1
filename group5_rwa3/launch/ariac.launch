@@ -23,7 +23,7 @@
   <arg unless="$(arg debug_mode)" name="debug_mode_args" value="" />
   <arg if="$(arg debug_mode)" name="debug_mode_args" value="--development-mode" />
 
-  <arg name="load_moveit" default="false" />
+  <arg name="load_moveit" default="true" />
   <arg unless="$(arg load_moveit)" name="load_moveit_args" value="" />
   <arg if="$(arg load_moveit)" name="load_moveit_args" value="--load-moveit" />
 
@@ -34,9 +34,7 @@
           $(arg gui_args)
           $(arg load_moveit_args)
           $(arg fill_demo_shipment_args)
-          $(arg visualize_sensors_args)
-          $(arg debug_mode_args)
-          -f $(find group5_rwa3)/config/trial_config/rwa3.yaml
+          -f $(find group5_rwa3)/config/trial_config/kitting_sample.yaml
           $(find group5_rwa3)/config/user_config/group5_config.yaml
           " required="true" output="screen" />
 
