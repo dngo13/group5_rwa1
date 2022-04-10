@@ -131,7 +131,6 @@ class LogicalCamera
     /// Accessor for boolean check of timer
     bool get_timer();
 
-    std::map<std::string,std::vector<Product> > logical_camera_map;
 
     private:
     ros::NodeHandle node_;

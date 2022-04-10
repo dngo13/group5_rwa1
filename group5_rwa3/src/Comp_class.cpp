@@ -33,6 +33,14 @@ void MyCompetitionClass::init() {
     "/ariac/orders", 10,
     &MyCompetitionClass::order_callback, this);
     
+    // competition_logical_camera_1_subscriber_ = node_.subscribe(
+    //         "/ariac/logical_camera_1", 10, &MyCompetitionClass::logicalCamera_bins_0_Callback, this);
+
+    // // subscribe to the '/ariac/logical_camera_2' topic.
+    // competition_logical_camera_2_subscriber_ = node_.subscribe(
+    //     "/ariac/logical_camera_2", 10, &MyCompetitionClass::logicalCamera_bins_1_Callback, this);
+
+
     timer = node_.createTimer(ros::Duration(2), &MyCompetitionClass::callback, this);
     
     // start the competition
@@ -47,6 +55,14 @@ void MyCompetitionClass::current_score_callback(const std_msgs::Float32::ConstPt
     }
     current_score_ = msg->data;
   }
+
+void MyCompetitionClass::logicalCamera_bins_0_Callback(const nist_gear::LogicalCameraImage::ConstPtr& msg) {
+        // ROS_INFO_STREAM("MAP size: " << logical_camera_map_.size());
+    }
+
+  void MyCompetitionClass::logicalCamera_bins_1_Callback(const nist_gear::LogicalCameraImage::ConstPtr& msg) {
+        // ROS_INFO_STREAM("MAP size: " << logical_camera_map_.size());
+   }
 
 void MyCompetitionClass::competition_state_callback(const std_msgs::String::ConstPtr & msg)
   {

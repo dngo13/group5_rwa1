@@ -116,7 +116,7 @@ namespace motioncontrol {
     }
     
 
-    geometry_msgs::Pose transformToWorldFrame(
+    geometry_msgs::Pose transformtoWorldFrame(
         const geometry_msgs::Pose& target,
         std::string agv) {
         static tf2_ros::StaticTransformBroadcaster br;
@@ -142,16 +142,14 @@ namespace motioncontrol {
         transformStamped.transform.rotation.y = target.orientation.y;
         transformStamped.transform.rotation.z = target.orientation.z;
         transformStamped.transform.rotation.w = target.orientation.w;
-
+      
 
         for (int i{ 0 }; i < 15; ++i)
             br.sendTransform(transformStamped);
-
         tf2_ros::Buffer tfBuffer;
         tf2_ros::TransformListener tfListener(tfBuffer);
         ros::Rate rate(10);
         ros::Duration timeout(1.0);
-
 
         geometry_msgs::TransformStamped world_pose_tf;
         geometry_msgs::TransformStamped ee_target_tf;
@@ -168,7 +166,6 @@ namespace motioncontrol {
                 continue;
             }
         }
-
         geometry_msgs::Pose world_pose{};
         world_pose.position.x = world_pose_tf.transform.translation.x;
         world_pose.position.y = world_pose_tf.transform.translation.y;

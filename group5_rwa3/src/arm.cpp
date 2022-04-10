@@ -111,11 +111,13 @@ namespace motioncontrol {
         arm_group_.move();
     }
     //////////////////////////////////////////////////////
-    void Arm::movePart(std::string part_type, std::string camera_frame, geometry_msgs::Pose goal_in_tray_frame, std::string agv) {
+    void Arm::movePart(std::string part_type, geometry_msgs::Pose pose_in_world_frame, geometry_msgs::Pose goal_in_tray_frame, std::string agv) {
         //convert goal_in_tray_frame into world frame
-        auto init_pose_in_world = motioncontrol::transformToWorldFrame(camera_frame);
+        // auto init_pose_in_world = motioncontrol::transformToWorldFrame(camera_frame);
+        auto init_pose_in_world = pose_in_world_frame;
+
         // ROS_INFO_STREAM(init_pose_in_world.position.x << " " << init_pose_in_world.position.y);
-        auto target_pose_in_world = motioncontrol::transformToWorldFrame(goal_in_tray_frame, agv);
+        auto target_pose_in_world = motioncontrol::transformtoWorldFrame(goal_in_tray_frame, agv);
         if (pickPart(part_type, init_pose_in_world)) {
             placePart(init_pose_in_world, goal_in_tray_frame, agv);
         }
@@ -178,6 +180,12 @@ namespace motioncontrol {
             z_pos = 0.859;
         }
         if (part_type.find("sensor") != std::string::npos) {
+            z_pos = 0.81;
+        }
+        if (part_type.find("regulator") != std::string::npos) {
+            z_pos = 0.81;
+        }
+        if (part_type.find("battery") != std::string::npos) {
             z_pos = 0.81;
         }
 
@@ -258,7 +266,7 @@ namespace motioncontrol {
     {
         goToPresetLocation(agv);
         // get the target pose of the part in the world frame
-        auto target_pose_in_world = motioncontrol::transformToWorldFrame(
+        auto target_pose_in_world = motioncontrol::transformtoWorldFrame(
             part_pose_in_frame,
             agv);
 

@@ -47,22 +47,14 @@
 #include <nist_gear/SubmitShipment.h>
 #include <nist_gear/AGVToAssemblyStation.h>
 #include <nist_gear/AssemblyStationSubmitShipment.h>
-//moveit
-#include <moveit_msgs/PlanningScene.h>
-#include <moveit_msgs/AttachedCollisionObject.h>
-#include <moveit_msgs/GetStateValidity.h>
-#include <moveit_msgs/DisplayRobotState.h>
-#include <moveit_msgs/ApplyPlanningScene.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit_visual_tools/moveit_visual_tools.h>
-//custom
+
+
 #include "../include/comp/comp_class.h"
 #include "../include/agv/agv.h"
 #include "../include/util/util.h"
 #include "../include/camera/logical_camera.h"
 #include "../include/arm/arm.h"
+
 
 void as_submit_assembly(ros::NodeHandle & node, std::string s_id, std::string st)
 {
@@ -98,6 +90,10 @@ int main(int argc, char ** argv)
 
   LogicalCamera cam(node);
 
+  // create an instance of the kitting arm
+  motioncontrol::Arm arm(node);
+  arm.init();
+
   // ros::Subscriber depth_camera_bins1_subscriber = node.subscribe(
   //   "/ariac/depth_camera_bins1/depth/image_raw --noarr", 10,
   //   &MyCompetitionClass::depth_camera_bins1_callback, &comp_class);
@@ -117,8 +113,6 @@ int main(int argc, char ** argv)
   ROS_INFO("Setup complete.");
   
   Agv agv(node);
-  motioncontrol::Arm arm(node);
-  arm.init();
 
   std::vector<Order> orders;
   std::vector<Kitting> kittings;
@@ -134,7 +128,7 @@ int main(int argc, char ** argv)
   unsigned short int cur_order_index{0};
   comp_state = comp_class.getCompetitionState();
   auto competition_start_time = comp_class.getClock();
-  std::vector<Product> order_0_shipments;
+
 
   ros::ServiceClient client1 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as1/submit_shipment");
   ros::ServiceClient client2 = node.serviceClient<nist_gear::AssemblyStationSubmitShipment>("/ariac/as2/submit_shipment");
@@ -149,76 +143,122 @@ int main(int argc, char ** argv)
   bool not_found = false;
   bool is_insufficient = false;
   bool blackout = true;
-  bool try1 = true;
   ros::Time time;
-  
-  arm.goToPresetLocation("home1");
-  
-  ros::Rate rate = 2;
-  rate.sleep();
 
+  ros::Rate rate = 2;	  
+  rate.sleep();	
   while(ros::ok){
 
   orders = comp_class.get_order_list();
+  
+  arm.goToPresetLocation("home1");
+  arm.goToPresetLocation("home2");
 
 
   if (!order0_models_found){
+    //kitting
     kittings = orders.at(0).kitting;
     for(auto &kit: orders.at(0).kitting){
+      
       kshipment_type = kit.shipment_type;
       agv_id = kit.agv_id;
-      
-      // motioncontrol::Agv agv{ node, agv_id };
-      // if (agv.getAGVStatus()) {
-      //     agv.shipAgv(kit.shipment_type, kit.station_id);
-      // }
-
-      
-
       products = kit.products;
+
+      auto list = cam.findparts();
+      auto camera_bins0_data = list.at(0);
+      auto camera_bins1_data = list.at(1);
+
+      std::vector<std::pair<Product, std::string> > camera_for_product{};
+      std::vector<Product> parts_for_kitting;
+      // products
       for (auto &part:kit.products){
         product = part;
-        ROS_INFO_STREAM("Part type: " << product.type);
-        bool flag1 = false;
-        bool flag2 = true;
-
-        while(flag2){
-          auto list = cam.findparts();
-          for (auto logcam: list){
-            if(logcam.empty() == true){
-            }
-            for (auto model: logcam){
-              if(product.type == model.type){
-                ROS_INFO_STREAM("Pose in world frame: " << '\n' << model.world_pose);
+        // ROS_INFO_STREAM("Part type: " << product.type);
+        for (auto &camlist: list){
+          int it{0};
+          for (auto &campart: camlist){
+            if(campart.type == part.type){
+              if(parts_for_kitting.size() == kit.products.size()){
+              break;
               }
+              campart.target_pose = part.frame_pose;
+              parts_for_kitting.push_back(campart);
+              // ROS_INFO_STREAM("campart: " << campart.type);
+              camlist.erase(camlist.begin() + it);
+              break;
             }
+            it++;
           }
-          flag2 = false;
         }
       }
+        
+      ROS_INFO_STREAM("final parts" << parts_for_kitting.at(0).frame);
+      ROS_INFO_STREAM("final parts" << parts_for_kitting.at(1).frame);
+      // ROS_INFO_STREAM("final parts" << parts_for_kitting.at(2).frame);
+
+
+      // unsigned short int products_for_kitting = parts_for_kitting.size();
+      // unsigned int counter{0};
+      for(auto &iter: parts_for_kitting){
+        // counter++;
+        // std::string frame = iter.camera + "_" + iter.type + "_" + std::to_string(counter) + "_frame";
+        // iter.frame = frame;
+        // ROS_INFO_STREAM(iter.frame);
+        // ROS_INFO_STREAM(iter.frame_pose);
+        arm.movePart(iter.type, iter.world_pose, iter.target_pose, kit.agv_id);
+      }
+
+        // while(flag2){
+        //   auto list = cam.findparts();
+        //   for (auto logcam: list){
+        //     if(logcam.empty() == true){
+        //     }
+        //     for (auto model: logcam){
+        //       if(product.type == model.type){
+        //         ROS_INFO_STREAM("frame: " << '\n' << model.type);
+        //       }
+        //     }
+        //   }
+        //   flag2 = false;
+        // }
+      
     }
     order0_models_found = true;
   }
 
-  cam.get_cam[0] = true;
-  ROS_INFO_ONCE("starting");
-  if (try1){
-    auto list = cam.findparts();
-    for (auto logcam: list){
-      if(logcam.empty() == true){
-      }
-      for (auto model: logcam){
-        if(product.type == model.type){
-          ROS_INFO_STREAM("Pose in world frame: " << '\n' << model.world_pose);
-        }
-      }
-    }
-    try1 = false;
-    arm.goToPresetLocation("home2");
-  }
+  // if (orders.size() > 1 && !order1_models_found){
+  //   kittings = orders.at(1).kitting;
+  //   for(auto &kit: orders.at(1).kitting){
+  //     kshipment_type = kit.shipment_type;
+  //     agv_id = kit.agv_id;
+  //     products = kit.products;
+  //     for (auto &part:kit.products){
+  //       product = part;
+  //       ROS_INFO_STREAM("Part type: " << product.type);
+  //       bool flag1 = false;
+  //       bool flag2 = true;
+
+  //       while(flag2){
+  //         auto list = cam.findparts();
+  //         for (auto logcam: list){
+  //           if(logcam.empty() == true){
+  //           }
+  //           for (auto model: logcam){
+  //             if(product.type == model.type){
+  //                ROS_INFO_STREAM("frame: " << '\n' << model.frame);              }
+  //             else{
+  //               parts_not_found.push_back(model.type);            
+  //             }
+  //           }
+  //         }
+  //         flag2 = false;
+  //       }
+  //     }
+  //   }
+  //   order1_models_found = true;
+  // }
 
   }
-
-
+  
   ros::waitForShutdown();  
 }
