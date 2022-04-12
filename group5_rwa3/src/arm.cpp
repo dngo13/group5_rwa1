@@ -186,7 +186,7 @@ namespace motioncontrol {
             z_pos = 0.83;
         }
         if (part_type.find("battery") != std::string::npos) {
-            z_pos = 0.83;
+            z_pos = 0.79;
         }
 
         // flat_orientation = motioncontrol::quaternionFromEuler(0, 1.57, 0);
@@ -326,7 +326,7 @@ namespace motioncontrol {
         target_pose_in_world.orientation.y = q_rslt.y();
         target_pose_in_world.orientation.z = q_rslt.z();
         target_pose_in_world.orientation.w = q_rslt.w();
-        target_pose_in_world.position.z += 0.2;
+        target_pose_in_world.position.z += 0.15;
 
         arm_group_.setMaxVelocityScalingFactor(0.1);
         arm_group_.setPoseTarget(target_pose_in_world);

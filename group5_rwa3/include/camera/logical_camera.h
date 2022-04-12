@@ -76,13 +76,7 @@ class LogicalCamera
     // Subscribe to the '/ariac/quality_control_sensor_4' topic.
     void quality_control_sensor4_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
  
-    /**
-     * @brief Checks if there is a sensor blackout.
-     * 
-     * @return true 
-     * @return false 
-     */
-    bool CheckBlackout();
+    
 
     /**
      * @brief Detects the parts in vicinity of all the logical cameras and stores data of each model. 
@@ -96,7 +90,15 @@ class LogicalCamera
 
     std::vector<std::vector<Product> > segregated_parts;
 
-    void segregate_parts(std::array<std::vector<Product>,19> camera_parts_list);
+    void segregate_parts(std::array<std::vector<Product>,19> list);
+
+    /**
+     * @brief Checks if there is a sensor blackout.
+     * 
+     * @return true 
+     * @return false 
+     */
+    double CheckBlackout();
 
     // Buffer for transform.
     tf2_ros::Buffer tfBuffer;
@@ -150,7 +152,7 @@ class LogicalCamera
     ros::Timer timer;
     bool wait{false};
     std::map<std::string, std::vector<Product> > camera_map_;
-
+    double blackout_time_ = 0;
 };
 
 

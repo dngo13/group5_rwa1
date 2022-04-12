@@ -41,6 +41,7 @@ void LogicalCamera::logical_camera_bins0_callback(const nist_gear::LogicalCamera
     //    logflag1 = false;
     //  } 
 
+     blackout_time_ = ros::Time::now().toSec(); 
      if (get_cam[0])
      { 
 
@@ -200,7 +201,7 @@ void LogicalCamera::logical_camera_bins1_callback(
     // if(image_msg->models.empty()){
     //    logflag2 = false;
     //  } 
-  
+    blackout_time_ = ros::Time::now().toSec();
     if (get_cam[1])
      { 
       ros::Duration timeout(5.0);
@@ -249,6 +250,10 @@ void LogicalCamera::logical_camera_bins1_callback(
      get_cam[1] = false; 
      }
 
+}
+
+double LogicalCamera::CheckBlackout(){
+  return blackout_time_;
 }
 
 

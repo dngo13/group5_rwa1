@@ -30,7 +30,7 @@ void MyCompetitionClass::init() {
 
     // Subscribe to the '/ariac/orders' topic.
     orders_subscriber = node_.subscribe(
-    "/ariac/orders", 10,
+    "/ariac/orders", 1,
     &MyCompetitionClass::order_callback, this);
     
     // competition_logical_camera_1_subscriber_ = node_.subscribe(
@@ -154,6 +154,7 @@ void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order
     if(new_order.order_id == "order_1"){
       new_order.priority = 3;
       ROS_INFO("High priority order is announced ");
+      high_priority_announced = true;
     }
   
     for (const auto &kit: order_msg->kitting_shipments){
