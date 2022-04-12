@@ -94,6 +94,10 @@ class LogicalCamera
     // List of all the models found by the logical cameras.
     std::array<std::vector<Product>,19> camera_parts_list;
 
+    std::vector<std::vector<Product> > segregated_parts;
+
+    void segregate_parts(std::array<std::vector<Product>,19> camera_parts_list);
+
     // Buffer for transform.
     tf2_ros::Buffer tfBuffer;
 
@@ -108,6 +112,10 @@ class LogicalCamera
   
     // List of products in bins1.
     std::vector<Product> product_list1_;
+
+    std::map<std::string, std::vector<Product> >& get_camera_map(){
+        return camera_map_;
+    }
 
     /**
      * @brief Get list of products in bins0.
@@ -141,7 +149,7 @@ class LogicalCamera
     bool logflag_{};
     ros::Timer timer;
     bool wait{false};
-
+    std::map<std::string, std::vector<Product> > camera_map_;
 
 };
 

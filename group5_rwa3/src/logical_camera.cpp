@@ -67,6 +67,7 @@ void LogicalCamera::logical_camera_bins0_callback(const nist_gear::LogicalCamera
         product.frame_pose = image_msg->models.at(i).pose;
         product.camera = "logical_camera_bins0";
         product.id = std::to_string(part_index);
+        product.status = "free";
         
         std::string frame_name = "logical_camera_bins0_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
         product.frame = frame_name;        
@@ -180,6 +181,13 @@ std::array<std::vector<Product>,19> LogicalCamera::findparts(){
 
 }
 
+void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
+  for (auto &l: list){
+    for(auto &part: l){
+      camera_map_[part.type].push_back(part);
+    }
+  }
+}
 
 std::vector<Product> LogicalCamera::get_product_list0(){
   return product_list0_;
@@ -211,7 +219,8 @@ void LogicalCamera::logical_camera_bins1_callback(
         product.frame_pose = image_msg->models.at(i).pose;
         product.camera = "logical_camera_bins1";
         product.id = std::to_string(part_index);
-        
+        product.status = "free";
+
         std::string frame_name = "logical_camera_bins1_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
         product.frame = frame_name;  
         // ROS_INFO_STREAM(product.frame);      

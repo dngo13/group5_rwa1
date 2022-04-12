@@ -165,62 +165,64 @@ int main(int argc, char ** argv)
       products = kit.products;
 
       auto list = cam.findparts();
-      auto camera_bins0_data = list.at(0);
-      auto camera_bins1_data = list.at(1);
-
-      std::vector<std::pair<Product, std::string> > camera_for_product{};
-      std::vector<Product> parts_for_kitting;
-      // products
-      for (auto &part:kit.products){
-        product = part;
-        // ROS_INFO_STREAM("Part type: " << product.type);
-        for (auto &camlist: list){
-          int it{0};
-          for (auto &campart: camlist){
-            if(campart.type == part.type){
-              if(parts_for_kitting.size() == kit.products.size()){
-              break;
-              }
-              campart.target_pose = part.frame_pose;
-              parts_for_kitting.push_back(campart);
-              // ROS_INFO_STREAM("campart: " << campart.type);
-              camlist.erase(camlist.begin() + it);
-              break;
-            }
-            it++;
-          }
-        }
-      }
+      // auto camera_bins0_data = list.at(0);
+      // auto camera_bins1_data = list.at(1);
+      
+      cam.segregate_parts(list);
+      auto cam_map = cam.get_camera_map();
+      // auto p = cam_map.find(kit.products.at(0).type);
+      // ROS_INFO_STREAM(p->second.at(0).frame);
+      
+      // if (p != cam_map.end()){
         
-      ROS_INFO_STREAM("final parts" << parts_for_kitting.at(0).frame);
-      ROS_INFO_STREAM("final parts" << parts_for_kitting.at(1).frame);
-      // ROS_INFO_STREAM("final parts" << parts_for_kitting.at(2).frame);
+      // }
+      // std::vector<std::pair<Product, std::string> > camera_for_product{};
+      std::vector<Product> parts_for_kitting;
+      // // products
+      // for (auto &part:kit.products){
+      //   // ROS_INFO_STREAM("Part type: " << product.type);
+      //   for (auto &camlist: list){
+      //     int it{0};
+      //     for (auto &campart: camlist){
+      //       if(campart.type == part.type){
+      //         if(parts_for_kitting.size() == kit.products.size()){
+      //         break;
+      //         }
+      //         campart.target_pose = part.frame_pose;
+      //         parts_for_kitting.push_back(campart);
+      //         // ROS_INFO_STREAM("campart: " << campart.type);
+      //         camlist.erase(camlist.begin() + it);
+      //         break;
+      //       }
+      //       it++;
+      //     }
+      //   }
+      // }
 
+      for (auto &part:kit.products){
+        // parts_for_kitting.push_back(part);
+        parts_for_kitting.push_back(part);
+        // auto p = cam_map.find(part.type);
+        
+        // ROS_INFO_STREAM(p->second.at(0).frame_pose);
 
-      // unsigned short int products_for_kitting = parts_for_kitting.size();
-      // unsigned int counter{0};
+      }
+      
+
       for(auto &iter: parts_for_kitting){
-        // counter++;
-        // std::string frame = iter.camera + "_" + iter.type + "_" + std::to_string(counter) + "_frame";
-        // iter.frame = frame;
-        // ROS_INFO_STREAM(iter.frame);
-        // ROS_INFO_STREAM(iter.frame_pose);
-        arm.movePart(iter.type, iter.world_pose, iter.target_pose, kit.agv_id);
+        
+        auto p = cam_map.find(iter.type);
+        for (int i{0}; i < p->second.size(); i++){
+          if(p->second.at(i).status.compare("free") == 0){
+            arm.movePart(iter.type, p->second.at(i).world_pose, iter.frame_pose, kit.agv_id);
+            p->second.at(i).status = "processed";
+            break;
+          }
+
+        }
+                
       }
 
-        // while(flag2){
-        //   auto list = cam.findparts();
-        //   for (auto logcam: list){
-        //     if(logcam.empty() == true){
-        //     }
-        //     for (auto model: logcam){
-        //       if(product.type == model.type){
-        //         ROS_INFO_STREAM("frame: " << '\n' << model.type);
-        //       }
-        //     }
-        //   }
-        //   flag2 = false;
-        // }
       
     }
     order0_models_found = true;

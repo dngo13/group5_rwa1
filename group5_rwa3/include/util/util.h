@@ -44,6 +44,7 @@ typedef struct Product
     geometry_msgs::Pose target_pose;
     geometry_msgs::TransformStamped transformStamped;
     std::string camera;
+    std::string status;
 }   
 product;
 
