@@ -243,6 +243,9 @@ int main(int argc, char ** argv)
               arm.goToPresetLocation("home2");
               arm.deactivateGripper();
               cam.isFaulty = false;
+              for (int j{0}; j <= 3; j++){
+                cam.get_faulty_cam[j] = true;
+              }
               continue;
             }
 
