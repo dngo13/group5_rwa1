@@ -5,13 +5,13 @@ LogicalCamera::LogicalCamera(ros::NodeHandle & node)
 {
     node_ = node;
     
-    quality_control_sensor1_subscriber = node_.subscribe("/ariac/quality_control_sensor_1", 10, &LogicalCamera::quality_control_sensor1_callback, this);
+    // quality_control_sensor1_subscriber = node_.subscribe("/ariac/quality_control_sensor_1", 10, &LogicalCamera::quality_control_sensor1_callback, this);
 
-    quality_control_sensor2_subscriber = node_.subscribe("/ariac/quality_control_sensor_2", 10, &LogicalCamera::quality_control_sensor2_callback, this);
+    // quality_control_sensor2_subscriber = node_.subscribe("/ariac/quality_control_sensor_2", 10, &LogicalCamera::quality_control_sensor2_callback, this);
 
-    quality_control_sensor3_subscriber = node_.subscribe("/ariac/quality_control_sensor_3", 10, &LogicalCamera::quality_control_sensor3_callback, this);
+    // quality_control_sensor3_subscriber = node_.subscribe("/ariac/quality_control_sensor_3", 10, &LogicalCamera::quality_control_sensor3_callback, this);
 
-    quality_control_sensor4_subscriber = node_.subscribe("/ariac/quality_control_sensor_4", 10, &LogicalCamera::quality_control_sensor4_callback, this);
+    // quality_control_sensor4_subscriber = node_.subscribe("/ariac/quality_control_sensor_4", 10, &LogicalCamera::quality_control_sensor4_callback, this);
     
     ros::Subscriber logical_camera_bins0_subscriber = node_.subscribe(
     "/ariac/logical_camera_bins0", 1, 
@@ -258,67 +258,63 @@ double LogicalCamera::CheckBlackout(){
 
 
 void LogicalCamera::quality_control_sensor1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-    if (!image_msg->models.empty()){
-    ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv1");
-  }
+    if (get_faulty_cam[0]){
+      if (!image_msg->models.empty()){
+      ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv1");
+      isFaulty = true;
+      }
 
+      get_faulty_cam[0] = false; 
+
+    }
 }
 
 
 void LogicalCamera::quality_control_sensor2_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-    if (!image_msg->models.empty()){
-    ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv2");
+    if (get_faulty_cam[1]){
+      if (!image_msg->models.empty()){
+      ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv2");
+      isFaulty = true;
+    }
+    get_faulty_cam[1] = false;
   }
 }
 
 
 void LogicalCamera::quality_control_sensor3_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-    if (!image_msg->models.empty()){
-    ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv3");
-  }
+    if (get_faulty_cam[2]){
+      if (!image_msg->models.empty()){
+      ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv3");
+      isFaulty = true;
+      }
+      get_faulty_cam[2] = false;
+    }
 }
 
 
 void LogicalCamera::quality_control_sensor4_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-    if (!image_msg->models.empty()){
-    ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on 4");
-  }
+    if (get_faulty_cam[3]){
+      if (!image_msg->models.empty()){
+      ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on 4");
+      isFaulty = true;
+      }
+    get_faulty_cam[3] = false;
+    }
 }
 
-// SENSOR BLACKOUT
-// bool LogicalCamera::CheckBlackout(){
-//   // logflag1 = false;
-//   // logflag2 = false;
-//   setter();
-//   ROS_INFO_STREAM_THROTTLE(1,(logflag1));
+std::vector<Product> LogicalCamera::get_faulty_part_list(){
+ 
+  quality_control_sensor1_subscriber = node_.subscribe("/ariac/quality_control_sensor_1", 1, &LogicalCamera::quality_control_sensor1_callback, this);
 
-//   quality_control_sensor1_subscriber_b1 = node_.subscribe("/ariac/logical_camera_bins0", 2, &LogicalCamera::callback_b1, this);
+  quality_control_sensor2_subscriber = node_.subscribe("/ariac/quality_control_sensor_2", 1, &LogicalCamera::quality_control_sensor2_callback, this);
 
-//   // quality_control_sensor2_subscriber_b2 = node_.subscribe("/ariac/quality_control_sensor_2", 2, &LogicalCamera::callback_b2, this);
-  
+  quality_control_sensor3_subscriber = node_.subscribe("/ariac/quality_control_sensor_3", 1, &LogicalCamera::quality_control_sensor3_callback, this);
 
-//   ROS_INFO_STREAM_THROTTLE(1,(logflag1));
-//   if((logflag1) == 0)
-//   {
-//     return true;
-//   }
-//   else
-//   {
-//     return false;
-//   }
-//   // return (logflag1 + logflag2);
-//   }
+  quality_control_sensor4_subscriber = node_.subscribe("/ariac/quality_control_sensor_4", 1, &LogicalCamera::quality_control_sensor4_callback, this);
+    
+  return faulty_part_list_;
+}
 
-// void LogicalCamera::callback_b1(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-//   ROS_INFO_STREAM_THROTTLE(1,"in b1");
-//   setter1();
-//   ROS_INFO_STREAM_THROTTLE(1,(logflag1));
-// }
-// // void LogicalCamera::callback_b2(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-// //   ROS_INFO_STREAM_THROTTLE(1,"b2");
-// //   logflag2 = 1;
-// //   ROS_INFO_STREAM_THROTTLE(1,logflag2);
-// // }
 
 void LogicalCamera::logical_camera_station1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
     ROS_INFO_STREAM_THROTTLE(10,"Logical camera station 1: '" << image_msg->models.size() << "' objects.");

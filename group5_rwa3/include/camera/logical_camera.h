@@ -92,6 +92,10 @@ class LogicalCamera
 
     void segregate_parts(std::array<std::vector<Product>,19> list);
 
+    std::vector<Product> get_faulty_part_list();  
+
+    bool isFaulty{false};
+
     /**
      * @brief Checks if there is a sensor blackout.
      * 
@@ -108,6 +112,8 @@ class LogicalCamera
 
     // Array of boolean to check the camera data only once when needed. 
     bool get_cam[19] = {true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true};
+
+    bool get_faulty_cam[4] = {true,true,true,true};
 
     // List of products in bins0.
     std::vector<Product> product_list0_;
@@ -153,6 +159,7 @@ class LogicalCamera
     bool wait{false};
     std::map<std::string, std::vector<Product> > camera_map_;
     double blackout_time_ = 0;
+    std::vector<Product> faulty_part_list_;
 };
 
 

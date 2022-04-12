@@ -226,6 +226,19 @@ int main(int argc, char ** argv)
             arm.movePart(iter.type, p->second.at(i).world_pose, iter.frame_pose, kit.agv_id);
             // p->second.at(i).status = "processed";
             cam_map[iter.type].at(i).status = "processed";
+            
+            double outside_time = ros::Time::now().toSec();
+            double inside_time = ros::Time::now().toSec();
+            ROS_INFO_STREAM("hello");
+            while (inside_time - outside_time < 5.0) {
+                inside_time = ros::Time::now().toSec();
+            }
+            ROS_INFO_STREAM("again");
+            if(cam.isFaulty){
+              ROS_INFO_STREAM("ready to add");
+            }
+
+
             break;
           } 
         }
