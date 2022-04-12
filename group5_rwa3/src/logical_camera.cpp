@@ -260,8 +260,17 @@ double LogicalCamera::CheckBlackout(){
 void LogicalCamera::quality_control_sensor1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
     if (get_faulty_cam[0]){
       if (!image_msg->models.empty()){
-      ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv1");
-      isFaulty = true;
+        ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv1");
+        isFaulty = true;
+    
+        for (auto &model:image_msg->models){
+          Product product;
+          product.type = model.type;
+          ROS_INFO_STREAM(product.type);
+          product.frame_pose = model.pose;
+          product.camera = "quality_control_sensor_1";
+          faulty_part_list_.push_back(product);
+        }
       }
 
       get_faulty_cam[0] = false; 
@@ -273,9 +282,18 @@ void LogicalCamera::quality_control_sensor1_callback(const nist_gear::LogicalCam
 void LogicalCamera::quality_control_sensor2_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
     if (get_faulty_cam[1]){
       if (!image_msg->models.empty()){
-      ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv2");
-      isFaulty = true;
-    }
+        ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv2");
+        isFaulty = true;
+    
+        for (auto &model:image_msg->models){
+          Product product;
+          product.type = model.type;
+          product.frame_pose = model.pose;
+          product.camera = "quality_control_sensor_2";
+          faulty_part_list_.push_back(product);
+        }
+      }
+
     get_faulty_cam[1] = false;
   }
 }
@@ -284,9 +302,18 @@ void LogicalCamera::quality_control_sensor2_callback(const nist_gear::LogicalCam
 void LogicalCamera::quality_control_sensor3_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
     if (get_faulty_cam[2]){
       if (!image_msg->models.empty()){
-      ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv3");
-      isFaulty = true;
+        ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv3");
+        isFaulty = true;
+
+        for (auto &model:image_msg->models){
+          Product product;
+          product.type = model.type;
+          product.frame_pose = model.pose;
+          product.camera = "quality_control_sensor_3";
+          faulty_part_list_.push_back(product);
+        }
       }
+
       get_faulty_cam[2] = false;
     }
 }
@@ -295,9 +322,18 @@ void LogicalCamera::quality_control_sensor3_callback(const nist_gear::LogicalCam
 void LogicalCamera::quality_control_sensor4_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
     if (get_faulty_cam[3]){
       if (!image_msg->models.empty()){
-      ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on 4");
-      isFaulty = true;
+        ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv4");
+        isFaulty = true;
+        
+        for (auto &model:image_msg->models){
+          Product product;
+          product.type = model.type;
+          product.frame_pose = model.pose;
+          product.camera = "quality_control_sensor_4";
+          faulty_part_list_.push_back(product);
+        }
       }
+
     get_faulty_cam[3] = false;
     }
 }
@@ -313,6 +349,13 @@ std::vector<Product> LogicalCamera::get_faulty_part_list(){
   quality_control_sensor4_subscriber = node_.subscribe("/ariac/quality_control_sensor_4", 1, &LogicalCamera::quality_control_sensor4_callback, this);
     
   return faulty_part_list_;
+}
+
+void LogicalCamera::query_faulty_cam(){
+  for (int j{0}; j <= 3; j++){  
+    get_faulty_cam[j] = true;
+  }
+  faulty_part_list_.clear();
 }
 
 

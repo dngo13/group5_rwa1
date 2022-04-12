@@ -115,6 +115,8 @@ class LogicalCamera
 
     bool get_faulty_cam[4] = {true,true,true,true};
 
+    void query_faulty_cam();
+
     // List of products in bins0.
     std::vector<Product> product_list0_;
   
