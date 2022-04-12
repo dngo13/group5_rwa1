@@ -41,8 +41,11 @@ typedef struct Product
     std::string id;
     bool faulty;
     geometry_msgs::Pose world_pose;
+    geometry_msgs::Pose target_pose;
     geometry_msgs::TransformStamped transformStamped;
-}
+    std::string camera;
+    std::string status;
+}   
 product;
 
 

@@ -45,7 +45,7 @@ namespace motioncontrol {
         bool pickPart(std::string part_type, geometry_msgs::Pose part_pose);
         bool placePart(geometry_msgs::Pose part_init_pose, geometry_msgs::Pose part_goal_pose, std::string agv);
         void testPreset(const std::vector<ArmPresetLocation>& preset_list);
-        void movePart(std::string part_type, std::string camera_frame, geometry_msgs::Pose goal_in_tray_frame, std::string agv);
+        void movePart(std::string part_type, geometry_msgs::Pose pose_in_world_frame, geometry_msgs::Pose goal_in_tray_frame, std::string agv);
         void activateGripper();
         void deactivateGripper();
         /**

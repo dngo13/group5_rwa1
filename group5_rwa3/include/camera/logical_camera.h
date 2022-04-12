@@ -76,13 +76,7 @@ class LogicalCamera
     // Subscribe to the '/ariac/quality_control_sensor_4' topic.
     void quality_control_sensor4_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
  
-    /**
-     * @brief Checks if there is a sensor blackout.
-     * 
-     * @return true 
-     * @return false 
-     */
-    bool CheckBlackout();
+    
 
     /**
      * @brief Detects the parts in vicinity of all the logical cameras and stores data of each model. 
@@ -94,6 +88,22 @@ class LogicalCamera
     // List of all the models found by the logical cameras.
     std::array<std::vector<Product>,19> camera_parts_list;
 
+    std::vector<std::vector<Product> > segregated_parts;
+
+    void segregate_parts(std::array<std::vector<Product>,19> list);
+
+    std::vector<Product> get_faulty_part_list();  
+
+    bool isFaulty{false};
+
+    /**
+     * @brief Checks if there is a sensor blackout.
+     * 
+     * @return true 
+     * @return false 
+     */
+    double CheckBlackout();
+
     // Buffer for transform.
     tf2_ros::Buffer tfBuffer;
 
@@ -103,11 +113,17 @@ class LogicalCamera
     // Array of boolean to check the camera data only once when needed. 
     bool get_cam[19] = {true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true};
 
+    bool get_faulty_cam[4] = {true,true,true,true};
+
     // List of products in bins0.
     std::vector<Product> product_list0_;
   
     // List of products in bins1.
     std::vector<Product> product_list1_;
+
+    std::map<std::string, std::vector<Product> >& get_camera_map(){
+        return camera_map_;
+    }
 
     /**
      * @brief Get list of products in bins0.
@@ -141,8 +157,9 @@ class LogicalCamera
     bool logflag_{};
     ros::Timer timer;
     bool wait{false};
-
-
+    std::map<std::string, std::vector<Product> > camera_map_;
+    double blackout_time_ = 0;
+    std::vector<Product> faulty_part_list_;
 };
 
 

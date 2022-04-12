@@ -111,9 +111,11 @@ namespace motioncontrol {
         arm_group_.move();
     }
     //////////////////////////////////////////////////////
-    void Arm::movePart(std::string part_type, std::string camera_frame, geometry_msgs::Pose goal_in_tray_frame, std::string agv) {
+    void Arm::movePart(std::string part_type, geometry_msgs::Pose pose_in_world_frame, geometry_msgs::Pose goal_in_tray_frame, std::string agv) {
         //convert goal_in_tray_frame into world frame
-        auto init_pose_in_world = motioncontrol::transformToWorldFrame(camera_frame);
+        // auto init_pose_in_world = motioncontrol::transformToWorldFrame(camera_frame);
+        auto init_pose_in_world = pose_in_world_frame;
+
         // ROS_INFO_STREAM(init_pose_in_world.position.x << " " << init_pose_in_world.position.y);
         auto target_pose_in_world = motioncontrol::transformtoWorldFrame(goal_in_tray_frame, agv);
         if (pickPart(part_type, init_pose_in_world)) {
@@ -179,6 +181,12 @@ namespace motioncontrol {
         }
         if (part_type.find("sensor") != std::string::npos) {
             z_pos = 0.81;
+        }
+        if (part_type.find("regulator") != std::string::npos) {
+            z_pos = 0.83;
+        }
+        if (part_type.find("battery") != std::string::npos) {
+            z_pos = 0.79;
         }
 
         // flat_orientation = motioncontrol::quaternionFromEuler(0, 1.57, 0);
@@ -318,7 +326,7 @@ namespace motioncontrol {
         target_pose_in_world.orientation.y = q_rslt.y();
         target_pose_in_world.orientation.z = q_rslt.z();
         target_pose_in_world.orientation.w = q_rslt.w();
-        target_pose_in_world.position.z += 0.2;
+        target_pose_in_world.position.z += 0.15;
 
         arm_group_.setMaxVelocityScalingFactor(0.1);
         arm_group_.setPoseTarget(target_pose_in_world);

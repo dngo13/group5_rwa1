@@ -101,6 +101,11 @@ public:
   /// Called when a new String message from /ariac/agv4/station is received.
   void agv4_station_callback(const std_msgs::String::ConstPtr & msg);
   
+  void logicalCamera_bins_0_Callback(const nist_gear::LogicalCameraImage::ConstPtr & msg);
+  void logicalCamera_bins_1_Callback(const nist_gear::LogicalCameraImage::ConstPtr & msg);
+
+  bool high_priority_announced{false};  
+
   /// callback for timer
   void callback(const ros::TimerEvent& event);
 
@@ -140,6 +145,10 @@ private:
   bool order_processed_;
   bool wait{false};
   ros::Timer timer;
+  /*!< subscriber to the topic /ariac/logical_camera_1 */
+  ros::Subscriber competition_logical_camera_1_subscriber_;
+  /*!< subscriber to the topic /ariac/logical_camera_2 */
+  ros::Subscriber competition_logical_camera_2_subscriber_;
 };
 
 #endif
