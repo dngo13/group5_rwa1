@@ -21,9 +21,6 @@ LogicalCamera::LogicalCamera(ros::NodeHandle & node)
     "/ariac/logical_camera_bins1", 1, 
     &LogicalCamera::logical_camera_bins1_callback, this);
 
-    // timer = node_.createTimer(ros::Duration(2), &LogicalCamera::callback, this);
-
-
 }
 
 void LogicalCamera::callback(const ros::TimerEvent& event){
@@ -36,19 +33,9 @@ bool LogicalCamera::get_timer(){
 
 
 void LogicalCamera::logical_camera_bins0_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-    //  ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins0: '" << image_msg->models.size() << "' objects.");
-    //  if(image_msg->models.empty()){
-    //    logflag1 = false;
-    //  } 
-
      blackout_time_ = ros::Time::now().toSec(); 
      if (get_cam[0])
      { 
-
-      // tf2_ros::Buffer tfBuffer;
-      // tf2_ros::TransformListener tfListener(tfBuffer);
-
-      //  ros::Rate rate(10);
       ros::Duration timeout(5.0);
 
       unsigned short int i{0};
@@ -87,7 +74,6 @@ void LogicalCamera::logical_camera_bins0_callback(const nist_gear::LogicalCamera
         product.world_pose.orientation.z = transformStamped.transform.rotation.z;
         product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
 
-        product_list0_.push_back(product);
         camera_parts_list.at(0).push_back(product);
 
         i++;
@@ -98,6 +84,60 @@ void LogicalCamera::logical_camera_bins0_callback(const nist_gear::LogicalCamera
      }
 
 }
+
+
+void LogicalCamera::logical_camera_bins1_callback(
+  const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
+    blackout_time_ = ros::Time::now().toSec();
+    if (get_cam[1])
+     { 
+      ros::Duration timeout(5.0);
+
+      unsigned short int i{0};
+      unsigned short int part_index{1}; 
+      while(i < image_msg->models.size())
+      {
+  
+        std::string product_type = image_msg->models.at(i).type;
+        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
+          part_index = 1;
+        }
+        Product product;
+        product.type = product_type;
+        product.frame_pose = image_msg->models.at(i).pose;
+        product.camera = "logical_camera_bins1";
+        product.id = std::to_string(part_index);
+        product.status = "free";
+
+        std::string frame_name = "logical_camera_bins1_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
+        product.frame = frame_name;  
+        // ROS_INFO_STREAM(product.frame);      
+        
+        geometry_msgs::TransformStamped transformStamped;
+
+        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
+        
+        product.time_stamp = ros::Time(0);
+        product.world_pose.position.x = transformStamped.transform.translation.x;
+        product.world_pose.position.y = transformStamped.transform.translation.y;
+        product.world_pose.position.z = transformStamped.transform.translation.z;
+
+        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
+        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
+        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
+        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
+
+        camera_parts_list.at(1).push_back(product);
+
+        i++;
+        part_index++; 
+      }
+      
+     get_cam[1] = false; 
+     }
+
+}
+
 
 std::array<std::vector<Product>,19> LogicalCamera::findparts(){
   ros::Subscriber logical_camera_bins0_subscriber = node_.subscribe(
@@ -182,6 +222,7 @@ std::array<std::vector<Product>,19> LogicalCamera::findparts(){
 
 }
 
+
 void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
   for (auto &l: list){
     for(auto &part: l){
@@ -190,67 +231,6 @@ void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
   }
 }
 
-std::vector<Product> LogicalCamera::get_product_list0(){
-  return product_list0_;
-}
-
-
-void LogicalCamera::logical_camera_bins1_callback(
-  const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
-    //  ROS_INFO_STREAM_THROTTLE(10,"Logical camera bins1: '" << image_msg->models.size() << "' objects.");
-    // if(image_msg->models.empty()){
-    //    logflag2 = false;
-    //  } 
-    blackout_time_ = ros::Time::now().toSec();
-    if (get_cam[1])
-     { 
-      ros::Duration timeout(5.0);
-
-      unsigned short int i{0};
-      unsigned short int part_index{1}; 
-      while(i < image_msg->models.size())
-      {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
-        Product product;
-        product.type = product_type;
-        product.frame_pose = image_msg->models.at(i).pose;
-        product.camera = "logical_camera_bins1";
-        product.id = std::to_string(part_index);
-        product.status = "free";
-
-        std::string frame_name = "logical_camera_bins1_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;  
-        // ROS_INFO_STREAM(product.frame);      
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
-        product_list1_.push_back(product);
-        camera_parts_list.at(1).push_back(product);
-
-        i++;
-        part_index++; 
-      }
-      
-     get_cam[1] = false; 
-     }
-
-}
 
 double LogicalCamera::CheckBlackout(){
   return blackout_time_;
@@ -357,7 +337,6 @@ void LogicalCamera::query_faulty_cam(){
   }
   faulty_part_list_.clear();
 }
-
 
 void LogicalCamera::logical_camera_station1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
     ROS_INFO_STREAM_THROTTLE(10,"Logical camera station 1: '" << image_msg->models.size() << "' objects.");

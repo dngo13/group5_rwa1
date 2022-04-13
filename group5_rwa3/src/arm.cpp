@@ -174,7 +174,7 @@ namespace motioncontrol {
 
         // preset z depending on the part type
         // some parts are bigger than others
-        // TODO: Add new z_pos values for the regulator and the battery
+        
         double z_pos{};
         if (part_type.find("pump") != std::string::npos) {
             z_pos = 0.859;
@@ -338,8 +338,7 @@ namespace motioncontrol {
         goToPresetLocation("home2");
 
         return true;
-        // TODO: check the part was actually placed in the correct pose in the agv
-        // and that it is not faulty
+        
     }
     /////////////////////////////////////////////////////
     void Arm::gripper_state_callback(const nist_gear::VacuumGripperState::ConstPtr& gripper_state_msg)

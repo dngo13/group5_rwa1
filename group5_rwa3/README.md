@@ -1,5 +1,5 @@
-# group5_rwa2
-# Package for ENPM 663-RWA2. 
+# group5_rwa3
+# Package for ENPM 663-RWA3. 
 
 Authors:
 Darshan Jain, Pulkit Mehta, Jeffin Kachappilly
@@ -13,22 +13,18 @@ This package requires:
 
 - Clone the package into the workspace and build the package using,
 ```
-$ catkin build group5_rwa2
+$ catkin build group5_rwa3
 ```
 
 - Source the workspace and then run,
 ```
-$ roslaunch group5_rwa2 ariac.launch 
+$ roslaunch group5_rwa3 ariac.launch 
 ```
 
 - In a seperate terminal run:
 ```
-$ rosrun group5_rwa2 My_node
+$ rosrun group5_rwa3 My_node
 ```
 
--For spawning new parts, in a seperate terminal run:
-```
-$  rosrun group5_rwa2 part_spawner.sh 
-```
 
 
