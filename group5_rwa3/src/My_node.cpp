@@ -121,6 +121,8 @@ int main(int argc, char ** argv)
   std::vector<std::string> parts_not_found;
   std::string check_type;
   geometry_msgs::Pose check_world_pose;
+  geometry_msgs::Pose check_frame_pose;
+  std::string check_agv_id;
   // comp_state = comp_class.getCompetitionState();
   auto competition_start_time = comp_class.getClock();
 
@@ -181,7 +183,7 @@ int main(int argc, char ** argv)
           else{
             noblackout = true;
           } 
-                // Check if high priority order is announced
+        // Check if high priority order is announced
         if(comp_class.high_priority_announced){
           remaining_part = iter;
           remaining_part_agv = kit.agv_id;
@@ -239,6 +241,8 @@ int main(int argc, char ** argv)
             else{
               check_type = iter.type;
               check_world_pose = motioncontrol::transformtoWorldFrame(iter.frame_pose,kit.agv_id);
+              check_frame_pose = iter.frame_pose;
+              check_agv_id = kit.agv_id;
               check_later = true;
             }
             break;
@@ -348,7 +352,59 @@ int main(int argc, char ** argv)
       ROS_INFO_STREAM("continuing");
       if(faulty_list.size() > 0){
         ROS_INFO_STREAM("faulty part there");
+        arm.pickPart(check_type, check_world_pose);
+        arm.goToPresetLocation("home2");
+        arm.deactivateGripper();
       }
+    
+    
+    auto p = cam_map.find(check_type);
+
+    for (int i{0}; i < p->second.size(); i++){
+      if(p->second.at(i).status.compare("free") == 0){
+        arm.movePart(check_type, p->second.at(i).world_pose, check_frame_pose, check_agv_id);
+        p->second.at(i).status = "processed";
+
+        // Get the data from quality contrl sensors
+        cam.query_faulty_cam();
+        auto faulty_list = cam.get_faulty_part_list();
+        double outside_time = ros::Time::now().toSec();
+        double inside_time = ros::Time::now().toSec();
+        ROS_INFO_STREAM("entering delay");
+        while (inside_time - outside_time < 2.0) {
+            inside_time = ros::Time::now().toSec();
+        }
+        ROS_INFO_STREAM("continuing");
+        if(check_agv_id == "agv1"){
+          id = 0;
+        }
+        if(check_agv_id == "agv2"){
+          id = 1;
+        }
+        if(check_agv_id == "agv3"){
+          id = 2;
+        }
+        if(check_agv_id == "agv4"){
+          id = 3;
+        }
+
+        // Check if part is faulty
+        if(cam.isFaulty[id]){
+        // if(faulty_list.size() > 0){
+          ROS_INFO_STREAM("part is faulty, removing it");
+          auto world_pose = motioncontrol::transformtoWorldFrame(check_frame_pose, check_agv_id);
+          arm.pickPart(check_type, world_pose);
+          arm.goToPresetLocation("home2");
+          arm.deactivateGripper();
+          cam.isFaulty[id] = false;
+          cam.query_faulty_cam();
+          continue;
+        }
+
+        break;
+      } 
+    }
+
       check_later =false;
     }
 
@@ -383,7 +439,7 @@ int main(int argc, char ** argv)
         }
 
         // Check if part is faulty
-        if(cam.isFaulty[id]){
+        if(cam.isFaulty[id] && (faulty_list.at(0).type == remaining_part.type || faulty_list.at(1).type == remaining_part.type)){
         // if(faulty_list.size() > 0){
           ROS_INFO_STREAM("part is faulty, removing it");
           auto world_pose = motioncontrol::transformtoWorldFrame(remaining_part.frame_pose, remaining_part_agv);
