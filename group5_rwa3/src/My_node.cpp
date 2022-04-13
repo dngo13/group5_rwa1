@@ -185,7 +185,7 @@ int main(int argc, char ** argv)
         parts_for_kitting.push_back(part);
       }
       
-
+      
       for(auto &iter: parts_for_kitting){
         if(comp_class.high_priority_announced){
           remaining_part = iter;
@@ -195,7 +195,7 @@ int main(int argc, char ** argv)
           order1_models_found = true;
           break;
         }
-
+        
         auto p = cam_map.find(iter.type);
         for (int i{0}; i < p->second.size(); i++){
           if(p->second.at(i).status.compare("free") == 0){
@@ -231,17 +231,11 @@ int main(int argc, char ** argv)
           } 
         }
         
-
       }  
     }
     order0_models_found = true;
   }
-  
-  // if(abs(ros::Time::now().toSec() - cam.CheckBlackout())>5){
-  //       ROS_INFO_STREAM("Sensor_blackout");
-  // }
-
- 
+   
   
   ROS_INFO_STREAM(orders.size());
 
@@ -277,7 +271,7 @@ int main(int argc, char ** argv)
               ROS_INFO_STREAM("continuing");
 
               
-              ROS_INFO_STREAM("Number of faulty parts: " << faulty_list.size());
+              
               if(cam.isFaulty){
               // if(faulty_list.size() > 0){
                 ROS_INFO_STREAM("part is faulty, removing it");
@@ -309,7 +303,15 @@ int main(int argc, char ** argv)
     
     order1_models_found = false;
     remaining_found = true;
+    // finished = true;
   }
+
+  // if (finished){
+  // cam.query_faulty_cam();
+  // auto faulty_list = cam.get_faulty_part_list();
+  // ROS_INFO_STREAM("Number of faulty parts: " << faulty_list.size());
+  // finished = false;
+  // }  
 
   if (remaining_found){
     auto p = cam_map.find(remaining_part.type);
@@ -350,9 +352,11 @@ int main(int argc, char ** argv)
     if (agv.getAGVStatus()){
       agv.shipAgv(remaining_shipment_type, remaining_part_as);
     }
+    remaining_found = false;
   }
-
+  if(comp_class.getCompetitionState() == "done"){
+    comp_class.endCompetition();
   }
-  
+  }
   ros::waitForShutdown();  
 }

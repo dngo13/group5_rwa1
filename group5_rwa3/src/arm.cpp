@@ -180,10 +180,10 @@ namespace motioncontrol {
             z_pos = 0.859;
         }
         if (part_type.find("sensor") != std::string::npos) {
-            z_pos = 0.81;
+            z_pos = 0.83;
         }
         if (part_type.find("regulator") != std::string::npos) {
-            z_pos = 0.83;
+            z_pos = 0.81;
         }
         if (part_type.find("battery") != std::string::npos) {
             z_pos = 0.79;
