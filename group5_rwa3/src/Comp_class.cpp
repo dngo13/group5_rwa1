@@ -30,9 +30,14 @@ void MyCompetitionClass::init() {
 
     // Subscribe to the '/ariac/orders' topic.
     orders_subscriber = node_.subscribe(
-    "/ariac/orders", 10,
+    "/ariac/orders", 1,
     &MyCompetitionClass::order_callback, this);
     
+    logical_camera_subscriber_ = node_.subscribe(
+    "/ariac/logical_camera_bins0", 1, 
+    &MyCompetitionClass::logical_camera_callback, this);
+
+    // Timer at start
     timer = node_.createTimer(ros::Duration(2), &MyCompetitionClass::callback, this);
     
     // start the competition
@@ -47,6 +52,7 @@ void MyCompetitionClass::current_score_callback(const std_msgs::Float32::ConstPt
     }
     current_score_ = msg->data;
   }
+
 
 void MyCompetitionClass::competition_state_callback(const std_msgs::String::ConstPtr & msg)
   {
@@ -103,8 +109,8 @@ void MyCompetitionClass::endCompetition()
   else
   {
     ROS_INFO("Competition ended!");
+    ros::shutdown();
   }
-  ros::shutdown();
 }
 
 ////////////////////////
@@ -138,6 +144,7 @@ void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order
     if(new_order.order_id == "order_1"){
       new_order.priority = 3;
       ROS_INFO("High priority order is announced ");
+      high_priority_announced = true;
     }
   
     for (const auto &kit: order_msg->kitting_shipments){
@@ -188,6 +195,14 @@ std::vector<Order> MyCompetitionClass::get_order_list(){
 //     "depth camera bin1 detected something ");
 // } 
 
+void MyCompetitionClass::logical_camera_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
+  blackout_time_ = ros::Time::now().toSec();
+}
+
+
+double MyCompetitionClass::CheckBlackout(){
+  return blackout_time_;
+}
 
 void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPtr & msg) 
   {
@@ -195,8 +210,6 @@ void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPt
     if (msg->object_detected) {  // If there is an object in proximity.
       ROS_INFO("Break beam triggered.");
     }
-    timer.stop();
-    timer.start();
   }
 
 void MyCompetitionClass::proximity_sensor0_callback(const sensor_msgs::Range::ConstPtr & msg)
@@ -206,13 +219,10 @@ void MyCompetitionClass::proximity_sensor0_callback(const sensor_msgs::Range::Co
   {  // If there is an object in proximity.
     ROS_INFO_THROTTLE(1, "Proximity sensor sees something.");
   }
-  timer.stop();
-  timer.start();
 }
 
 void MyCompetitionClass::laser_profiler0_callback(const sensor_msgs::LaserScan::ConstPtr & msg)
 {
-  // ROS_INFO_THROTTLE(1, "Laser profiler0 sees something.");
   size_t number_of_valid_ranges = std::count_if(
     msg->ranges.begin(), msg->ranges.end(), [](const float f)
     {
@@ -220,10 +230,8 @@ void MyCompetitionClass::laser_profiler0_callback(const sensor_msgs::LaserScan::
       });
   if (number_of_valid_ranges > 0)
   {
-    ROS_INFO_THROTTLE(10, "Laser profiler sees something.");
+    // ROS_INFO_THROTTLE(10, "Laser profiler sees something.");
   }
-  timer.stop();
-  timer.start();
 }
 
 void MyCompetitionClass::agv1_station_callback(const std_msgs::String::ConstPtr & msg)
@@ -246,16 +254,9 @@ void MyCompetitionClass::agv4_station_callback(const std_msgs::String::ConstPtr 
   msg->data;
 }
 
-std::string MyCompetitionClass::get_agv_id()
-{
-  return order_list_.at(0).kitting.at(0).agv_id;
-}
 
 void MyCompetitionClass::callback(const ros::TimerEvent& event){
   wait = true;
 }
 
-bool MyCompetitionClass::get_timer(){
-  return wait;
-}
 

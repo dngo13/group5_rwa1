@@ -37,7 +37,7 @@ orders:
     announcement_condition_value: 0.0
     kitting:
       shipment_count: 1
-      agvs: [agv1. agv3]
+      agvs: [agv1, agv3]
       destinations: [as1, as3]
       products:
         part_0:
@@ -62,7 +62,7 @@ orders:
     announcement_condition: wanted_products
     announcement_condition_value: 1
     kitting:
-      shipment_count: 2
+      shipment_count: 1
       agvs: [agv2]
       destinations: [as2]
       products:
@@ -103,5 +103,5 @@ sensor_blackout:
   duration: 30
 
 faulty_products:
-  - assembly_battery_blue_2
-  - assembly_sensor_red_3
+  - assembly_battery_blue_1
+  - assembly_sensor_red_1

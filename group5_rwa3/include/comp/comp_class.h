@@ -54,11 +54,6 @@ public:
 
   /// Called when a new Order message is received.
   void order_callback(const nist_gear::Order::ConstPtr & order_msg);
-  /**
-   * @brief Stores the kitting and assembly products in seperate lists. 
-   * 
-   */
-  void process_order();
 
   /**
    * @brief Gets the order list object
@@ -66,14 +61,14 @@ public:
    * @return std::vector<Order> 
    */
   std::vector<Order> get_order_list();
-
-  /**
-   * @brief Gets the product list object
+   /**
+   * @brief Checks if there is a sensor blackout.
    * 
-   * @return std::vector<Product> 
+   * @return true 
+   * @return false 
    */
-  std::vector<Product> get_product_list();
- 
+  double CheckBlackout();
+
   // Called when a new LogicalCameraImage message from /ariac/depth_camera_bins1 is received.
   void depth_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
   
@@ -101,24 +96,14 @@ public:
   /// Called when a new String message from /ariac/agv4/station is received.
   void agv4_station_callback(const std_msgs::String::ConstPtr & msg);
   
+  /// Called when a new LogicalCameraImage message from /ariac/logical_camera_bins0 is received.
+  void logical_camera_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg);
+
+  // Check for high priority, if announced
+  bool high_priority_announced{false};  
+
   /// callback for timer
   void callback(const ros::TimerEvent& event);
-
-  /// Accessor for boolean check of timer
-  bool get_timer();
-
-  /**
-   * @brief Gets the agv id object
-   * 
-   * @return std::string agv_id
-   */
-  std::string get_agv_id();
-
-  /**
-   * @brief Get list of prothe product list0 object
-   * 
-   * @return std::vector<Product> 
-   */
 
 
 private:
@@ -135,11 +120,13 @@ private:
   ros::Subscriber current_score_subscriber_;
   ros::Subscriber competition_state_subscriber_;
   ros::Subscriber competition_clock_subscriber_;
+  ros::Subscriber logical_camera_subscriber_;
   ros::Subscriber orders_subscriber;
   std::vector<Order> order_list_;
   bool order_processed_;
   bool wait{false};
   ros::Timer timer;
+  double blackout_time_ = 0;
 };
 
 #endif
