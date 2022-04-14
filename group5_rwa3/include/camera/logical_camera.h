@@ -100,6 +100,8 @@ class LogicalCamera
     /// Accessor for boolean check of timer
     bool get_timer();
 
+    std::vector<Product> faulty_part_list_;
+    
     /**
      * @brief Detects the parts in vicinity of all the logical cameras and stores data of each model. 
      * 
@@ -151,7 +153,7 @@ class LogicalCamera
     bool wait{false};
     std::map<std::string, std::vector<Product> > camera_map_;
     double blackout_time_ = 0;
-    std::vector<Product> faulty_part_list_;
+    
 };
 
 

@@ -204,12 +204,8 @@ int main(int argc, char ** argv)
             
             if (noblackout){
               // Get the data from quality contrl sensors
-              // ros::Rate rate = 2;	  
-              // rate.sleep();	
-              ROS_INFO_STREAM(iter.id);
               cam.query_faulty_cam();
               auto faulty_list = cam.get_faulty_part_list();
-              
               double outside_time = ros::Time::now().toSec();
               double inside_time = ros::Time::now().toSec();
               // Introducing a delay for list to populate
@@ -217,7 +213,7 @@ int main(int argc, char ** argv)
               while (inside_time - outside_time < 1.0) {
                   inside_time = ros::Time::now().toSec();
               }
-              
+              ROS_INFO_STREAM("continuing");
               if(kit.agv_id == "agv1"){
                 id = 0;
               }
@@ -231,11 +227,10 @@ int main(int argc, char ** argv)
                 id = 3;
               }
               // Check if part is faulty
-              // if(cam.isFaulty[id]){
-              if (cam.faulty_part_list_.size() > 0){
+              if(cam.isFaulty[id]){
                 ROS_INFO_STREAM("part is faulty, removing it from the tray");
-                // auto world_pose = motioncontrol::gettransforminWorldFrame(cam.faulty_part_list_.at(0).frame_pose, cam.faulty_part_list_.at(0).camera);
-                arm.pickPart(iter.type, cam.faulty_part_list_.at(0).world_pose);
+                auto world_pose = motioncontrol::transformtoWorldFrame(iter.frame_pose,kit.agv_id);
+                arm.pickPart(iter.type, world_pose);
                 arm.goToPresetLocation("home2");
                 arm.deactivateGripper();
                 cam.isFaulty[id] = false;
@@ -284,13 +279,11 @@ int main(int argc, char ** argv)
               arm.movePart(iter.type, p->second.at(i).world_pose, iter.frame_pose, kit.agv_id);
               p->second.at(i).status = "processed";
 
-              // Get the data from quality control sensors
+              // Get the data from quality contrl sensors
               cam.query_faulty_cam();
               auto faulty_list = cam.get_faulty_part_list();
-              
               double outside_time = ros::Time::now().toSec();
               double inside_time = ros::Time::now().toSec();
-              
               ROS_INFO_STREAM("entering delay");
               while (inside_time - outside_time < 2.0) {
                   inside_time = ros::Time::now().toSec();
