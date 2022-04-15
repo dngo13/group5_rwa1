@@ -190,8 +190,6 @@ int main(int argc, char ** argv)
           // Process the shipment
           for(auto &iter: parts_for_kitting){
  
-            
-            
             if (cam.faulty_part_list_.size() > 0 ){
               ROS_INFO_STREAM("OUTSIDE: part is faulty, removing it from the tray");
               arm.pickPart("assembly_sensor_red", cam.faulty_part_list_.back().world_pose);
@@ -209,6 +207,7 @@ int main(int argc, char ** argv)
               for (int i{0}; i < p->second.size(); i++){
                 // Check if the part is not already picked before, i.e., is present on bin
                 if(p->second.at(i).status.compare("free") == 0){
+                  ROS_INFO_STREAM("Moving the part: " << iter.type);
                   // Pick and place the part from bin to agv tray
                   arm.movePart(iter.type, p->second.at(i).world_pose, iter.frame_pose, kit.agv_id);
                   // Update the status of the picked up part
@@ -323,7 +322,7 @@ int main(int argc, char ** argv)
                     while (inside_time - outside_time < 1.0) {
                         inside_time = ros::Time::now().toSec();
                     }
-                    
+                    ROS_INFO_STREAM("Number of faulty parts in list: " << cam.faulty_part_list_.size());
                     // Check if part is faulty
                     if (cam.faulty_part_list_.size() > 0 && (cam.faulty_part_list_.back().type == iter.type)){
                       ROS_INFO_STREAM("part is faulty, removing it from the tray");
@@ -356,15 +355,24 @@ int main(int argc, char ** argv)
           agv.shipAgv(kit.shipment_type, kit.station_id);
         }
 
+        ROS_INFO_STREAM("Moving to next shipment");
+
 
       }
-      // order0_models_found = true;
+      order0_models_found = true;
     }
+    notfinished = false;
   }
+
 
   if(comp_class.getCompetitionState() == "done"){
     comp_class.endCompetition();
   }
+
+  if(!notfinished){
+    ros::shutdown();
+  }
+
   }
   ros::waitForShutdown();  
 }
