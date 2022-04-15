@@ -191,13 +191,14 @@ int main(int argc, char ** argv)
           for(auto &iter: parts_for_kitting){
  
             if (cam.faulty_part_list_.size() > 0 ){
-              ROS_INFO_STREAM("OUTSIDE: part is faulty, removing it from the tray");
-              arm.pickPart("assembly_sensor_red", cam.faulty_part_list_.back().world_pose);
+              ROS_INFO_STREAM("Checked: part is faulty, removing it from the tray");
+              arm.pickPart("assembly_sensor_red", cam.faulty_part_list_.at(0).world_pose);
               arm.goToPresetLocation("home2");
               arm.deactivateGripper();
               cam.query_faulty_cam();
               break;
             }
+            
             
             ROS_INFO_STREAM(iter.type);
             if (!iter.processed){
@@ -227,15 +228,12 @@ int main(int argc, char ** argv)
                     // ORDER 1 PROCESSING
                     // Check if high priority order is announced
                     if(comp_class.high_priority_announced && !order1_done){
-                      ROS_INFO_STREAM("Hello from inside");
                       while(true){
                         auto temp_order_list = comp_class.get_order_list();
                         if(temp_order_list.size() > 1){
-                          ROS_INFO_STREAM("Size is greater than 1");
-
                           for(auto &kit1: temp_order_list.at(1).kitting){
 
-                            ROS_INFO_STREAM("[CURRENT PROCESS order1]: " << kit1.shipment_type);
+                            ROS_INFO_STREAM("[CURRENT PROCESS order 1]: " << kit1.shipment_type);
 
                             // Create an empty list of parts for this kit
                             std::vector<Product> parts_for_kitting1;
@@ -278,9 +276,17 @@ int main(int argc, char ** argv)
                                       }
                                       
                                       // Check if part is faulty
-                                      if (cam.faulty_part_list_.size() > 0 && (cam.faulty_part_list_.back().world_pose == p->second.at(i).world_pose)){
+                                      if (cam.faulty_part_list_.size() == 1 && (cam.faulty_part_list_.at(0).type.compare(iter.type) == 0)){
+                                        ROS_INFO_STREAM("part is faulty, removing it from the tray size 1");
+                                        arm.pickPart(iter.type, cam.faulty_part_list_.at(0).world_pose);
+                                        arm.goToPresetLocation("home2");
+                                        arm.deactivateGripper();
+                                        cam.query_faulty_cam();
+                                        continue;
+                                      }
+                                      if (cam.faulty_part_list_.size() > 1){
                                         ROS_INFO_STREAM("part is faulty, removing it from the tray");
-                                        arm.pickPart(iter.type, cam.faulty_part_list_.back().world_pose);
+                                        arm.pickPart(iter.type, cam.faulty_part_list_.at(1).world_pose);
                                         arm.goToPresetLocation("home2");
                                         arm.deactivateGripper();
                                         cam.query_faulty_cam();
@@ -319,12 +325,13 @@ int main(int argc, char ** argv)
                     double inside_time = ros::Time::now().toSec();
                     // Delay for list construction
                     ROS_INFO_STREAM("entering delay");
-                    while (inside_time - outside_time < 1.0) {
+                    while (inside_time - outside_time < 4.0) {
                         inside_time = ros::Time::now().toSec();
                     }
                     ROS_INFO_STREAM("Number of faulty parts in list: " << cam.faulty_part_list_.size());
+                    
                     // Check if part is faulty
-                    if (cam.faulty_part_list_.size() > 0 && (cam.faulty_part_list_.back().type == iter.type)){
+                    if (cam.faulty_part_list_.size() > 0 && (cam.faulty_part_list_.at(0).type.compare(iter.type) == 0)){
                       ROS_INFO_STREAM("part is faulty, removing it from the tray");
                       arm.pickPart(iter.type, cam.faulty_part_list_.at(0).world_pose);
                       arm.goToPresetLocation("home2");
@@ -332,6 +339,7 @@ int main(int argc, char ** argv)
                       cam.query_faulty_cam();
                       continue;
                     }
+                    
                     iter.processed = true;
                     ROS_INFO_STREAM("Labelled as processed" << iter.type);
                     shipment_product_count++;
@@ -348,6 +356,7 @@ int main(int argc, char ** argv)
             }
 
           }
+          shipment_product_count++;
         }
         ros::Duration(sleep(1.0));
         motioncontrol::Agv agv{node, kit.agv_id};
