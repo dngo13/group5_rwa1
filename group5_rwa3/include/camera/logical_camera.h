@@ -79,9 +79,6 @@ class LogicalCamera
     // List of all the models found by the logical cameras.
     std::array<std::vector<Product>,19> camera_parts_list;
 
-    // Boolean for faulty status of part 
-    bool isFaulty[4] = {false,false,false,false};
-
     // Buffer for transform.
     tf2_ros::Buffer tfBuffer;
 

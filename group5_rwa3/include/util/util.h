@@ -45,6 +45,8 @@ typedef struct Product
     geometry_msgs::TransformStamped transformStamped;
     std::string camera;
     std::string status;
+    bool processed;
+    std::string qcs_id;
 }   
 product;
 

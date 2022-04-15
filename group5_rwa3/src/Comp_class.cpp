@@ -132,7 +132,6 @@ std::string MyCompetitionClass::getCompetitionState() {
 void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order_msg)
   {
     ROS_INFO_STREAM("Received order:\n" << *order_msg);
-    
     received_orders_.push_back(*order_msg);
     
     // Creating instance of struct Order.

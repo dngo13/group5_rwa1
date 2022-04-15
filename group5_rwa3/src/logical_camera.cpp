@@ -181,7 +181,6 @@ void LogicalCamera::quality_control_sensor1_callback(const nist_gear::LogicalCam
     if (get_faulty_cam[0]){
       if (!image_msg->models.empty()){
         ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv1");
-        isFaulty[0] = true;
 
         for (auto &model:image_msg->models){
           Product product;
@@ -202,13 +201,14 @@ void LogicalCamera::quality_control_sensor2_callback(const nist_gear::LogicalCam
     if (get_faulty_cam[1]){
       if (!image_msg->models.empty()){
         ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv2");
-        isFaulty[1] = true;
     
         for (auto &model:image_msg->models){
           Product product;
           product.type = model.type;
           product.frame_pose = model.pose;
           product.camera = "quality_control_sensor_2";
+          auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+          product.world_pose = world_pose;
           faulty_part_list_.push_back(product);
         }
       }
@@ -222,13 +222,14 @@ void LogicalCamera::quality_control_sensor3_callback(const nist_gear::LogicalCam
     if (get_faulty_cam[2]){
       if (!image_msg->models.empty()){
         ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv3");
-        isFaulty[2] = true;
 
         for (auto &model:image_msg->models){
           Product product;
           product.type = model.type;
           product.frame_pose = model.pose;
           product.camera = "quality_control_sensor_3";
+          auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+          product.world_pose = world_pose;
           faulty_part_list_.push_back(product);
         }
       }
@@ -242,13 +243,14 @@ void LogicalCamera::quality_control_sensor4_callback(const nist_gear::LogicalCam
     if (get_faulty_cam[3]){
       if (!image_msg->models.empty()){
         ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv4");
-        isFaulty[3] = true;
-        
+
         for (auto &model:image_msg->models){
           Product product;
           product.type = model.type;
           product.frame_pose = model.pose;
           product.camera = "quality_control_sensor_4";
+          auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+          product.world_pose = world_pose;
           faulty_part_list_.push_back(product);
         }
       }
