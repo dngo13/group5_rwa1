@@ -117,7 +117,9 @@ namespace motioncontrol {
         auto init_pose_in_world = pose_in_world_frame;
 
         // ROS_INFO_STREAM(init_pose_in_world.position.x << " " << init_pose_in_world.position.y);
-        auto target_pose_in_world = motioncontrol::transformtoWorldFrame(goal_in_tray_frame, agv);
+        // auto target_pose_in_world = motioncontrol::transformtoWorldFrame(goal_in_tray_frame, agv);
+        auto target_pose_in_world = motioncontrol::gettransforminWorldFrame(goal_in_tray_frame, agv);
+        
         if (pickPart(part_type, init_pose_in_world)) {
             placePart(init_pose_in_world, goal_in_tray_frame, agv);
         }
@@ -180,7 +182,7 @@ namespace motioncontrol {
             z_pos = 0.859;
         }
         if (part_type.find("sensor") != std::string::npos) {
-            z_pos = 0.83;
+            z_pos = 0.81;
         }
         if (part_type.find("regulator") != std::string::npos) {
             z_pos = 0.81;

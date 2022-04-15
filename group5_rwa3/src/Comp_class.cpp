@@ -33,6 +33,10 @@ void MyCompetitionClass::init() {
     "/ariac/orders", 1,
     &MyCompetitionClass::order_callback, this);
     
+    logical_camera_subscriber_ = node_.subscribe(
+    "/ariac/logical_camera_bins0", 1, 
+    &MyCompetitionClass::logical_camera_callback, this);
+
     // Timer at start
     timer = node_.createTimer(ros::Duration(2), &MyCompetitionClass::callback, this);
     
@@ -128,7 +132,6 @@ std::string MyCompetitionClass::getCompetitionState() {
 void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order_msg)
   {
     ROS_INFO_STREAM("Received order:\n" << *order_msg);
-    
     received_orders_.push_back(*order_msg);
     
     // Creating instance of struct Order.
@@ -191,6 +194,14 @@ std::vector<Order> MyCompetitionClass::get_order_list(){
 //     "depth camera bin1 detected something ");
 // } 
 
+void MyCompetitionClass::logical_camera_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
+  blackout_time_ = ros::Time::now().toSec();
+}
+
+
+double MyCompetitionClass::CheckBlackout(){
+  return blackout_time_;
+}
 
 void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPtr & msg) 
   {

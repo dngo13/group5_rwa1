@@ -37,52 +37,22 @@ void LogicalCamera::logical_camera_bins0_callback(const nist_gear::LogicalCamera
      if (get_cam[0])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
         std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
-        if(i == 0 && image_msg->models.at(i).type.compare("assembly_battery_blue") == 0){
-          part_index = 5;
-        }
         Product product;
         product.type = product_type;
         product.frame_pose = image_msg->models.at(i).pose;
         product.camera = "logical_camera_bins0";
-        product.id = std::to_string(part_index);
         product.status = "free";
-        
-        std::string frame_name = "logical_camera_bins0_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        // ROS_INFO_STREAM(product.frame);  
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(0).push_back(product);
-
-        i++;
-        part_index++; 
+        i++; 
       }
-      
      get_cam[0] = false; 
      }
-
 }
 
 
@@ -92,50 +62,20 @@ void LogicalCamera::logical_camera_bins1_callback(
     if (get_cam[1])
      { 
       ros::Duration timeout(5.0);
-
-      unsigned short int i{0};
-      unsigned short int part_index{1}; 
-      while(i < image_msg->models.size())
-      {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
+      unsigned short int i{0}; 
+      while(i < image_msg->models.size()){
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
         product.camera = "logical_camera_bins1";
-        product.id = std::to_string(part_index);
-        product.status = "free";
-
-        std::string frame_name = "logical_camera_bins1_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;  
-        // ROS_INFO_STREAM(product.frame);      
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
+        product.status = "free"; 
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(1).push_back(product);
-
         i++;
-        part_index++; 
       }
-      
      get_cam[1] = false; 
      }
-
 }
 
 
@@ -241,20 +181,18 @@ void LogicalCamera::quality_control_sensor1_callback(const nist_gear::LogicalCam
     if (get_faulty_cam[0]){
       if (!image_msg->models.empty()){
         ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv1");
-        isFaulty = true;
-    
+
         for (auto &model:image_msg->models){
           Product product;
           product.type = model.type;
-          ROS_INFO_STREAM(product.type);
           product.frame_pose = model.pose;
           product.camera = "quality_control_sensor_1";
+          auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+          product.world_pose = world_pose;
           faulty_part_list_.push_back(product);
         }
       }
-
       get_faulty_cam[0] = false; 
-
     }
 }
 
@@ -263,13 +201,14 @@ void LogicalCamera::quality_control_sensor2_callback(const nist_gear::LogicalCam
     if (get_faulty_cam[1]){
       if (!image_msg->models.empty()){
         ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv2");
-        isFaulty = true;
     
         for (auto &model:image_msg->models){
           Product product;
           product.type = model.type;
           product.frame_pose = model.pose;
           product.camera = "quality_control_sensor_2";
+          auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+          product.world_pose = world_pose;
           faulty_part_list_.push_back(product);
         }
       }
@@ -283,13 +222,14 @@ void LogicalCamera::quality_control_sensor3_callback(const nist_gear::LogicalCam
     if (get_faulty_cam[2]){
       if (!image_msg->models.empty()){
         ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv3");
-        isFaulty = true;
 
         for (auto &model:image_msg->models){
           Product product;
           product.type = model.type;
           product.frame_pose = model.pose;
           product.camera = "quality_control_sensor_3";
+          auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+          product.world_pose = world_pose;
           faulty_part_list_.push_back(product);
         }
       }
@@ -303,13 +243,14 @@ void LogicalCamera::quality_control_sensor4_callback(const nist_gear::LogicalCam
     if (get_faulty_cam[3]){
       if (!image_msg->models.empty()){
         ROS_INFO_STREAM_THROTTLE(10,"Faulty part detected on agv4");
-        isFaulty = true;
-        
+
         for (auto &model:image_msg->models){
           Product product;
           product.type = model.type;
           product.frame_pose = model.pose;
           product.camera = "quality_control_sensor_4";
+          auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+          product.world_pose = world_pose;
           faulty_part_list_.push_back(product);
         }
       }
