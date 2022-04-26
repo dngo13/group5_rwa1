@@ -154,6 +154,13 @@ int main(int argc, char ** argv)
   cam.segregate_parts(list);
   // get the map of parts
   auto cam_map = cam.get_camera_map();
+  // auto binl = cam.get_bin_list();
+  
+  
+  // auto ebin = cam.get_ebin_list();
+  // for(auto &bin: ebin){
+  //   ROS_INFO_STREAM("bin number "<< bin);
+  // }
   // Create an empty list of parts for this kit
   std::vector<Product> parts_for_kitting;
 

@@ -138,6 +138,8 @@ class LogicalCamera
         return camera_map_;
     }
 
+    std::array<std::vector<Product>,8> get_bin_list();
+
     std::vector<int> get_ebin_list();
 
     private:

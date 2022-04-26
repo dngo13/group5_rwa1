@@ -48,20 +48,20 @@ void LogicalCamera::logical_camera_bins0_callback(const nist_gear::LogicalCamera
         product.status = "free";
         auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
         product.world_pose = world_pose;
-        if(abs(world_pose.x)<2.28 && abs(world_pose.y)>2.96){
-          product.bin_number = 1
+        if(abs(world_pose.position.x)<2.28 && abs(world_pose.position.y)>2.96){
+          product.bin_number = 1;
           bins_list.at(0).push_back(product);
         }
-        else if(abs(world_pose.x)<2.28 && abs(world_pose.y)<2.96){
-          product.bin_number = 2
+        else if(abs(world_pose.position.x)<2.28 && abs(world_pose.position.y)<2.96){
+          product.bin_number = 2;
           bins_list.at(1).push_back(product);
         }
-        else if(abs(world_pose.x)>2.28 && abs(world_pose.y)<2.96){
-          product.bin_number = 3
+        else if(abs(world_pose.position.x)>2.28 && abs(world_pose.position.y)<2.96){
+          product.bin_number = 3;
           bins_list.at(2).push_back(product);
         }
-        else if(abs(world_pose.x)>2.28 && abs(world_pose.y)>2.96){
-          product.bin_number = 4
+        else if(abs(world_pose.position.x)>2.28 && abs(world_pose.position.y)>2.96){
+          product.bin_number = 4;
           bins_list.at(3).push_back(product);
         }
         camera_parts_list.at(0).push_back(product);
@@ -87,20 +87,21 @@ void LogicalCamera::logical_camera_bins1_callback(
         product.status = "free"; 
         auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
         product.world_pose = world_pose;
-        if(abs(world_pose.x)<2.28 && abs(world_pose.y)>2.96){
-          product.bin_number = 5
+        if(abs(world_pose.position.x)<2.28 && abs(world_pose.position.y)>2.96){
+          product.bin_number = 5;
           bins_list.at(4).push_back(product);
         }
-        else if(abs(world_pose.x)<2.28 && abs(world_pose.y)<2.96){
-          product.bin_number = 6
+        else if(abs(world_pose.position.x)<2.28 && abs(world_pose.position.y)<2.96){
+          product.bin_number = 6;
           bins_list.at(5).push_back(product);
         }
-        else if(abs(world_pose.x)>2.28 && abs(world_pose.y)<2.96){
-          product.bin_number = 7
+        else if(abs(world_pose.position.x)>2.28 && abs(world_pose.position.y)<2.96){
+          product.bin_number = 7;
           bins_list.at(6).push_back(product);
         }
-        else if(abs(world_pose.x)>2.28 && abs(world_pose.y)>2.96){
-          product.bin_number = 8
+        else if(abs(world_pose.position.x)>2.28 && abs(world_pose.position.y)>2.96){
+          product.bin_number = 8;
+          ROS_INFO_STREAM("in 8");
           bins_list.at(7).push_back(product);
         }
         camera_parts_list.at(1).push_back(product);
@@ -189,11 +190,15 @@ std::array<std::vector<Product>,19> LogicalCamera::findparts(){
     &LogicalCamera::logical_camera_belt_callback, this);
 
   ros::Duration(0.5).sleep();
-  
+  // for (auto &vec: bins_list){
+  //     for (auto &part: vec){
+  //       ROS_INFO_STREAM("type: "<<part.type);
+  //       ROS_INFO_STREAM("bin_number: "<<part.bin_number);
+  //     }
+  // }
   return camera_parts_list;  
 
 }
-
 
 void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
   for (auto &l: list){
@@ -206,7 +211,7 @@ void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
 std::vector<int> LogicalCamera::get_ebin_list(){
   for (int i = 0; i<7;i++){
     if(bins_list.at(i).size() == 0){
-      empty_bin.push_back(i+1)
+      empty_bin.push_back(i+1);
     }
   }
   return empty_bin;
