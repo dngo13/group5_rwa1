@@ -475,8 +475,8 @@ namespace gantry {
         // - gantry_arm_wrist_2_joint
         // - gantry_arm_wrist_3_joint
         // - small_long_joint
-        // - torso_base_main_joint
         // - torso_rail_joint
+        // - torso_base_main_joint
 
         double gantry_arm_shoulder_pan_joint{ 0 };
         double gantry_arm_shoulder_lift_joint{ -0.92 };
@@ -490,7 +490,7 @@ namespace gantry {
         
 
         //home position
-        home1_.arm_preset = { -2.45, 0.0, -1.57, -0,.01 -0.92, 1.20, -0.25, 1.54, 0.83 };
+        home1_.arm_preset = { -2.45, 0.0, -1.57, -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
         home1_.name = "home1";
         home2_.arm_preset = { -1.01, 0.0, -1.57, -0,.01 -0.92, 1.20, -0.25, 1.54, 0.83 };
         home2_.name = "home2";
@@ -514,7 +514,7 @@ namespace gantry {
     }
 
     //////////////////////////////////////////////////////
-    void Arm::moveBaseTo(double torso_rail_joint) {
+    void Arm::moveBaseTo(double torso_rail_joint, double small_long_joint) {
         // get the current joint positions
         const moveit::core::JointModelGroup* joint_model_group =
             arm_group_.getCurrentState()->getJointModelGroup("gantry_full");
@@ -525,7 +525,7 @@ namespace gantry {
 
         // next, assign a value to only the linear_arm_actuator_joint
         joint_group_positions_.at(1) = -torso_rail_joint;
-
+        joint_group_positions_.at(0) = small_long_joint;
         // move the arm
         arm_group_.setJointValueTarget(joint_group_positions_);
         arm_group_.move();
@@ -565,7 +565,7 @@ namespace gantry {
 
         
         
-        moveBaseTo(part_init_pose.position.y);
+        moveBaseTo(part_init_pose.position.y, part_init_pose.position.x);
 
         // // move the arm above the part to grasp
         // // gripper stays at the current z
@@ -929,8 +929,8 @@ namespace gantry_motioncontrol {
         // For the full robot = torso + arm
 
  
-        home_.gantry_torso_preset = { -3.90, -0.13, -0.02 };
-        home_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        home_.gantry_torso_preset = { -3.5, 0.0, -1.57 };
+        home_.gantry_arm_preset = {-0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
         //concatenate gantry torso and gantry arm
         home_.gantry_full_preset.insert(home_.gantry_full_preset.begin(), home_.gantry_torso_preset.begin(), home_.gantry_torso_preset.end());
         home_.gantry_full_preset.insert(home_.gantry_full_preset.end(), home_.gantry_arm_preset.begin(), home_.gantry_arm_preset.end());
@@ -943,11 +943,18 @@ namespace gantry_motioncontrol {
         safe_bins_.gantry_full_preset.insert(safe_bins_.gantry_full_preset.end(), safe_bins_.gantry_arm_preset.begin(), safe_bins_.gantry_arm_preset.end());
 
         //at bins 1, 2, 3, 4
-        at_bins1234_.gantry_torso_preset = { -1.72, -2.90, -0.02 };
-        at_bins1234_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_bins1234_.gantry_torso_preset = { -1.72, -2.90, -1.57 };
+        at_bins1234_.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
         at_bins1234_.gantry_full_preset.insert(at_bins1234_.gantry_full_preset.begin(), at_bins1234_.gantry_torso_preset.begin(), at_bins1234_.gantry_torso_preset.end());
         at_bins1234_.gantry_full_preset.insert(at_bins1234_.gantry_full_preset.end(), at_bins1234_.gantry_arm_preset.begin(), at_bins1234_.gantry_arm_preset.end());
         
+        //at bins 5, 6, 7, 8
+        at_bins5678_.gantry_torso_preset = { -1.72, 3.0, -1.57 };
+        at_bins5678_.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        at_bins5678_.gantry_full_preset.insert(at_bins5678_.gantry_full_preset.begin(), at_bins5678_.gantry_torso_preset.begin(), at_bins5678_.gantry_torso_preset.end());
+        at_bins5678_.gantry_full_preset.insert(at_bins5678_.gantry_full_preset.end(), at_bins5678_.gantry_arm_preset.begin(), at_bins5678_.gantry_arm_preset.end());
+        
+
         // above bin1
         at_bin1_.gantry_torso_preset = { -0.09, -2.45, 0.0 };
         at_bin1_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
@@ -962,10 +969,31 @@ namespace gantry_motioncontrol {
 
         // above agv1
         //small_long_joint. torso_rail_joint, torso_base_main_joint
-        at_agv1_.gantry_torso_preset = { 0.07, -3.73, -0.02 };
-        at_agv1_.gantry_arm_preset = { 0.07 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_agv1_.gantry_torso_preset = { -0.37, -3.78, -0.69 };
+        at_agv1_.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
         at_agv1_.gantry_full_preset.insert(at_agv1_.gantry_full_preset.begin(), at_agv1_.gantry_torso_preset.begin(), at_agv1_.gantry_torso_preset.end());
         at_agv1_.gantry_full_preset.insert(at_agv1_.gantry_full_preset.end(), at_agv1_.gantry_arm_preset.begin(), at_agv1_.gantry_arm_preset.end());
+
+        // above agv2
+        //small_long_joint. torso_rail_joint, torso_base_main_joint
+        at_agv2_.gantry_torso_preset = { -0.37, -2.16, -2.70 };
+        at_agv2_.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        at_agv2_.gantry_full_preset.insert(at_agv2_.gantry_full_preset.begin(), at_agv2_.gantry_torso_preset.begin(), at_agv2_.gantry_torso_preset.end());
+        at_agv2_.gantry_full_preset.insert(at_agv2_.gantry_full_preset.end(), at_agv2_.gantry_arm_preset.begin(), at_agv2_.gantry_arm_preset.end());
+
+        // above agv3
+        //small_long_joint. torso_rail_joint, torso_base_main_joint
+        at_agv3_.gantry_torso_preset = { -0.37, 2.41, -0.69 };
+        at_agv3_.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        at_agv3_.gantry_full_preset.insert(at_agv3_.gantry_full_preset.begin(), at_agv3_.gantry_torso_preset.begin(), at_agv3_.gantry_torso_preset.end());
+        at_agv3_.gantry_full_preset.insert(at_agv3_.gantry_full_preset.end(), at_agv3_.gantry_arm_preset.begin(), at_agv3_.gantry_arm_preset.end());
+
+        // above agv4
+        //small_long_joint. torso_rail_joint, torso_base_main_joint
+        at_agv4_.gantry_torso_preset = { -0.37, 3.49, -2.70 };
+        at_agv4_.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        at_agv4_.gantry_full_preset.insert(at_agv4_.gantry_full_preset.begin(), at_agv4_.gantry_torso_preset.begin(), at_agv4_.gantry_torso_preset.end());
+        at_agv4_.gantry_full_preset.insert(at_agv4_.gantry_full_preset.end(), at_agv4_.gantry_arm_preset.begin(), at_agv4_.gantry_arm_preset.end());
 
 
         // raw pointers are frequently used to refer to the planning group for improved performance.

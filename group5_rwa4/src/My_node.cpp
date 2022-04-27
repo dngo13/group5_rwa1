@@ -94,6 +94,7 @@ int main(int argc, char ** argv)
   motioncontrol::Arm arm(node);
   arm.init();
   gantry_motioncontrol::Gantry gantry(node);
+  // gantry::Arm gantry(node);
   gantry.init();
 
   // ros::Subscriber depth_camera_bins1_subscriber = node.subscribe(
@@ -154,12 +155,31 @@ int main(int argc, char ** argv)
   cam.segregate_parts(list);
   // get the map of parts
   auto cam_map = cam.get_camera_map();
+  // auto binl = cam.get_bin_list();
+  
+  
+  // auto ebin = cam.get_ebin_list();
+  // for(auto &bin: ebin){
+  //   ROS_INFO_STREAM("bin number "<< bin);
+  // }
   // Create an empty list of parts for this kit
   std::vector<Product> parts_for_kitting;
 
   std::vector<Product> parts_to_check_later;
 
   gantry.goToPresetLocation(gantry.home_);
+  // gantry.goToPresetLocation(gantry.at_bins1234_);
+  // gantry.goToPresetLocation(gantry.at_agv1_);
+  // gantry.goToPresetLocation(gantry.at_agv2_);
+  // gantry.goToPresetLocation(gantry.at_bins1234_);
+  // gantry.goToPresetLocation(gantry.home_);
+  // gantry.goToPresetLocation(gantry.at_bins5678_);
+  // gantry.goToPresetLocation(gantry.at_agv3_);
+  // gantry.goToPresetLocation(gantry.at_agv4_);
+  // gantry.goToPresetLocation(gantry.at_bins5678_);
+  // gantry.goToPresetLocation(gantry.home_);
+
+
   arm.goToPresetLocation("home1");
   arm.goToPresetLocation("home2");
 
@@ -214,6 +234,7 @@ int main(int argc, char ** argv)
                   ROS_INFO_STREAM("Moving the part: " << iter.type);
                   // Pick and place the part from bin to agv tray
                   gantry.goToPresetLocation(gantry.at_bins1234_);
+                  gantry.goToPresetLocation(gantry.at_bin1_);
                   gantry.pickPart(p->second.at(i).world_pose);
                   // arm.movePart(iter.type, p->second.at(i).world_pose, iter.frame_pose, kit.agv_id);
                   // Update the status of the picked up part

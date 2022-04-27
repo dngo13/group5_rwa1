@@ -40,11 +40,11 @@ orders:
       agvs: [agv1, agv3]
       destinations: [as1, as3]
       products:
-        part_0:
-          type: assembly_sensor_red
-          pose:
-            xyz: [-0.1, 0.1, 0]
-            rpy: [0, 0, 'pi/3']
+        # part_0:
+        #   type: assembly_sensor_red
+        #   pose:
+        #     xyz: [-0.1, 0.1, 0]
+        #     rpy: [0, 0, 'pi/3']
         part_1:
           type: assembly_battery_blue
           pose:
@@ -73,7 +73,7 @@ orders:
             rpy: [0, 0, '-pi/3']
 
 models_over_bins:
-  bin3:
+  bin2:
     models:
       assembly_sensor_red:
         xyz_start: [0.2, 0.2, 0.0]

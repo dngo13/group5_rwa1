@@ -47,6 +47,7 @@ typedef struct Product
     std::string status;
     bool processed;
     std::string qcs_id;
+    int bin_number;
 }   
 product;
 

@@ -139,7 +139,7 @@ namespace gantry {
          *
          * @param location A preset location
          */
-        void moveBaseTo(double linear_arm_actuator_joint_position);
+        void moveBaseTo(double linear_arm_actuator_joint_position, double);
         nist_gear::VacuumGripperState getGripperState();
 
         
@@ -229,8 +229,12 @@ namespace gantry_motioncontrol {
         nist_gear::VacuumGripperState getGripperState();
         //--preset locations;
         start home_;
-        bin at_bin1_, safe_bins_, at_bins1234_;
+        bin at_bin1_, safe_bins_, at_bins1234_, at_bins5678_;
         agv at_agv1_;
+        agv at_agv2_;
+        agv at_agv3_;
+        agv at_agv4_;
+
         grasp pre_grasp_, post_grasp_;
 
         private:

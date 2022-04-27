@@ -138,6 +138,13 @@ class LogicalCamera
         return camera_map_;
     }
 
+    std::array<std::vector<Product>,8> get_bin_list();
+
+    std::vector<int> get_ebin_list();
+
+    geometry_msgs::Pose get_part_pose_in_empty_bin(int bin_number);
+
+    unsigned short int empty_bin_place_count { 0 }; 
 
     private:
     ros::NodeHandle node_;
@@ -150,7 +157,18 @@ class LogicalCamera
     bool wait{false};
     std::map<std::string, std::vector<Product> > camera_map_;
     double blackout_time_ = 0;
-    
+    std::array<std::vector<Product>,8> bins_list;
+    std::vector<int> empty_bin;
+    std::array<double,3> bin1_origin_ { -1.898, 3.37, 0.751 };
+    std::array<double,3> bin2_origin_ { -1.898, 2.56, 0.751 };
+    std::array<double,3> bin3_origin_ { -2.651, 2.56, 0.751 };
+    std::array<double,3> bin4_origin_ { -2.651, 3.37, 0.751 };
+    std::array<double,3> bin5_origin_ { -1.898, -3.37, 0.751 };
+    std::array<double,3> bin6_origin_ { -1.898, -2.56, 0.751 };
+    std::array<double,3> bin7_origin_ { -2.651, -2.56, 0.751 };
+    std::array<double,3> bin8_origin_ { -2.651, -3.37, 0.751 };
+
+
 };
 
 
