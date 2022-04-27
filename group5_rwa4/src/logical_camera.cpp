@@ -48,19 +48,19 @@ void LogicalCamera::logical_camera_bins0_callback(const nist_gear::LogicalCamera
         product.status = "free";
         auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
         product.world_pose = world_pose;
-        if(abs(world_pose.position.x)<2.28 && abs(world_pose.position.y)>2.96){
+        if(world_pose.position.x > -2.28 && world_pose.position.y > 2.96){
           product.bin_number = 1;
           bins_list.at(0).push_back(product);
         }
-        else if(abs(world_pose.position.x)<2.28 && abs(world_pose.position.y)<2.96){
+        else if( world_pose.position.x > -2.28 && world_pose.position.y < 2.96){
           product.bin_number = 2;
           bins_list.at(1).push_back(product);
         }
-        else if(abs(world_pose.position.x)>2.28 && abs(world_pose.position.y)<2.96){
+        else if(world_pose.position.x < -2.28 && world_pose.position.y < 2.96){
           product.bin_number = 3;
           bins_list.at(2).push_back(product);
         }
-        else if(abs(world_pose.position.x)>2.28 && abs(world_pose.position.y)>2.96){
+        else if(world_pose.position.x < -2.28 && world_pose.position.y > 2.96){
           product.bin_number = 4;
           bins_list.at(3).push_back(product);
         }
@@ -87,19 +87,19 @@ void LogicalCamera::logical_camera_bins1_callback(
         product.status = "free"; 
         auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
         product.world_pose = world_pose;
-        if(abs(world_pose.position.x)<2.28 && abs(world_pose.position.y)>2.96){
+        if(world_pose.position.x > -2.28 && world_pose.position.y < -2.96){
           product.bin_number = 5;
           bins_list.at(4).push_back(product);
         }
-        else if(abs(world_pose.position.x)<2.28 && abs(world_pose.position.y)<2.96){
+        else if(world_pose.position.x > -2.28 && world_pose.position.y > -2.96){
           product.bin_number = 6;
           bins_list.at(5).push_back(product);
         }
-        else if(abs(world_pose.position.x)>2.28 && abs(world_pose.position.y)<2.96){
+        else if(world_pose.position.x < -2.28 && world_pose.position.y > -2.96){
           product.bin_number = 7;
           bins_list.at(6).push_back(product);
         }
-        else if(abs(world_pose.position.x)>2.28 && abs(world_pose.position.y)>2.96){
+        else if(world_pose.position.x < -2.28 && world_pose.position.y < -2.96){
           product.bin_number = 8;
           ROS_INFO_STREAM("in 8");
           bins_list.at(7).push_back(product);
@@ -208,8 +208,65 @@ void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
   }
 }
 
+// geometry_msgs::Pose LogicalCamera::get_part_pose_in_empty_bin(int bin_number){
+//   std::array<double,3> bin_origin{0,0,0};
+//   geometry_msgs::Pose part_world_pose;
+
+//   if (bin_number == 1){
+//     bin_origin = bin1_origin_;
+//   }
+//   if (bin_number == 2){
+//     bin_origin = bin2_origin_;
+//   }
+//   if (bin_number == 3){
+//     bin_origin = bin3_origin_;
+//   }
+//   if (bin_number == 4){
+//     bin_origin = bin4_origin_;
+//   }
+//   if (bin_number == 5){
+//     bin_origin = bin5_origin_;
+//   }
+//   if (bin_number == 6){
+//     bin_origin = bin6_origin_;
+//   }
+//   if (bin_number == 7){
+//     bin_origin = bin7_origin_;
+//   }
+//   if (bin_number == 8){
+//     bin_origin = bin8_origin_;
+//   }
+
+//   if (empty_bin_place_count == 0){
+//     part_world_pose.position.x = bin_origin.at(0) + 0.2;
+//     part_world_pose.position.y = bin_origin.at(1) - 0.2;
+//     part_world_pose.position.z = bin_origin.at(2);
+//     empty_bin_place_count = 1;
+//   }
+//   if (empty_bin_place_count == 1){
+//     part_world_pose.position.x = bin_origin.at(0) + 0.2;
+//     part_world_pose.position.y = bin_origin.at(1) + 0.2;
+//     part_world_pose.position.z = bin_origin.at(2);
+//     empty_bin_place_count = 2;
+//   }
+//   if (empty_bin_place_count == 2){
+//     part_world_pose.position.x = bin_origin.at(0) - 0.2;
+//     part_world_pose.position.y = bin_origin.at(1) + 0.2;
+//     part_world_pose.position.z = bin_origin.at(2);
+//     empty_bin_place_count = 3;
+//   }
+//   if (empty_bin_place_count == 3){
+//     part_world_pose.position.x = bin_origin.at(0) - 0.2;
+//     part_world_pose.position.y = bin_origin.at(1) - 0.2;
+//     part_world_pose.position.z = bin_origin.at(2);
+//   }
+
+//   return part_world_pose;
+
+// }
+
 std::vector<int> LogicalCamera::get_ebin_list(){
-  for (int i = 0; i<7;i++){
+  for (int i = 0; i<8;i++){
     if(bins_list.at(i).size() == 0){
       empty_bin.push_back(i+1);
     }

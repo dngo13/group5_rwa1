@@ -74,6 +74,10 @@ namespace motioncontrol {
         home1_.name = "home1";
         home2_.arm_preset = { 0, -M_PI, -1.25, 1.74, -2.04, -1.57, 0 };
         home2_.name = "home2";
+        on_.arm_preset = { 1.76 , 0, -0.74, 1.76, 5.28, 0, 0 };
+        on_.name = "on"; 
+        above_.arm_preset = { 1.76 , 0, -1.62, 1.76, 6.28, 0, 0 };
+        above_.name = "above";
         agv1_.arm_preset = { 3.83, -M_PI, -1.25, 1.74, -2.04, -1.57, 0 };
         agv1_.name = "agv1";
         agv2_.arm_preset = { 0.83, -M_PI, -1.25, 1.74, -2.04, -1.57, 0 };
@@ -82,6 +86,10 @@ namespace motioncontrol {
         agv3_.name = "agv3";
         agv4_.arm_preset = { -4.33, -M_PI, -1.25, 1.74, -2.04, -1.57, 0 };
         agv4_.name = "agv4";
+        // bin1_.arm_preset = { 3.2 , 1.51 , -1.12 , 1.76, -2.04, -1.57, 0 };
+        // bin1_.name = "bin1";
+
+
 
 
         // raw pointers are frequently used to refer to the planning group for improved performance.
@@ -378,6 +386,12 @@ namespace motioncontrol {
         else if (location_name.compare("home2") == 0) {
             location = home2_;
         }
+        else if (location_name.compare("on") == 0) {
+            location = on_;
+        }
+        else if (location_name.compare("above") == 0) {
+            location = above_;
+        }
         else if (location_name.compare("agv1") == 0) {
             location = agv1_;
         }
@@ -390,6 +404,9 @@ namespace motioncontrol {
         else if (location_name.compare("agv4") == 0) {
             location = agv4_;
         }
+        // else if (location_name.compare("bin1") == 0) {
+        //     location = bin1_;
+        // }
         joint_group_positions_.at(0) = location.arm_preset.at(0);
         joint_group_positions_.at(1) = location.arm_preset.at(1);
         joint_group_positions_.at(2) = location.arm_preset.at(2);
@@ -407,6 +424,110 @@ namespace motioncontrol {
             arm_group_.move();
     }
 
+    geometry_msgs::Pose Arm::get_part_pose_in_empty_bin(int bin_number){
+        std::array<double,3> bin_origin{0,0,0};
+        geometry_msgs::Pose part_world_pose;
+        ROS_INFO_STREAM("empty_bin_place_count "<<empty_bin_place_count);
+        if (bin_number == 1){
+            bin_origin = bin1_origin_;
+        }
+        if (bin_number == 2){
+            bin_origin = bin2_origin_;
+        }
+        if (bin_number == 3){
+            bin_origin = bin3_origin_;
+        }
+        if (bin_number == 4){
+            bin_origin = bin4_origin_;
+        }
+        if (bin_number == 5){
+            bin_origin = bin5_origin_;
+        }
+        if (bin_number == 6){
+            bin_origin = bin6_origin_;
+        }
+        if (bin_number == 7){
+            bin_origin = bin7_origin_;
+        }
+        if (bin_number == 8){
+            bin_origin = bin8_origin_;
+        }
+
+        if (empty_bin_place_count == 0){
+            part_world_pose.position.x = bin_origin.at(0) + 0.2;
+            part_world_pose.position.y = bin_origin.at(1) - 0.2;
+            part_world_pose.position.z = bin_origin.at(2);
+            empty_bin_place_count++;
+        }
+        else if (empty_bin_place_count == 1){
+            part_world_pose.position.x = bin_origin.at(0) + 0.2;
+            part_world_pose.position.y = bin_origin.at(1) + 0.2;
+            part_world_pose.position.z = bin_origin.at(2);
+            empty_bin_place_count++;
+        }
+        else if (empty_bin_place_count == 2){
+            part_world_pose.position.x = bin_origin.at(0) - 0.2;
+            part_world_pose.position.y = bin_origin.at(1) + 0.2;
+            part_world_pose.position.z = bin_origin.at(2);
+            empty_bin_place_count++;
+        }
+        else if (empty_bin_place_count == 3){
+            part_world_pose.position.x = bin_origin.at(0) - 0.2;
+            part_world_pose.position.y = bin_origin.at(1) - 0.2;
+            part_world_pose.position.z = bin_origin.at(2);
+        }
+        return part_world_pose;
+    }
+
+    void Arm::pick_from_conveyor(std::vector<int> ebin)
+    {   
+        for(int i = 0 ; i<3; i++){
+            double trigger_time_ = ros::Time::now().toSec();
+            int sbin = 0;
+            goToPresetLocation("on");
+            while (!gripper_state_.enabled) {
+                activateGripper();
+            }
+            while (!gripper_state_.attached && ros::Time::now().toSec() - trigger_time_ < 20){
+    
+            }
+            ROS_INFO_STREAM("object attached");
+            goToPresetLocation("above");
+            for(auto &bin: ebin){
+                ROS_INFO_STREAM("bin number "<< bin);
+                if(bin == 1 || bin == 2 || bin == 5 || bin == 6)
+                {
+                    sbin = bin;
+                    break;
+                }
+            }
+            ROS_INFO_STREAM("sbin number "<< sbin);
+            geometry_msgs::Pose bin = get_part_pose_in_empty_bin(sbin);
+            ROS_INFO_STREAM("Y_pos: "<<bin.position.y);
+            geometry_msgs::Pose arm_ee_link_pose = arm_group_.getCurrentPose().pose;
+            auto side_orientation = motioncontrol::quaternionFromEuler(1.57, 0, 0);
+            // auto flat_orientation = motioncontrol::quaternionFromEuler(0, 1.57, 0);
+            // arm_ee_link_pose = arm_group_.getCurrentPose().pose;
+            arm_ee_link_pose.orientation.x = side_orientation.getX();
+            arm_ee_link_pose.orientation.y = side_orientation.getY();
+            arm_ee_link_pose.orientation.z = side_orientation.getZ();
+            arm_ee_link_pose.orientation.w = side_orientation.getW();
+            arm_group_.setPoseTarget(arm_ee_link_pose);
+            arm_group_.move();
+            // arm_ee_link_pose = arm_group_.getCurrentPose().pose;
+            moveBaseTo(bin.position.y);
+            arm_ee_link_pose.position.x = bin.position.x;
+            arm_ee_link_pose.position.y = bin.position.y;
+            arm_ee_link_pose.position.z = bin.position.z + 0.2;
+            arm_group_.setMaxVelocityScalingFactor(1.0);
+            arm_group_.setPoseTarget(arm_ee_link_pose);
+            arm_group_.move();
+            ros::Duration(2.0).sleep();
+            deactivateGripper();
+            goToPresetLocation("above");
+        }
+        // goToPresetLocation(bin);
+    }
 
     ///////////////////////////
     ////// Callback Functions
@@ -848,17 +969,6 @@ namespace gantry {
         arm_controller_state_ = *msg;
     }
 }//namespace
-
-
-
-
-
-
-
-
-
-
-
 
 namespace gantry_motioncontrol {
     /////////////////////////////////////////////////////

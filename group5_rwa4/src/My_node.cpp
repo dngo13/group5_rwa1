@@ -157,24 +157,25 @@ int main(int argc, char ** argv)
   // auto binl = cam.get_bin_list();
   
   
-  // auto ebin = cam.get_ebin_list();
-  // for(auto &bin: ebin){
-  //   ROS_INFO_STREAM("bin number "<< bin);
-  // }
+  auto ebin = cam.get_ebin_list();
+  for(auto &bin: ebin){
+    ROS_INFO_STREAM("bin number "<< bin);
+  }
   // Create an empty list of parts for this kit
   std::vector<Product> parts_for_kitting;
 
   std::vector<Product> parts_to_check_later;
 
-  gantry.goToPresetLocation(gantry.home_);
+  // gantry.goToPresetLocation(gantry.home_);
   arm.goToPresetLocation("home1");
-  arm.goToPresetLocation("home2");
+  // arm.goToPresetLocation("home2");
+  arm.pick_from_conveyor(ebin);
 
+  
   while(ros::ok){
   
   // get the list of orders
   orders = comp_class.get_order_list();  
-
   // Process order 0
   if (notfinished)
   {
