@@ -207,7 +207,7 @@ namespace gantry_motioncontrol {
             std::vector<double> gantry_full_preset;  //3 joints
             std::vector<double> gantry_torso_preset; //6 joints
             std::vector<double> gantry_arm_preset;   //9 joints
-        } start, bin, agv, grasp;
+        } start, bin, agv, grasp, briefcase;
 
         Gantry(ros::NodeHandle& node);
         /**
@@ -234,7 +234,12 @@ namespace gantry_motioncontrol {
         agv at_agv2_;
         agv at_agv3_;
         agv at_agv4_;
-
+        agv at_agv2_as1;
+        agv at_agv4_as3;
+        
+        briefcase at_as1;
+        briefcase at_as3;
+        
         grasp pre_grasp_, post_grasp_;
 
         private:
