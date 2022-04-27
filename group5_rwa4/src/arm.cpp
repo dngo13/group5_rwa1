@@ -995,6 +995,32 @@ namespace gantry_motioncontrol {
         at_agv4_.gantry_full_preset.insert(at_agv4_.gantry_full_preset.begin(), at_agv4_.gantry_torso_preset.begin(), at_agv4_.gantry_torso_preset.end());
         at_agv4_.gantry_full_preset.insert(at_agv4_.gantry_full_preset.end(), at_agv4_.gantry_arm_preset.begin(), at_agv4_.gantry_arm_preset.end());
 
+        // above agv2 at as1
+        //small_long_joint. torso_rail_joint, torso_base_main_joint
+        at_agv2_as1.gantry_torso_preset = { -3.81, -2.16, -2.70 };
+        at_agv2_as1.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        at_agv2_as1.gantry_full_preset.insert(at_agv2_as1.gantry_full_preset.begin(), at_agv2_as1.gantry_torso_preset.begin(), at_agv2_as1.gantry_torso_preset.end());
+        at_agv2_as1.gantry_full_preset.insert(at_agv2_as1.gantry_full_preset.end(), at_agv2_as1.gantry_arm_preset.begin(), at_agv2_as1.gantry_arm_preset.end());
+
+        // above agv4 at as3
+        //small_long_joint. torso_rail_joint, torso_base_main_joint
+        at_agv4_as3.gantry_torso_preset = { -3.81, 3.49, -2.70 };
+        at_agv4_as3.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        at_agv4_as3.gantry_full_preset.insert(at_agv4_as3.gantry_full_preset.begin(), at_agv4_as3.gantry_torso_preset.begin(), at_agv4_as3.gantry_torso_preset.end());
+        at_agv4_as3.gantry_full_preset.insert(at_agv4_as3.gantry_full_preset.end(), at_agv4_as3.gantry_arm_preset.begin(), at_agv4_as3.gantry_arm_preset.end());
+
+        // above briefcase at as1
+        at_as1.gantry_torso_preset = { -3.81, -3.51, -3.96 };
+        at_as1.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        at_as1.gantry_full_preset.insert(at_as1.gantry_full_preset.begin(), at_as1.gantry_torso_preset.begin(), at_as1.gantry_torso_preset.end());
+        at_as1.gantry_full_preset.insert(at_as1.gantry_full_preset.end(), at_as1.gantry_arm_preset.begin(), at_as1.gantry_arm_preset.end());
+
+        // above briefcase at as3
+        at_as3.gantry_torso_preset = { -3.81, 2.41, -3.96 };
+        at_as3.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        at_as3.gantry_full_preset.insert(at_as3.gantry_full_preset.begin(), at_as3.gantry_torso_preset.begin(), at_as3.gantry_torso_preset.end());
+        at_as3.gantry_full_preset.insert(at_as3.gantry_full_preset.end(), at_as3.gantry_arm_preset.begin(), at_as3.gantry_arm_preset.end());
+
 
         // raw pointers are frequently used to refer to the planning group for improved performance.
         // to start, we will create a pointer that references the current robot’s state.
