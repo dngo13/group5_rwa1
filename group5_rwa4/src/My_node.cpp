@@ -168,6 +168,14 @@ int main(int argc, char ** argv)
   std::vector<Product> parts_to_check_later;
 
   gantry.goToPresetLocation(gantry.home_);
+  gantry.goToPresetLocation(gantry.at_bins5678_);
+  gantry.goToPresetLocation(gantry.at_agv4_as3);
+  gantry.goToPresetLocation(gantry.at_as3);
+  gantry.goToPresetLocation(gantry.at_bins1234_);
+
+  gantry.goToPresetLocation(gantry.at_agv2_as1);
+  gantry.goToPresetLocation(gantry.at_as1);
+  
   // gantry.goToPresetLocation(gantry.at_bins1234_);
   // gantry.goToPresetLocation(gantry.at_agv1_);
   // gantry.goToPresetLocation(gantry.at_agv2_);
