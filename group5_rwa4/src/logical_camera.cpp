@@ -208,65 +208,66 @@ void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
   }
 }
 
-geometry_msgs::Pose LogicalCamera::get_part_pose_in_empty_bin(int bin_number){
-  std::array<double,3> bin_origin{0,0,0};
-  geometry_msgs::Pose part_world_pose;
+// geometry_msgs::Pose LogicalCamera::get_part_pose_in_empty_bin(int bin_number){
+//   std::array<double,3> bin_origin{0,0,0};
+//   geometry_msgs::Pose part_world_pose;
 
-  if (bin_number == 1){
-    bin_origin = bin1_origin_;
-  }
-  if (bin_number == 2){
-    bin_origin = bin2_origin_;
-  }
-  if (bin_number == 3){
-    bin_origin = bin3_origin_;
-  }
-  if (bin_number == 4){
-    bin_origin = bin4_origin_;
-  }
-  if (bin_number == 5){
-    bin_origin = bin5_origin_;
-  }
-  if (bin_number == 6){
-    bin_origin = bin6_origin_;
-  }
-  if (bin_number == 7){
-    bin_origin = bin7_origin_;
-  }
-  if (bin_number == 8){
-    bin_origin = bin8_origin_;
-  }
+//   if (bin_number == 1){
+//     bin_origin = bin1_origin_;
+//   }
+//   if (bin_number == 2){
+//     bin_origin = bin2_origin_;
+//   }
+//   if (bin_number == 3){
+//     bin_origin = bin3_origin_;
+//   }
+//   if (bin_number == 4){
+//     bin_origin = bin4_origin_;
+//   }
+//   if (bin_number == 5){
+//     bin_origin = bin5_origin_;
+//   }
+//   if (bin_number == 6){
+//     bin_origin = bin6_origin_;
+//   }
+//   if (bin_number == 7){
+//     bin_origin = bin7_origin_;
+//   }
+//   if (bin_number == 8){
+//     bin_origin = bin8_origin_;
+//   }
 
-  if (empty_bin_place_count == 0){
-    part_world_pose.position.x = bin_origin.at(0) + 0.2;
-    part_world_pose.position.y = bin_origin.at(1) - 0.2;
-    part_world_pose.position.z = bin_origin.at(2);
-    empty_bin_place_count = 1;
-  }
-  if (empty_bin_place_count == 1){
-    part_world_pose.position.x = bin_origin.at(0) + 0.2;
-    part_world_pose.position.y = bin_origin.at(1) + 0.2;
-    part_world_pose.position.z = bin_origin.at(2);
-    empty_bin_place_count = 2;
-  }
-  if (empty_bin_place_count == 2){
-    part_world_pose.position.x = bin_origin.at(0) - 0.2;
-    part_world_pose.position.y = bin_origin.at(1) + 0.2;
-    part_world_pose.position.z = bin_origin.at(2);
-    empty_bin_place_count = 3;
-  }
-  if (empty_bin_place_count == 3){
-    part_world_pose.position.x = bin_origin.at(0) - 0.2;
-    part_world_pose.position.y = bin_origin.at(1) - 0.2;
-    part_world_pose.position.z = bin_origin.at(2);
-  }
+//   if (empty_bin_place_count == 0){
+//     part_world_pose.position.x = bin_origin.at(0) + 0.2;
+//     part_world_pose.position.y = bin_origin.at(1) - 0.2;
+//     part_world_pose.position.z = bin_origin.at(2);
+//     empty_bin_place_count = 1;
+//   }
+//   if (empty_bin_place_count == 1){
+//     part_world_pose.position.x = bin_origin.at(0) + 0.2;
+//     part_world_pose.position.y = bin_origin.at(1) + 0.2;
+//     part_world_pose.position.z = bin_origin.at(2);
+//     empty_bin_place_count = 2;
+//   }
+//   if (empty_bin_place_count == 2){
+//     part_world_pose.position.x = bin_origin.at(0) - 0.2;
+//     part_world_pose.position.y = bin_origin.at(1) + 0.2;
+//     part_world_pose.position.z = bin_origin.at(2);
+//     empty_bin_place_count = 3;
+//   }
+//   if (empty_bin_place_count == 3){
+//     part_world_pose.position.x = bin_origin.at(0) - 0.2;
+//     part_world_pose.position.y = bin_origin.at(1) - 0.2;
+//     part_world_pose.position.z = bin_origin.at(2);
+//   }
 
-  return part_world_pose;
+//   return part_world_pose;
 
-}
+// }
 
 std::vector<int> LogicalCamera::get_ebin_list(){
-  for (int i = 0; i<7;i++){
+  empty_bin.clear();
+  for (int i = 0; i<8;i++){
     if(bins_list.at(i).size() == 0){
       empty_bin.push_back(i+1);
     }
@@ -386,48 +387,22 @@ void LogicalCamera::logical_camera_station1_callback(const nist_gear::LogicalCam
     if (get_cam[2])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
         std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
         product.type = product_type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_station1_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_station1";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(2).push_back(product);
-
         i++;
-        part_index++; 
       }
-      
      get_cam[2] = false; 
      }
-
 }   
 
 void LogicalCamera::logical_camera_station2_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
@@ -435,48 +410,22 @@ void LogicalCamera::logical_camera_station2_callback(const nist_gear::LogicalCam
     if (get_cam[3])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
         std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
         product.type = product_type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_station2_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_station2";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(3).push_back(product);
-
         i++;
-        part_index++; 
       }
-      
      get_cam[3] = false; 
      }
-
 }
 
 void LogicalCamera::logical_camera_station3_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
@@ -484,45 +433,20 @@ void LogicalCamera::logical_camera_station3_callback(const nist_gear::LogicalCam
     if (get_cam[4])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
         std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
         product.type = product_type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_station3_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_station3";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(4).push_back(product);
-
         i++;
-        part_index++; 
       }
-      
      get_cam[4] = false; 
      }
 
@@ -535,41 +459,18 @@ void LogicalCamera::logical_camera_station4_callback(const nist_gear::LogicalCam
       ros::Duration timeout(5.0);
 
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
         std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
         product.type = product_type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_station4_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_station4";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(5).push_back(product);
-
         i++;
-        part_index++; 
       }
       
      get_cam[5] = false; 
@@ -580,43 +481,18 @@ void LogicalCamera::logical_camera_agv1as1_callback(const nist_gear::LogicalCame
   if (get_cam[6])
      { 
       ros::Duration timeout(5.0);
-
-      unsigned short int i{0};
-      unsigned short int part_index{1}; 
+      unsigned short int i{0}; 
       while(i < image_msg->models.size())
       {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv1as1_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv1as1";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(6).push_back(product);
-
         i++;
-        part_index++; 
       }
       
      get_cam[6] = false; 
@@ -627,43 +503,18 @@ void LogicalCamera::logical_camera_agv1as2_callback(const nist_gear::LogicalCame
   if (get_cam[7])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv1as2_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv1as2";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(7).push_back(product);
-
         i++;
-        part_index++; 
       }
       
      get_cam[7] = false; 
@@ -674,45 +525,20 @@ void LogicalCamera::logical_camera_agv1ks_callback(const nist_gear::LogicalCamer
   if (get_cam[8])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
         std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
         product.type = product_type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv1ks_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv1ks";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(8).push_back(product);
-
         i++;
-        part_index++; 
-      }
-      
+      }     
      get_cam[8] = false; 
      }
 }
@@ -721,43 +547,18 @@ void LogicalCamera::logical_camera_agv2as1_callback(const nist_gear::LogicalCame
   if (get_cam[9])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv2as1_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv2as1";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(9).push_back(product);
-
         i++;
-        part_index++; 
       }
       
      get_cam[9] = false; 
@@ -768,45 +569,19 @@ void LogicalCamera::logical_camera_agv2as2_callback(const nist_gear::LogicalCame
   if (get_cam[10])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv2as2_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv2as2";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(10).push_back(product);
-
         i++;
-        part_index++; 
       }
-      
      get_cam[10] = false; 
      }
 }
@@ -815,45 +590,20 @@ void LogicalCamera::logical_camera_agv2ks_callback(const nist_gear::LogicalCamer
   if (get_cam[11])
      {
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
         std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
         product.type = product_type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv2ks_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv2ks";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(11).push_back(product);
-
-        i++;
-        part_index++; 
+        i++; 
       }
-      
      get_cam[11] = false; 
      }
 }
@@ -862,45 +612,19 @@ void LogicalCamera::logical_camera_agv3as3_callback(const nist_gear::LogicalCame
   if (get_cam[12])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv3as3_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv3as3";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(12).push_back(product);
-
         i++;
-        part_index++; 
       }
-      
      get_cam[12] = false; 
      }
 }
@@ -909,45 +633,19 @@ void LogicalCamera::logical_camera_agv3as4_callback(const nist_gear::LogicalCame
   if (get_cam[13])
      { 
       ros::Duration timeout(5.0);
-
-      unsigned short int i{0};
-      unsigned short int part_index{1}; 
+      unsigned short int i{0}; 
       while(i < image_msg->models.size())
       {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv3as4_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv3as4";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(13).push_back(product);
-
         i++;
-        part_index++; 
       }
-      
      get_cam[13] = false; 
      }
 }
@@ -958,43 +656,18 @@ void LogicalCamera::logical_camera_agv3ks_callback(const nist_gear::LogicalCamer
       ros::Duration timeout(5.0);
 
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv3ks_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv3ks";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(14).push_back(product);
-
         i++;
-        part_index++; 
       }
-      
      get_cam[14] = false; 
      }
 }
@@ -1003,45 +676,19 @@ void LogicalCamera::logical_camera_agv4as3_callback(const nist_gear::LogicalCame
   if (get_cam[15])
      { 
       ros::Duration timeout(5.0);
-
-      unsigned short int i{0};
-      unsigned short int part_index{1}; 
+      unsigned short int i{0}; 
       while(i < image_msg->models.size())
       {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv4as3_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv4as3";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(15).push_back(product);
-
-        i++;
-        part_index++; 
+        i++; 
       }
-      
      get_cam[15] = false; 
      }
 }
@@ -1050,45 +697,19 @@ void LogicalCamera::logical_camera_agv4as4_callback(const nist_gear::LogicalCame
   if (get_cam[16])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv4as4_" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv4as4";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(16).push_back(product);
-
         i++;
-        part_index++; 
       }
-      
      get_cam[16] = false; 
      }
 }
@@ -1097,45 +718,19 @@ void LogicalCamera::logical_camera_agv4ks_callback(const nist_gear::LogicalCamer
   if (get_cam[17])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
-        std::string product_type = image_msg->models.at(i).type;
-        if(i!= 0 && image_msg->models.at(i).type != image_msg->models.at(i-1).type){
-          part_index = 1;
-        }
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
-        product.id = std::to_string(part_index);
-        
-        std::string frame_name = "logical_camera_agv4ks" + image_msg->models.at(i).type + "_" + std::to_string(part_index) + "_frame";
-        product.frame = frame_name;        
-        
-        geometry_msgs::TransformStamped transformStamped;
-
-        transformStamped = tfBuffer.lookupTransform("world", frame_name, ros::Time(0), timeout);
-        
-        product.time_stamp = ros::Time(0);
-        product.world_pose.position.x = transformStamped.transform.translation.x;
-        product.world_pose.position.y = transformStamped.transform.translation.y;
-        product.world_pose.position.z = transformStamped.transform.translation.z;
-
-        product.world_pose.orientation.x = transformStamped.transform.rotation.x;
-        product.world_pose.orientation.y = transformStamped.transform.rotation.y;
-        product.world_pose.orientation.z = transformStamped.transform.rotation.z;
-        product.world_pose.orientation.w = transformStamped.transform.rotation.w; 
-
- 
+        product.camera = "logical_camera_agv4ks";
+        product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(17).push_back(product);
-
         i++;
-        part_index++; 
       }
-      
      get_cam[17] = false; 
      }
 }
@@ -1144,21 +739,19 @@ void LogicalCamera::logical_camera_belt_callback(const nist_gear::LogicalCameraI
   if (get_cam[18])
      { 
       ros::Duration timeout(5.0);
-
       unsigned short int i{0};
-      unsigned short int part_index{1}; 
       while(i < image_msg->models.size())
       {
-  
-        std::string product_type = image_msg->models.at(i).type;
         Product product;
-        product.type = product_type;
+        product.type = image_msg->models.at(i).type;
         product.frame_pose = image_msg->models.at(i).pose;
         product.camera = "logical_camera_belt";
         product.status = "free";
+        auto world_pose = motioncontrol::gettransforminWorldFrame(product.frame_pose, product.camera);
+        product.world_pose = world_pose;
         camera_parts_list.at(18).push_back(product);
+        i++;
       }
-      
      get_cam[18] = false; 
      }
 }

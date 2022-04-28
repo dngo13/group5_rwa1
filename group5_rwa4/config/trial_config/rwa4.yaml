@@ -51,11 +51,11 @@ orders:
       agvs: [agv4]
       destinations: [as3]
       products:
-        # part_0:
-        #   type: assembly_battery_green
-        #   pose:
-        #     xyz: [0.1, 0.1, 0]
-        #     rpy: [0, 0, 0]
+        part_0:
+          type: assembly_battery_green
+          pose:
+            xyz: [0.1, 0.1, 0]
+            rpy: [0, 0, 0]
         part_1:
           type: assembly_pump_blue
           pose:

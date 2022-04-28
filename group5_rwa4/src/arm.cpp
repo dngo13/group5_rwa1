@@ -74,6 +74,10 @@ namespace motioncontrol {
         home1_.name = "home1";
         home2_.arm_preset = { 0, -M_PI, -1.25, 1.74, -2.04, -1.57, 0 };
         home2_.name = "home2";
+        on_.arm_preset = { 1.76 , 0, -0.74, 1.76, 5.28, 0, 0 };
+        on_.name = "on"; 
+        above_.arm_preset = { 1.76 , 0, -1.62, 1.76, 6.28, 0, 0.0 };
+        above_.name = "above";
         agv1_.arm_preset = { 3.83, -M_PI, -1.25, 1.74, -2.04, -1.57, 0 };
         agv1_.name = "agv1";
         agv2_.arm_preset = { 0.83, -M_PI, -1.25, 1.74, -2.04, -1.57, 0 };
@@ -82,6 +86,10 @@ namespace motioncontrol {
         agv3_.name = "agv3";
         agv4_.arm_preset = { -4.33, -M_PI, -1.25, 1.74, -2.04, -1.57, 0 };
         agv4_.name = "agv4";
+        // bin1_.arm_preset = { 3.2 , 1.51 , -1.12 , 1.76, -2.04, -1.57, 0 };
+        // bin1_.name = "bin1";
+
+
 
 
         // raw pointers are frequently used to refer to the planning group for improved performance.
@@ -378,6 +386,12 @@ namespace motioncontrol {
         else if (location_name.compare("home2") == 0) {
             location = home2_;
         }
+        else if (location_name.compare("on") == 0) {
+            location = on_;
+        }
+        else if (location_name.compare("above") == 0) {
+            location = above_;
+        }
         else if (location_name.compare("agv1") == 0) {
             location = agv1_;
         }
@@ -390,6 +404,9 @@ namespace motioncontrol {
         else if (location_name.compare("agv4") == 0) {
             location = agv4_;
         }
+        // else if (location_name.compare("bin1") == 0) {
+        //     location = bin1_;
+        // }
         joint_group_positions_.at(0) = location.arm_preset.at(0);
         joint_group_positions_.at(1) = location.arm_preset.at(1);
         joint_group_positions_.at(2) = location.arm_preset.at(2);
@@ -407,6 +424,127 @@ namespace motioncontrol {
             arm_group_.move();
     }
 
+    geometry_msgs::Pose Arm::get_part_pose_in_empty_bin(int bin_number){
+        std::array<double,3> bin_origin{0,0,0};
+        geometry_msgs::Pose part_world_pose;
+        ROS_INFO_STREAM("empty_bin_place_count "<<empty_bin_place_count);
+        if (bin_number == 1){
+            bin_origin = bin1_origin_;
+        }
+        if (bin_number == 2){
+            bin_origin = bin2_origin_;
+        }
+        if (bin_number == 3){
+            bin_origin = bin3_origin_;
+        }
+        if (bin_number == 4){
+            bin_origin = bin4_origin_;
+        }
+        if (bin_number == 5){
+            bin_origin = bin5_origin_;
+        }
+        if (bin_number == 6){
+            bin_origin = bin6_origin_;
+        }
+        if (bin_number == 7){
+            bin_origin = bin7_origin_;
+        }
+        if (bin_number == 8){
+            bin_origin = bin8_origin_;
+        }
+
+        if (empty_bin_place_count == 0){
+            part_world_pose.position.x = bin_origin.at(0) + 0.20;
+            part_world_pose.position.y = bin_origin.at(1) - 0.15;
+            part_world_pose.position.z = bin_origin.at(2);
+            empty_bin_place_count++;
+        }
+        else if (empty_bin_place_count == 1){
+            part_world_pose.position.x = bin_origin.at(0) + 0.20;
+            part_world_pose.position.y = bin_origin.at(1) + 0.15;
+            part_world_pose.position.z = bin_origin.at(2);
+            empty_bin_place_count++;
+        }
+        else if (empty_bin_place_count == 2){
+            part_world_pose.position.x = bin_origin.at(0) - 0.10;
+            part_world_pose.position.y = bin_origin.at(1) + 0.15;
+            part_world_pose.position.z = bin_origin.at(2);
+            empty_bin_place_count++;
+        }
+        else if (empty_bin_place_count == 3){
+            part_world_pose.position.x = bin_origin.at(0) - 0.10;
+            part_world_pose.position.y = bin_origin.at(1) - 0.15;
+            part_world_pose.position.z = bin_origin.at(2);
+        }
+        return part_world_pose;
+    }
+
+    void Arm::pick_from_conveyor(std::vector<int> ebin)
+    {   
+        for(int i = 0 ; i<3; i++){
+            double trigger_time_ = ros::Time::now().toSec();
+            int sbin = 0;
+            goToPresetLocation("on");
+            while (!gripper_state_.enabled) {
+                activateGripper();
+            }
+            while (!gripper_state_.attached && ros::Time::now().toSec() - trigger_time_ < 20){
+    
+            }
+            ROS_INFO_STREAM("object attached");
+            goToPresetLocation("above");
+            for(auto &bin: ebin){
+                ROS_INFO_STREAM("bin number "<< bin);
+                if(bin == 1 || bin == 2 || bin == 5 || bin == 6)
+                {
+                    sbin = bin;
+                    break;
+                }
+            }
+            ROS_INFO_STREAM("sbin number "<< sbin);
+            geometry_msgs::Pose bin = get_part_pose_in_empty_bin(sbin);
+            ROS_INFO_STREAM("Y_pos: "<< bin.position.y);
+            geometry_msgs::Pose arm_ee_link_pose = arm_group_.getCurrentPose().pose;
+            auto side_orientation = motioncontrol::quaternionFromEuler(1.57, 0, 0);
+            // auto flat_orientation = motioncontrol::quaternionFromEuler(0, 1.57, 0);
+            // arm_ee_link_pose = arm_group_.getCurrentPose().pose;
+            arm_ee_link_pose.orientation.x = side_orientation.getX();
+            arm_ee_link_pose.orientation.y = side_orientation.getY();
+            arm_ee_link_pose.orientation.z = side_orientation.getZ();
+            arm_ee_link_pose.orientation.w = side_orientation.getW();
+            arm_group_.setPoseTarget(arm_ee_link_pose);
+            arm_group_.move();
+            // arm_ee_link_pose = arm_group_.getCurrentPose().pose;
+            moveBaseTo(bin.position.y - 0.5);
+            arm_ee_link_pose.position.x = bin.position.x - 0.15;
+            arm_ee_link_pose.position.y = bin.position.y;
+            arm_ee_link_pose.position.z = bin.position.z + 0.09;
+            arm_group_.setMaxVelocityScalingFactor(1.0);
+            arm_group_.setPoseTarget(arm_ee_link_pose);
+            arm_group_.move();
+        
+            // get the current joint positions
+            const moveit::core::JointModelGroup* joint_model_group =
+                arm_group_.getCurrentState()->getJointModelGroup("kitting_arm");
+            moveit::core::RobotStatePtr current_state = arm_group_.getCurrentState();
+
+            // get the current set of joint values for the group.
+            current_state->copyJointGroupPositions(joint_model_group, joint_group_positions_);
+
+            // next, assign a value to only the linear_arm_actuator_joint
+            joint_group_positions_.at(6) = M_PI / 9;
+
+            // move the arm
+            arm_group_.setJointValueTarget(joint_group_positions_);
+            arm_group_.move();
+
+
+            ros::Duration(2.0).sleep();
+            deactivateGripper();
+            goToPresetLocation("above");
+        }
+        // goToPresetLocation(bin);
+    }
 
     ///////////////////////////
     ////// Callback Functions
@@ -475,8 +613,8 @@ namespace gantry {
         // - gantry_arm_wrist_2_joint
         // - gantry_arm_wrist_3_joint
         // - small_long_joint
-        // - torso_rail_joint
         // - torso_base_main_joint
+        // - torso_rail_joint
 
         double gantry_arm_shoulder_pan_joint{ 0 };
         double gantry_arm_shoulder_lift_joint{ -0.92 };
@@ -490,7 +628,7 @@ namespace gantry {
         
 
         //home position
-        home1_.arm_preset = { -2.45, 0.0, -1.57, -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        home1_.arm_preset = { -2.45, 0.0, -1.57, -0,.01 -0.92, 1.20, -0.25, 1.54, 0.83 };
         home1_.name = "home1";
         home2_.arm_preset = { -1.01, 0.0, -1.57, -0,.01 -0.92, 1.20, -0.25, 1.54, 0.83 };
         home2_.name = "home2";
@@ -514,7 +652,7 @@ namespace gantry {
     }
 
     //////////////////////////////////////////////////////
-    void Arm::moveBaseTo(double torso_rail_joint, double small_long_joint) {
+    void Arm::moveBaseTo(double torso_rail_joint) {
         // get the current joint positions
         const moveit::core::JointModelGroup* joint_model_group =
             arm_group_.getCurrentState()->getJointModelGroup("gantry_full");
@@ -525,7 +663,7 @@ namespace gantry {
 
         // next, assign a value to only the linear_arm_actuator_joint
         joint_group_positions_.at(1) = -torso_rail_joint;
-        joint_group_positions_.at(0) = small_long_joint;
+
         // move the arm
         arm_group_.setJointValueTarget(joint_group_positions_);
         arm_group_.move();
@@ -565,7 +703,7 @@ namespace gantry {
 
         
         
-        moveBaseTo(part_init_pose.position.y, part_init_pose.position.x);
+        moveBaseTo(part_init_pose.position.y);
 
         // // move the arm above the part to grasp
         // // gripper stays at the current z
@@ -849,17 +987,6 @@ namespace gantry {
     }
 }//namespace
 
-
-
-
-
-
-
-
-
-
-
-
 namespace gantry_motioncontrol {
     /////////////////////////////////////////////////////
     Gantry::Gantry(ros::NodeHandle& node) : node_("/ariac/gantry"),
@@ -936,6 +1063,11 @@ namespace gantry_motioncontrol {
         home_.gantry_full_preset.insert(home_.gantry_full_preset.end(), home_.gantry_arm_preset.begin(), home_.gantry_arm_preset.end());
         // print(home_.gantry_full);
 
+        home2_.gantry_torso_preset = { -8.5, 0.0, -1.57 };
+        home2_.gantry_arm_preset = {-0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        home2_.gantry_full_preset.insert(home2_.gantry_full_preset.begin(), home2_.gantry_torso_preset.begin(), home2_.gantry_torso_preset.end());
+        home2_.gantry_full_preset.insert(home2_.gantry_full_preset.end(), home2_.gantry_arm_preset.begin(), home2_.gantry_arm_preset.end());
+
         //safe spot to reach any bin without colliding with anything
         safe_bins_.gantry_torso_preset = { -6.90, -0.13, -0.02 };
         safe_bins_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
@@ -956,10 +1088,149 @@ namespace gantry_motioncontrol {
         
 
         // above bin1
-        at_bin1_.gantry_torso_preset = { -0.09, -2.45, 0.0 };
+        at_bin1_.gantry_torso_preset = { 0.06, -2.63, 0.0 };
         at_bin1_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
         at_bin1_.gantry_full_preset.insert(at_bin1_.gantry_full_preset.begin(), at_bin1_.gantry_torso_preset.begin(), at_bin1_.gantry_torso_preset.end());
         at_bin1_.gantry_full_preset.insert(at_bin1_.gantry_full_preset.end(), at_bin1_.gantry_arm_preset.begin(), at_bin1_.gantry_arm_preset.end());
+
+        // above bin2
+        at_bin2_.gantry_torso_preset = { 0.0, -3.35, 3.14 };
+        at_bin2_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_bin2_.gantry_full_preset.insert(at_bin2_.gantry_full_preset.begin(), at_bin2_.gantry_torso_preset.begin(), at_bin2_.gantry_torso_preset.end());
+        at_bin2_.gantry_full_preset.insert(at_bin2_.gantry_full_preset.end(), at_bin2_.gantry_arm_preset.begin(), at_bin2_.gantry_arm_preset.end());
+
+        // above bin3
+        at_bin3_.gantry_torso_preset = { -0.78, -3.35, 3.14 };
+        at_bin3_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_bin3_.gantry_full_preset.insert(at_bin3_.gantry_full_preset.begin(), at_bin3_.gantry_torso_preset.begin(), at_bin3_.gantry_torso_preset.end());
+        at_bin3_.gantry_full_preset.insert(at_bin3_.gantry_full_preset.end(), at_bin3_.gantry_arm_preset.begin(), at_bin3_.gantry_arm_preset.end());
+
+        // above bin4
+        at_bin4_.gantry_torso_preset = { -0.63, -2.63, 0.0 };
+        at_bin4_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_bin4_.gantry_full_preset.insert(at_bin4_.gantry_full_preset.begin(), at_bin4_.gantry_torso_preset.begin(), at_bin4_.gantry_torso_preset.end());
+        at_bin4_.gantry_full_preset.insert(at_bin4_.gantry_full_preset.end(), at_bin4_.gantry_arm_preset.begin(), at_bin4_.gantry_arm_preset.end());
+
+        // above bin5
+        at_bin5_.gantry_torso_preset = { 0.0, 2.63, 3.14 };
+        at_bin5_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_bin5_.gantry_full_preset.insert(at_bin5_.gantry_full_preset.begin(), at_bin5_.gantry_torso_preset.begin(), at_bin5_.gantry_torso_preset.end());
+        at_bin5_.gantry_full_preset.insert(at_bin5_.gantry_full_preset.end(), at_bin5_.gantry_arm_preset.begin(), at_bin5_.gantry_arm_preset.end());
+
+        // above bin6
+        at_bin6_.gantry_torso_preset = { 0.06, 3.36, 0.0 };
+        at_bin6_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_bin6_.gantry_full_preset.insert(at_bin6_.gantry_full_preset.begin(), at_bin6_.gantry_torso_preset.begin(), at_bin6_.gantry_torso_preset.end());
+        at_bin6_.gantry_full_preset.insert(at_bin6_.gantry_full_preset.end(), at_bin6_.gantry_arm_preset.begin(), at_bin6_.gantry_arm_preset.end());
+
+        // above bin7
+        at_bin7_.gantry_torso_preset = { -0.63, 3.36, 0.0 };
+        at_bin7_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_bin7_.gantry_full_preset.insert(at_bin7_.gantry_full_preset.begin(), at_bin7_.gantry_torso_preset.begin(), at_bin7_.gantry_torso_preset.end());
+        at_bin7_.gantry_full_preset.insert(at_bin7_.gantry_full_preset.end(), at_bin7_.gantry_arm_preset.begin(), at_bin7_.gantry_arm_preset.end());
+
+        // above bin8
+        at_bin8_.gantry_torso_preset = { -0.74, 2.63, 3.14 };
+        at_bin8_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_bin8_.gantry_full_preset.insert(at_bin8_.gantry_full_preset.begin(), at_bin8_.gantry_torso_preset.begin(), at_bin8_.gantry_torso_preset.end());
+        at_bin8_.gantry_full_preset.insert(at_bin8_.gantry_full_preset.end(), at_bin8_.gantry_arm_preset.begin(), at_bin8_.gantry_arm_preset.end());
+
+        // above agv3_as3
+        at_agv3_as3_.gantry_torso_preset = { -3.40, 2.10, 0.0 };
+        at_agv3_as3_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_agv3_as3_.gantry_full_preset.insert(at_agv3_as3_.gantry_full_preset.begin(), at_agv3_as3_.gantry_torso_preset.begin(), at_agv3_as3_.gantry_torso_preset.end());
+        at_agv3_as3_.gantry_full_preset.insert(at_agv3_as3_.gantry_full_preset.end(), at_agv3_as3_.gantry_arm_preset.begin(), at_agv3_as3_.gantry_arm_preset.end());
+
+        // above agv4_as3
+        at_agv4_as3_.gantry_torso_preset = { -3.70, 3.99, 3.14 };
+        at_agv4_as3_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_agv4_as3_.gantry_full_preset.insert(at_agv4_as3_.gantry_full_preset.begin(), at_agv4_as3_.gantry_torso_preset.begin(), at_agv4_as3_.gantry_torso_preset.end());
+        at_agv4_as3_.gantry_full_preset.insert(at_agv4_as3_.gantry_full_preset.end(), at_agv4_as3_.gantry_arm_preset.begin(), at_agv4_as3_.gantry_arm_preset.end());
+
+        // above near_as3
+        near_as3_.gantry_torso_preset = { -3.30, 2.91, 1.57 };
+        near_as3_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        near_as3_.gantry_full_preset.insert(near_as3_.gantry_full_preset.begin(), near_as3_.gantry_torso_preset.begin(), near_as3_.gantry_torso_preset.end());
+        near_as3_.gantry_full_preset.insert(near_as3_.gantry_full_preset.end(), near_as3_.gantry_arm_preset.begin(), near_as3_.gantry_arm_preset.end());
+
+        // above as3
+        at_as3_.gantry_torso_preset = { -3.85, 2.82, 1.57 };
+        at_as3_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_as3_.gantry_full_preset.insert(at_as3_.gantry_full_preset.begin(), at_as3_.gantry_torso_preset.begin(), at_as3_.gantry_torso_preset.end());
+        at_as3_.gantry_full_preset.insert(at_as3_.gantry_full_preset.end(), at_as3_.gantry_arm_preset.begin(), at_as3_.gantry_arm_preset.end());
+
+        // above agv1_as1
+        at_agv1_as1_.gantry_torso_preset = { -3.55, -3.93, 0.0 };
+        at_agv1_as1_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_agv1_as1_.gantry_full_preset.insert(at_agv1_as1_.gantry_full_preset.begin(), at_agv1_as1_.gantry_torso_preset.begin(), at_agv1_as1_.gantry_torso_preset.end());
+        at_agv1_as1_.gantry_full_preset.insert(at_agv1_as1_.gantry_full_preset.end(), at_agv1_as1_.gantry_arm_preset.begin(), at_agv1_as1_.gantry_arm_preset.end());
+
+        // above agv2_as1
+        at_agv2_as1_.gantry_torso_preset = { -3.7, -2.13, 3.14 };
+        at_agv2_as1_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_agv2_as1_.gantry_full_preset.insert(at_agv2_as1_.gantry_full_preset.begin(), at_agv2_as1_.gantry_torso_preset.begin(), at_agv2_as1_.gantry_torso_preset.end());
+        at_agv2_as1_.gantry_full_preset.insert(at_agv2_as1_.gantry_full_preset.end(), at_agv2_as1_.gantry_arm_preset.begin(), at_agv2_as1_.gantry_arm_preset.end());
+
+        // above near_as1
+        near_as1_.gantry_torso_preset = { -3.30, -3.21, 1.57 };
+        near_as1_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        near_as1_.gantry_full_preset.insert(near_as1_.gantry_full_preset.begin(), near_as1_.gantry_torso_preset.begin(), near_as1_.gantry_torso_preset.end());
+        near_as1_.gantry_full_preset.insert(near_as1_.gantry_full_preset.end(), near_as1_.gantry_arm_preset.begin(), near_as1_.gantry_arm_preset.end());
+
+        // above as1
+        at_as1_.gantry_torso_preset = { -3.85, -3.21, 1.57 };
+        at_as1_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_as1_.gantry_full_preset.insert(at_as1_.gantry_full_preset.begin(), at_as1_.gantry_torso_preset.begin(), at_as1_.gantry_torso_preset.end());
+        at_as1_.gantry_full_preset.insert(at_as1_.gantry_full_preset.end(), at_as1_.gantry_arm_preset.begin(), at_as1_.gantry_arm_preset.end());
+
+        // above agv1_as2
+        at_agv1_as2_.gantry_torso_preset = { -8.55, -3.93, 0.0 };
+        at_agv1_as2_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_agv1_as2_.gantry_full_preset.insert(at_agv1_as2_.gantry_full_preset.begin(), at_agv1_as2_.gantry_torso_preset.begin(), at_agv1_as2_.gantry_torso_preset.end());
+        at_agv1_as2_.gantry_full_preset.insert(at_agv1_as2_.gantry_full_preset.end(), at_agv1_as2_.gantry_arm_preset.begin(), at_agv1_as2_.gantry_arm_preset.end());
+
+        // above agv2_as2
+        at_agv2_as2_.gantry_torso_preset = { -8.7, -2.13, 3.14 };
+        at_agv2_as2_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_agv2_as2_.gantry_full_preset.insert(at_agv2_as2_.gantry_full_preset.begin(), at_agv2_as2_.gantry_torso_preset.begin(), at_agv2_as2_.gantry_torso_preset.end());
+        at_agv2_as2_.gantry_full_preset.insert(at_agv2_as2_.gantry_full_preset.end(), at_agv2_as2_.gantry_arm_preset.begin(), at_agv2_as2_.gantry_arm_preset.end());
+
+        // above near_as2
+        near_as2_.gantry_torso_preset = { -8.30, -3.21, 1.57 };
+        near_as2_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        near_as2_.gantry_full_preset.insert(near_as2_.gantry_full_preset.begin(), near_as2_.gantry_torso_preset.begin(), near_as2_.gantry_torso_preset.end());
+        near_as2_.gantry_full_preset.insert(near_as2_.gantry_full_preset.end(), near_as2_.gantry_arm_preset.begin(), near_as2_.gantry_arm_preset.end());
+
+        // above as2
+        at_as2_.gantry_torso_preset = { -8.85, -3.21, 1.57 };
+        at_as2_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_as2_.gantry_full_preset.insert(at_as2_.gantry_full_preset.begin(), at_as2_.gantry_torso_preset.begin(), at_as2_.gantry_torso_preset.end());
+        at_as2_.gantry_full_preset.insert(at_as2_.gantry_full_preset.end(), at_as2_.gantry_arm_preset.begin(), at_as2_.gantry_arm_preset.end());
+
+        // above agv3_as4
+        at_agv3_as4_.gantry_torso_preset = { -8.40, 2.10, 0.0 };
+        at_agv3_as4_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_agv3_as4_.gantry_full_preset.insert(at_agv3_as4_.gantry_full_preset.begin(), at_agv3_as4_.gantry_torso_preset.begin(), at_agv3_as4_.gantry_torso_preset.end());
+        at_agv3_as4_.gantry_full_preset.insert(at_agv3_as4_.gantry_full_preset.end(), at_agv3_as4_.gantry_arm_preset.begin(), at_agv3_as4_.gantry_arm_preset.end());
+
+        // above agv4_as4
+        at_agv4_as4_.gantry_torso_preset = { -8.70, 3.99, 3.14 };
+        at_agv4_as4_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_agv4_as4_.gantry_full_preset.insert(at_agv4_as4_.gantry_full_preset.begin(), at_agv4_as4_.gantry_torso_preset.begin(), at_agv4_as4_.gantry_torso_preset.end());
+        at_agv4_as4_.gantry_full_preset.insert(at_agv4_as4_.gantry_full_preset.end(), at_agv4_as4_.gantry_arm_preset.begin(), at_agv4_as4_.gantry_arm_preset.end());
+
+        // above near_as4
+        near_as4_.gantry_torso_preset = { -8.30, 2.91, 1.57 };
+        near_as4_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        near_as4_.gantry_full_preset.insert(near_as4_.gantry_full_preset.begin(), near_as4_.gantry_torso_preset.begin(), near_as4_.gantry_torso_preset.end());
+        near_as4_.gantry_full_preset.insert(near_as4_.gantry_full_preset.end(), near_as4_.gantry_arm_preset.begin(), near_as4_.gantry_arm_preset.end());
+
+        // above as4
+        at_as4_.gantry_torso_preset = { -8.85, 2.82, 1.57 };
+        at_as4_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_as4_.gantry_full_preset.insert(at_as4_.gantry_full_preset.begin(), at_as4_.gantry_torso_preset.begin(), at_as4_.gantry_torso_preset.end());
+        at_as4_.gantry_full_preset.insert(at_as4_.gantry_full_preset.end(), at_as4_.gantry_arm_preset.begin(), at_as4_.gantry_arm_preset.end());
+
 
         // before approaching agv1
         // before_agv1_.gantry_torso = { 0.07, -2.92, -0.02 };
@@ -994,33 +1265,6 @@ namespace gantry_motioncontrol {
         at_agv4_.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
         at_agv4_.gantry_full_preset.insert(at_agv4_.gantry_full_preset.begin(), at_agv4_.gantry_torso_preset.begin(), at_agv4_.gantry_torso_preset.end());
         at_agv4_.gantry_full_preset.insert(at_agv4_.gantry_full_preset.end(), at_agv4_.gantry_arm_preset.begin(), at_agv4_.gantry_arm_preset.end());
-
-        // above agv2 at as1
-        //small_long_joint. torso_rail_joint, torso_base_main_joint
-        at_agv2_as1.gantry_torso_preset = { -3.81, -2.16, -2.70 };
-        at_agv2_as1.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
-        at_agv2_as1.gantry_full_preset.insert(at_agv2_as1.gantry_full_preset.begin(), at_agv2_as1.gantry_torso_preset.begin(), at_agv2_as1.gantry_torso_preset.end());
-        at_agv2_as1.gantry_full_preset.insert(at_agv2_as1.gantry_full_preset.end(), at_agv2_as1.gantry_arm_preset.begin(), at_agv2_as1.gantry_arm_preset.end());
-
-        // above agv4 at as3
-        //small_long_joint. torso_rail_joint, torso_base_main_joint
-        at_agv4_as3.gantry_torso_preset = { -3.81, 3.49, -2.70 };
-        at_agv4_as3.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
-        at_agv4_as3.gantry_full_preset.insert(at_agv4_as3.gantry_full_preset.begin(), at_agv4_as3.gantry_torso_preset.begin(), at_agv4_as3.gantry_torso_preset.end());
-        at_agv4_as3.gantry_full_preset.insert(at_agv4_as3.gantry_full_preset.end(), at_agv4_as3.gantry_arm_preset.begin(), at_agv4_as3.gantry_arm_preset.end());
-
-        // above briefcase at as1
-        at_as1.gantry_torso_preset = { -3.81, -3.51, -3.96 };
-        at_as1.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
-        at_as1.gantry_full_preset.insert(at_as1.gantry_full_preset.begin(), at_as1.gantry_torso_preset.begin(), at_as1.gantry_torso_preset.end());
-        at_as1.gantry_full_preset.insert(at_as1.gantry_full_preset.end(), at_as1.gantry_arm_preset.begin(), at_as1.gantry_arm_preset.end());
-
-        // above briefcase at as3
-        at_as3.gantry_torso_preset = { -3.81, 2.41, -3.96 };
-        at_as3.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
-        at_as3.gantry_full_preset.insert(at_as3.gantry_full_preset.begin(), at_as3.gantry_torso_preset.begin(), at_as3.gantry_torso_preset.end());
-        at_as3.gantry_full_preset.insert(at_as3.gantry_full_preset.end(), at_as3.gantry_arm_preset.begin(), at_as3.gantry_arm_preset.end());
-
 
         // raw pointers are frequently used to refer to the planning group for improved performance.
         // to start, we will create a pointer that references the current robot’s state.
@@ -1068,7 +1312,7 @@ namespace gantry_motioncontrol {
         geometry_msgs::Pose postGraspPose;
         auto part_init_pose_in_world = part_init_pose;
 
-        part_init_pose_in_world.position.z = part_init_pose_in_world.position.z + 0.09;
+        part_init_pose_in_world.position.z = part_init_pose_in_world.position.z + 0.06;
         part_init_pose_in_world.orientation.x = gantry_ee_link_pose.orientation.x;
         part_init_pose_in_world.orientation.y = gantry_ee_link_pose.orientation.y;
         part_init_pose_in_world.orientation.z = gantry_ee_link_pose.orientation.z;
@@ -1097,33 +1341,62 @@ namespace gantry_motioncontrol {
         if (state.enabled) {
             ROS_INFO_STREAM("[Gripper] = enabled");
             //--Move arm to part
-            full_gantry_group_.setPoseTarget(part_init_pose_in_world);
-            moveit::planning_interface::MoveGroupInterface::Plan plan;
-            full_gantry_group_.plan(plan);
-            auto plan_result = full_gantry_group_.execute(plan);//TODO catch the error message
+            arm_gantry_group_.setPoseTarget(part_init_pose_in_world);
+            arm_gantry_group_.move();
 
             state = getGripperState();
             // move the arm closer until the object is attached
             while (!state.attached) {
                 part_init_pose_in_world.position.z = part_init_pose_in_world.position.z - 0.0005;
-                full_gantry_group_.setPoseTarget(part_init_pose_in_world);
-                full_gantry_group_.move();
-                full_gantry_group_.setPoseTarget(gantry_ee_link_pose);
+                arm_gantry_group_.setPoseTarget(part_init_pose_in_world);
+                arm_gantry_group_.move();
+                arm_gantry_group_.setPoseTarget(gantry_ee_link_pose);
                 state = getGripperState();
             }
 
             ROS_INFO_STREAM("[Gripper] = object attached");
             // ros::Duration(1.0).sleep();
-            postGraspPose = full_gantry_group_.getCurrentPose().pose;
+            postGraspPose = arm_gantry_group_.getCurrentPose().pose;
             postGraspPose.position.z = postGraspPose.position.z + 0.1;
             //--Move arm to previous position
-            full_gantry_group_.setPoseTarget(postGraspPose);
-            full_gantry_group_.move();
+            arm_gantry_group_.setPoseTarget(postGraspPose);
+            arm_gantry_group_.move();
             ros::Duration(2.0).sleep();
-            full_gantry_group_.setPoseTarget(gantry_ee_link_pose);
-            full_gantry_group_.move();
+            arm_gantry_group_.setPoseTarget(gantry_ee_link_pose);
+            arm_gantry_group_.move();
             return true;
         }
+
+        // if (state.enabled) {
+        //     ROS_INFO_STREAM("[Gripper] = enabled");
+        //     //--Move arm to part
+        //     full_gantry_group_.setPoseTarget(part_init_pose_in_world);
+        //     moveit::planning_interface::MoveGroupInterface::Plan plan;
+        //     full_gantry_group_.plan(plan);
+        //     auto plan_result = full_gantry_group_.execute(plan);//TODO catch the error message
+
+        //     state = getGripperState();
+        //     // move the arm closer until the object is attached
+        //     while (!state.attached) {
+        //         part_init_pose_in_world.position.z = part_init_pose_in_world.position.z - 0.0005;
+        //         full_gantry_group_.setPoseTarget(part_init_pose_in_world);
+        //         full_gantry_group_.move();
+        //         full_gantry_group_.setPoseTarget(gantry_ee_link_pose);
+        //         state = getGripperState();
+        //     }
+
+        //     ROS_INFO_STREAM("[Gripper] = object attached");
+        //     // ros::Duration(1.0).sleep();
+        //     postGraspPose = full_gantry_group_.getCurrentPose().pose;
+        //     postGraspPose.position.z = postGraspPose.position.z + 0.1;
+        //     //--Move arm to previous position
+        //     full_gantry_group_.setPoseTarget(postGraspPose);
+        //     full_gantry_group_.move();
+        //     ros::Duration(2.0).sleep();
+        //     full_gantry_group_.setPoseTarget(gantry_ee_link_pose);
+        //     full_gantry_group_.move();
+        //     return true;
+        // }
         return false;
     }
 
@@ -1153,6 +1426,15 @@ namespace gantry_motioncontrol {
         //TODO: Consider other agvs
         if (agv == "agv1") {
             goToPresetLocation(at_agv1_);
+        }
+        if (agv == "agv2") {
+            goToPresetLocation(at_agv2_);
+        }
+        if (agv == "agv3") {
+            goToPresetLocation(at_agv3_);
+        }
+        if (agv == "agv4") {
+            goToPresetLocation(at_agv4_);
         }
 
 

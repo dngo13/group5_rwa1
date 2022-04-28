@@ -94,7 +94,6 @@ int main(int argc, char ** argv)
   motioncontrol::Arm arm(node);
   arm.init();
   gantry_motioncontrol::Gantry gantry(node);
-  // gantry::Arm gantry(node);
   gantry.init();
 
   // ros::Subscriber depth_camera_bins1_subscriber = node.subscribe(
@@ -150,52 +149,62 @@ int main(int argc, char ** argv)
   rate.sleep();	
 
   // find parts seen by logical cameras
-  auto list = cam.findparts(); 
-  // Segregate parts and create the map of parts
-  cam.segregate_parts(list);
-  // get the map of parts
-  auto cam_map = cam.get_camera_map();
-  // auto binl = cam.get_bin_list();
-  
-  
-  // auto ebin = cam.get_ebin_list();
-  // for(auto &bin: ebin){
-  //   ROS_INFO_STREAM("bin number "<< bin);
-  // }
+  auto list1 = cam.findparts();   
+
+  auto ebin = cam.get_ebin_list();
+  for(auto &bin: ebin){
+    ROS_INFO_STREAM("bin number "<< bin);
+  }
   // Create an empty list of parts for this kit
   std::vector<Product> parts_for_kitting;
 
   std::vector<Product> parts_to_check_later;
 
   gantry.goToPresetLocation(gantry.home_);
-  gantry.goToPresetLocation(gantry.at_bins5678_);
-  gantry.goToPresetLocation(gantry.at_agv4_as3);
-  gantry.goToPresetLocation(gantry.at_as3);
-  gantry.goToPresetLocation(gantry.at_bins1234_);
-
-  gantry.goToPresetLocation(gantry.at_agv2_as1);
-  gantry.goToPresetLocation(gantry.at_as1);
-  
   // gantry.goToPresetLocation(gantry.at_bins1234_);
   // gantry.goToPresetLocation(gantry.at_agv1_);
+  // gantry.goToPresetLocation(gantry.at_bins1234_);
   // gantry.goToPresetLocation(gantry.at_agv2_);
   // gantry.goToPresetLocation(gantry.at_bins1234_);
+  // gantry.goToPresetLocation(gantry.near_as1_);
+  // gantry.goToPresetLocation(gantry.at_agv1_as1_);
+  // gantry.goToPresetLocation(gantry.near_as1_);
+  // gantry.goToPresetLocation(gantry.at_as1_);
+  // gantry.goToPresetLocation(gantry.near_as1_);
+  // gantry.goToPresetLocation(gantry.at_agv2_as1_);
+  // gantry.goToPresetLocation(gantry.near_as1_);
+  // gantry.goToPresetLocation(gantry.at_as1_);
+  // gantry.goToPresetLocation(gantry.near_as1_);
   // gantry.goToPresetLocation(gantry.home_);
-  // gantry.goToPresetLocation(gantry.at_bins5678_);
-  // gantry.goToPresetLocation(gantry.at_agv3_);
-  // gantry.goToPresetLocation(gantry.at_agv4_);
-  // gantry.goToPresetLocation(gantry.at_bins5678_);
-  // gantry.goToPresetLocation(gantry.home_);
+  // gantry.goToPresetLocation(gantry.home2_);
+  // gantry.goToPresetLocation(gantry.near_as2_);
+  // gantry.goToPresetLocation(gantry.at_agv1_as2_);
+  // gantry.goToPresetLocation(gantry.near_as2_);
+  // gantry.goToPresetLocation(gantry.at_as2_);
+  // gantry.goToPresetLocation(gantry.near_as2_);
+  // gantry.goToPresetLocation(gantry.at_agv2_as2_);
+  // gantry.goToPresetLocation(gantry.near_as2_);
+  // gantry.goToPresetLocation(gantry.at_as2_);
+  // gantry.goToPresetLocation(gantry.near_as2_);
+  // gantry.goToPresetLocation(gantry.home2_);
 
+  
+  arm.pick_from_conveyor(ebin);
 
   arm.goToPresetLocation("home1");
   arm.goToPresetLocation("home2");
 
+  // find parts seen by logical cameras
+  auto list = cam.findparts(); 
+  // Segregate parts and create the map of parts
+  cam.segregate_parts(list);
+  // get the map of parts
+  auto cam_map = cam.get_camera_map();
+  
   while(ros::ok){
   
   // get the list of orders
   orders = comp_class.get_order_list();  
-
   // Process order 0
   if (notfinished)
   {
@@ -241,10 +250,11 @@ int main(int argc, char ** argv)
                 if(p->second.at(i).status.compare("free") == 0){
                   ROS_INFO_STREAM("Moving the part: " << iter.type);
                   // Pick and place the part from bin to agv tray
-                  gantry.goToPresetLocation(gantry.at_bins1234_);
-                  gantry.goToPresetLocation(gantry.at_bin1_);
-                  gantry.pickPart(p->second.at(i).world_pose);
-                  // arm.movePart(iter.type, p->second.at(i).world_pose, iter.frame_pose, kit.agv_id);
+                  // gantry.goToPresetLocation(gantry.at_bins1234_);
+                  // gantry.goToPresetLocation(gantry.at_bin1_);
+                  // gantry.pickPart(p->second.at(i).world_pose);
+                  // gantry.placePart(p->second.at(i).world_pose, iter.frame_pose, kit.agv_id);
+                  arm.movePart(iter.type, p->second.at(i).world_pose, iter.frame_pose, kit.agv_id);
                   // Update the status of the picked up part
                   cam_map[iter.type].at(i).status = "processed";
                   

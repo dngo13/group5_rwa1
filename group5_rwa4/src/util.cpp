@@ -214,7 +214,6 @@ namespace motioncontrol {
             header = "quality_control_sensor_4_frame";
             child = "quality_control_sensor_4_model_";
         }
-
         else if (frame.compare("logical_camera_bins0") == 0){
             header = "logical_camera_bins0_frame";
             child = "logical_camera_bins0_model_";
@@ -222,6 +221,54 @@ namespace motioncontrol {
         else if (frame.compare("logical_camera_bins1") == 0){
             header = "logical_camera_bins1_frame";
             child = "logical_camera_bins1_model_";
+        }
+        else if (frame.compare("logical_camera_agv1as1") == 0){
+            header = "logical_camera_agv1as1_frame";
+            child = "logical_camera_agv1as1_model_";
+        }
+        else if (frame.compare("logical_camera_agv1as2") == 0){
+            header = "logical_camera_agv1as2_frame";
+            child = "logical_camera_agv1as2_model_";
+        }
+        else if (frame.compare("logical_camera_agv2as1") == 0){
+            header = "logical_camera_agv2as1_frame";
+            child = "logical_camera_agv2as1_model_";
+        }
+        else if (frame.compare("logical_camera_agv2as2") == 0){
+            header = "logical_camera_agv2as2_frame";
+            child = "logical_camera_agv2as2_model_";
+        }
+        else if (frame.compare("logical_camera_agv3as3") == 0){
+            header = "logical_camera_agv3as3_frame";
+            child = "logical_camera_agv3as3_model_";
+        }
+        else if (frame.compare("logical_camera_agv3as4") == 0){
+            header = "logical_camera_agv3as4_frame";
+            child = "logical_camera_agv3as4_model_";
+        }
+        else if (frame.compare("logical_camera_agv4as3") == 0){
+            header = "logical_camera_agv4as3_frame";
+            child = "logical_camera_agv4as3_model_";
+        }
+        else if (frame.compare("logical_camera_agv4as4") == 0){
+            header = "logical_camera_agv4as4_frame";
+            child = "logical_camera_agv4as4_model_";
+        }
+        else if (frame.compare("logical_camera_station1") == 0){
+            header = "logical_camera_station1_frame";
+            child = "logical_camera_station1_model_";
+        }
+        else if (frame.compare("logical_camera_station2") == 0){
+            header = "logical_camera_station2_frame";
+            child = "logical_camera_station2_model_";
+        }
+        else if (frame.compare("logical_camera_station3") == 0){
+            header = "logical_camera_station3_frame";
+            child = "logical_camera_station3_model_";
+        }
+        else if (frame.compare("logical_camera_station4") == 0){
+            header = "logical_camera_station4_frame";
+            child = "logical_camera_station4_model_";
         }
         
 

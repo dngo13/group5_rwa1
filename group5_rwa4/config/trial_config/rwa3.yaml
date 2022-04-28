@@ -15,7 +15,7 @@ options:
   insert_models_over_bins: true
   insert_models_over_stations: false
   gazebo_state_logging: false
-  belt_population_cycles: 0
+  belt_population_cycles: 10
 time_limit: -1
 
 agv_infos:
@@ -73,7 +73,7 @@ orders:
             rpy: [0, 0, '-pi/3']
 
 models_over_bins:
-  bin2:
+  bin3:
     models:
       assembly_sensor_red:
         xyz_start: [0.2, 0.2, 0.0]
@@ -97,6 +97,13 @@ models_over_bins:
         rpy: [0, 0, 0]
         num_models_x: 2
         num_models_y: 2
+
+belt_models:
+  assembly_battery_green:
+    10.0:
+      pose:
+        xyz: [0.0, 4.3, 0.92]
+        rpy: [0, 0, 'pi/2']
 
 sensor_blackout:
   product_count: 1

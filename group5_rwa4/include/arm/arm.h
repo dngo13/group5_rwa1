@@ -19,6 +19,7 @@
 #include <nist_gear/VacuumGripperControl.h>
 // custom
 #include "../util/util.h"
+#include "../comp/comp_class.h"
 
 namespace motioncontrol {
 
@@ -36,7 +37,7 @@ namespace motioncontrol {
         typedef struct ArmPresetLocation {
             std::vector<double> arm_preset;  //9 joints
             std::string name;
-        } start, bin, agv, grasp;
+        } start, bin, agv, grasp, conveyor;
 
         Arm(ros::NodeHandle& node_handle);
         /**
@@ -49,6 +50,7 @@ namespace motioncontrol {
         void movePart(std::string part_type, geometry_msgs::Pose pose_in_world_frame, geometry_msgs::Pose goal_in_tray_frame, std::string agv);
         void activateGripper();
         void deactivateGripper();
+        geometry_msgs::Pose get_part_pose_in_empty_bin(int bin_number);
         /**
          * @brief Move the joint linear_arm_actuator_joint only
          *
@@ -66,12 +68,22 @@ namespace motioncontrol {
         // Send command message to robot controller
         bool sendJointPosition(trajectory_msgs::JointTrajectory command_msg);
         void goToPresetLocation(std::string location_name);
-
+        void pick_from_conveyor(std::vector<int> ebin);
         //--preset locations;
         start home1_, home2_;
         agv agv1_, agv2_, agv3_, agv4_;
+        conveyor on_, above_;
 
         private:
+        std::array<double,3> bin1_origin_ { -1.898, 3.37, 0.751 };
+        std::array<double,3> bin2_origin_ { -1.898, 2.56, 0.751 };
+        std::array<double,3> bin3_origin_ { -2.651, 2.56, 0.751 };
+        std::array<double,3> bin4_origin_ { -2.651, 3.37, 0.751 };
+        std::array<double,3> bin5_origin_ { -1.898, -3.37, 0.751 };
+        std::array<double,3> bin6_origin_ { -1.898, -2.56, 0.751 };
+        std::array<double,3> bin7_origin_ { -2.651, -2.56, 0.751 };
+        std::array<double,3> bin8_origin_ { -2.651, -3.37, 0.751 };
+        int empty_bin_place_count = 0;
         std::vector<double> joint_group_positions_;
         std::vector<double> joint_arm_positions_;
         ros::NodeHandle node_;
@@ -139,7 +151,7 @@ namespace gantry {
          *
          * @param location A preset location
          */
-        void moveBaseTo(double linear_arm_actuator_joint_position, double);
+        void moveBaseTo(double linear_arm_actuator_joint_position);
         nist_gear::VacuumGripperState getGripperState();
 
         
@@ -147,7 +159,7 @@ namespace gantry {
         // Send command message to robot controller
         bool sendJointPosition(trajectory_msgs::JointTrajectory command_msg);
         void goToPresetLocation(std::string location_name);
-
+        
         //--preset locations;
         start home1_, home2_;
         agv agv1_, agv2_, agv3_, agv4_;
@@ -183,11 +195,6 @@ namespace gantry {
 
 
 
-
-
-
-
-
 namespace gantry_motioncontrol {
 
 
@@ -207,7 +214,7 @@ namespace gantry_motioncontrol {
             std::vector<double> gantry_full_preset;  //3 joints
             std::vector<double> gantry_torso_preset; //6 joints
             std::vector<double> gantry_arm_preset;   //9 joints
-        } start, bin, agv, grasp, briefcase;
+        } start, bin, agv, grasp, near_as, as;
 
         Gantry(ros::NodeHandle& node);
         /**
@@ -228,19 +235,12 @@ namespace gantry_motioncontrol {
         void deactivateGripper();
         nist_gear::VacuumGripperState getGripperState();
         //--preset locations;
-        start home_;
-        bin at_bin1_, safe_bins_, at_bins1234_, at_bins5678_;
-        agv at_agv1_;
-        agv at_agv2_;
-        agv at_agv3_;
-        agv at_agv4_;
-        agv at_agv2_as1;
-        agv at_agv4_as3;
-        
-        briefcase at_as1;
-        briefcase at_as3;
-        
+        start home_, home2_;
+        bin at_bin1_,at_bin2_, at_bin3_, at_bin4_, at_bin5_, at_bin6_, at_bin7_, at_bin8_, safe_bins_, at_bins1234_, at_bins5678_;
+        agv at_agv1_, at_agv2_, at_agv3_, at_agv4_, at_agv1_as1_, at_agv1_as2_, at_agv2_as1_, at_agv2_as2_, at_agv3_as3_, at_agv3_as4_, at_agv4_as3_, at_agv4_as4_;
         grasp pre_grasp_, post_grasp_;
+        near_as near_as1_, near_as2_, near_as3_, near_as4_;
+        as at_as1_, at_as2_, at_as3_, at_as4_;
 
         private:
         std::vector<double> joint_group_positions_;
