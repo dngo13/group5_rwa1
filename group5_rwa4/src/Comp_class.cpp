@@ -207,7 +207,7 @@ void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPt
   {
     // ROS_INFO("Break beam0 triggered.");
     if (msg->object_detected) {  // If there is an object in proximity.
-      ROS_INFO("Break beam triggered.");
+      // ROS_INFO("Break beam triggered.");
     }
   }
 

@@ -475,11 +475,30 @@ namespace motioncontrol {
         return part_world_pose;
     }
     ///////////////////////////////
-    void Arm::pick_from_conveyor(std::vector<int> ebin, unsigned short int n)
+    std::vector<int> Arm::pick_from_conveyor(std::vector<int> ebin, unsigned short int n)
     {   
+        std::vector<int> rbin;
+        int sbin = 0;
+        for(auto &bin: ebin){
+            ROS_INFO_STREAM("bin number "<< bin);
+            if(bin == 1 || bin == 2 || bin == 5 || bin == 6)
+            {
+                sbin = bin;
+                break;
+            }
+        }
+
+        for(auto &bin: ebin){
+            if(bin == sbin){
+                continue;
+            }
+            else{
+                rbin.push_back(bin);
+            }
+        }
         for(int i = 0 ; i < n; i++){
             double trigger_time_ = ros::Time::now().toSec();
-            int sbin = 0;
+            
             goToPresetLocation("on");
             geometry_msgs::Pose arm_ee_link_pose = arm_group_.getCurrentPose().pose;
             auto side_orientation = motioncontrol::quaternionFromEuler(0, 0, 1.57);
@@ -500,14 +519,7 @@ namespace motioncontrol {
             arm_ee_link_pose.orientation.w = side_orientation.getW();
             arm_group_.setPoseTarget(arm_ee_link_pose);
             arm_group_.move();
-            for(auto &bin: ebin){
-                ROS_INFO_STREAM("bin number "<< bin);
-                if(bin == 1 || bin == 2 || bin == 5 || bin == 6)
-                {
-                    sbin = bin;
-                    break;
-                }
-            }
+            
             ROS_INFO_STREAM("sbin number "<< sbin);
             geometry_msgs::Pose bin = get_part_pose_in_empty_bin(sbin);
             ROS_INFO_STREAM("Y_pos: "<< bin.position.y);
@@ -544,6 +556,7 @@ namespace motioncontrol {
             goToPresetLocation("above");
         }
         // goToPresetLocation(bin);
+        return rbin;
     }
     ///////////////////////////////
     void Arm::flippart(geometry_msgs::Pose part_pose){

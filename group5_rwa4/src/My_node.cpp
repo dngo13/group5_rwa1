@@ -150,8 +150,8 @@ int main(int argc, char ** argv)
 
   // find parts seen by logical cameras
   auto list1 = cam.findparts();   
-
   auto ebin = cam.get_ebin_list();
+  
   for(auto &bin: ebin){
     ROS_INFO_STREAM("bin number "<< bin);
   }
@@ -190,15 +190,19 @@ int main(int argc, char ** argv)
   // gantry.goToPresetLocation(gantry.home2_);
 
   
-  arm.pick_from_conveyor(ebin, 3);
+  auto rbin = arm.pick_from_conveyor(ebin, 3);
 
   arm.goToPresetLocation("home1");
   arm.goToPresetLocation("home2");
-
+  for(auto &bin: rbin){
+    ROS_INFO_STREAM("bin number after clear "<< bin);
+  }
   // find parts seen by logical cameras
   auto list = cam.findparts(); 
   // Segregate parts and create the map of parts
+  
   cam.segregate_parts(list);
+
   // get the map of parts
   auto cam_map = cam.get_camera_map();
   
