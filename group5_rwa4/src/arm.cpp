@@ -1100,7 +1100,7 @@ namespace gantry_motioncontrol {
         at_bin2_.gantry_full_preset.insert(at_bin2_.gantry_full_preset.end(), at_bin2_.gantry_arm_preset.begin(), at_bin2_.gantry_arm_preset.end());
 
         // above bin3
-        at_bin3_.gantry_torso_preset = { -0.78, -3.35, 3.14 };
+        at_bin3_.gantry_torso_preset = { -0.78, -3.26, 3.14 };
         at_bin3_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
         at_bin3_.gantry_full_preset.insert(at_bin3_.gantry_full_preset.begin(), at_bin3_.gantry_torso_preset.begin(), at_bin3_.gantry_torso_preset.end());
         at_bin3_.gantry_full_preset.insert(at_bin3_.gantry_full_preset.end(), at_bin3_.gantry_arm_preset.begin(), at_bin3_.gantry_arm_preset.end());
@@ -1148,14 +1148,14 @@ namespace gantry_motioncontrol {
         at_agv4_as3_.gantry_full_preset.insert(at_agv4_as3_.gantry_full_preset.end(), at_agv4_as3_.gantry_arm_preset.begin(), at_agv4_as3_.gantry_arm_preset.end());
 
         // above near_as3
-        near_as3_.gantry_torso_preset = { -3.30, 2.91, 1.57 };
+        near_as3_.gantry_torso_preset = { -3.0, 2.91, 3.14 };
         near_as3_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
         near_as3_.gantry_full_preset.insert(near_as3_.gantry_full_preset.begin(), near_as3_.gantry_torso_preset.begin(), near_as3_.gantry_torso_preset.end());
         near_as3_.gantry_full_preset.insert(near_as3_.gantry_full_preset.end(), near_as3_.gantry_arm_preset.begin(), near_as3_.gantry_arm_preset.end());
 
         // above as3
-        at_as3_.gantry_torso_preset = { -3.85, 2.82, 1.57 };
-        at_as3_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_as3_.gantry_torso_preset = { -3.65, 2.82, 1.57 };
+        at_as3_.gantry_arm_preset = { 0 , -2.26 , 1.50 ,0.76 ,1.55 ,0.83 };
         at_as3_.gantry_full_preset.insert(at_as3_.gantry_full_preset.begin(), at_as3_.gantry_torso_preset.begin(), at_as3_.gantry_torso_preset.end());
         at_as3_.gantry_full_preset.insert(at_as3_.gantry_full_preset.end(), at_as3_.gantry_arm_preset.begin(), at_as3_.gantry_arm_preset.end());
 
@@ -1196,14 +1196,14 @@ namespace gantry_motioncontrol {
         at_agv2_as2_.gantry_full_preset.insert(at_agv2_as2_.gantry_full_preset.end(), at_agv2_as2_.gantry_arm_preset.begin(), at_agv2_as2_.gantry_arm_preset.end());
 
         // above near_as2
-        near_as2_.gantry_torso_preset = { -8.30, -3.21, 1.57 };
+        near_as2_.gantry_torso_preset = { -8.0, -3.21, 3.14 };
         near_as2_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
         near_as2_.gantry_full_preset.insert(near_as2_.gantry_full_preset.begin(), near_as2_.gantry_torso_preset.begin(), near_as2_.gantry_torso_preset.end());
         near_as2_.gantry_full_preset.insert(near_as2_.gantry_full_preset.end(), near_as2_.gantry_arm_preset.begin(), near_as2_.gantry_arm_preset.end());
 
         // above as2
-        at_as2_.gantry_torso_preset = { -8.85, -3.21, 1.57 };
-        at_as2_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_as2_.gantry_torso_preset = { -8.65, -3.21, 1.57 };
+        at_as2_.gantry_arm_preset = { 0 , -2.26 , 1.50 ,0.76 ,1.55 ,0.83 };
         at_as2_.gantry_full_preset.insert(at_as2_.gantry_full_preset.begin(), at_as2_.gantry_torso_preset.begin(), at_as2_.gantry_torso_preset.end());
         at_as2_.gantry_full_preset.insert(at_as2_.gantry_full_preset.end(), at_as2_.gantry_arm_preset.begin(), at_as2_.gantry_arm_preset.end());
 
@@ -1220,14 +1220,14 @@ namespace gantry_motioncontrol {
         at_agv4_as4_.gantry_full_preset.insert(at_agv4_as4_.gantry_full_preset.end(), at_agv4_as4_.gantry_arm_preset.begin(), at_agv4_as4_.gantry_arm_preset.end());
 
         // above near_as4
-        near_as4_.gantry_torso_preset = { -8.30, 2.91, 1.57 };
+        near_as4_.gantry_torso_preset = { -8.0, 2.91, 3.14 };
         near_as4_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
         near_as4_.gantry_full_preset.insert(near_as4_.gantry_full_preset.begin(), near_as4_.gantry_torso_preset.begin(), near_as4_.gantry_torso_preset.end());
         near_as4_.gantry_full_preset.insert(near_as4_.gantry_full_preset.end(), near_as4_.gantry_arm_preset.begin(), near_as4_.gantry_arm_preset.end());
 
         // above as4
-        at_as4_.gantry_torso_preset = { -8.85, 2.82, 1.57 };
-        at_as4_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_as4_.gantry_torso_preset = { -8.65, 2.82, 1.57 };
+        at_as4_.gantry_arm_preset = { 0 , -2.26 , 1.50 ,0.76 ,1.55 ,0.83 };
         at_as4_.gantry_full_preset.insert(at_as4_.gantry_full_preset.begin(), at_as4_.gantry_torso_preset.begin(), at_as4_.gantry_torso_preset.end());
         at_as4_.gantry_full_preset.insert(at_as4_.gantry_full_preset.end(), at_as4_.gantry_arm_preset.begin(), at_as4_.gantry_arm_preset.end());
 
@@ -1248,7 +1248,7 @@ namespace gantry_motioncontrol {
         // above agv2
         //small_long_joint. torso_rail_joint, torso_base_main_joint
         at_agv2_.gantry_torso_preset = { -0.37, -2.16, -2.70 };
-        at_agv2_.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        at_agv2_.gantry_arm_preset = { -0.01, -1.3, 1.20, 0.12, 1.54, 0.83};
         at_agv2_.gantry_full_preset.insert(at_agv2_.gantry_full_preset.begin(), at_agv2_.gantry_torso_preset.begin(), at_agv2_.gantry_torso_preset.end());
         at_agv2_.gantry_full_preset.insert(at_agv2_.gantry_full_preset.end(), at_agv2_.gantry_arm_preset.begin(), at_agv2_.gantry_arm_preset.end());
 
@@ -1261,8 +1261,8 @@ namespace gantry_motioncontrol {
 
         // above agv4
         //small_long_joint. torso_rail_joint, torso_base_main_joint
-        at_agv4_.gantry_torso_preset = { -0.37, 3.49, -2.70 };
-        at_agv4_.gantry_arm_preset = { -0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
+        at_agv4_.gantry_torso_preset = { -0.22, 3.67, -3.14 };
+        at_agv4_.gantry_arm_preset = { -0.01, -1.17, 1.20, -0.01, 1.54, 0.83 };
         at_agv4_.gantry_full_preset.insert(at_agv4_.gantry_full_preset.begin(), at_agv4_.gantry_torso_preset.begin(), at_agv4_.gantry_torso_preset.end());
         at_agv4_.gantry_full_preset.insert(at_agv4_.gantry_full_preset.end(), at_agv4_.gantry_arm_preset.begin(), at_agv4_.gantry_arm_preset.end());
 
@@ -1312,7 +1312,7 @@ namespace gantry_motioncontrol {
         geometry_msgs::Pose postGraspPose;
         auto part_init_pose_in_world = part_init_pose;
 
-        part_init_pose_in_world.position.z = part_init_pose_in_world.position.z + 0.06;
+        part_init_pose_in_world.position.z = part_init_pose_in_world.position.z + 0.08;
         part_init_pose_in_world.orientation.x = gantry_ee_link_pose.orientation.x;
         part_init_pose_in_world.orientation.y = gantry_ee_link_pose.orientation.y;
         part_init_pose_in_world.orientation.z = gantry_ee_link_pose.orientation.z;
@@ -1423,15 +1423,23 @@ namespace gantry_motioncontrol {
         // geometry_msgs::Pose currentPose = full_gantry_group_.getCurrentPose().pose;
 
         if (location == "agv1") {
+            goToPresetLocation(home_);
+            goToPresetLocation(at_bins1234_);
             goToPresetLocation(at_agv1_);
         }
         if (location == "agv2") {
+            goToPresetLocation(home_);
+            goToPresetLocation(at_bins1234_);
             goToPresetLocation(at_agv2_);
         }
         if (location == "agv3") {
+            goToPresetLocation(home_);
+            goToPresetLocation(at_bins5678_);
             goToPresetLocation(at_agv3_);
         }
         if (location == "agv4") {
+            goToPresetLocation(home_);
+            goToPresetLocation(at_bins5678_);
             goToPresetLocation(at_agv4_);
         }
         if (location == "as1") {
@@ -1490,7 +1498,7 @@ namespace gantry_motioncontrol {
         part_in_world_frame.orientation.y = q_rslt.y();
         part_in_world_frame.orientation.z = q_rslt.z();
         part_in_world_frame.orientation.w = q_rslt.w();
-        part_in_world_frame.position.z += 0.1;
+        part_in_world_frame.position.z += 0.17;
 
         //allow replanning if it fails
         // arm_gantry_group_.allowReplanning(true);
