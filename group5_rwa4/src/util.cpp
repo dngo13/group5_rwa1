@@ -119,19 +119,27 @@ namespace motioncontrol {
 
     geometry_msgs::Pose transformtoWorldFrame(
         const geometry_msgs::Pose& target,
-        std::string agv) {
+        std::string location) {
         static tf2_ros::StaticTransformBroadcaster br;
         geometry_msgs::TransformStamped transformStamped;
 
         std::string kit_tray;
-        if (agv.compare("agv1") == 0)
+        if (location.compare("agv1") == 0)
             kit_tray = "kit_tray_1";
-        else if (agv.compare("agv2") == 0)
+        else if (location.compare("agv2") == 0)
             kit_tray = "kit_tray_2";
-        else if (agv.compare("agv3") == 0)
+        else if (location.compare("agv3") == 0)
             kit_tray = "kit_tray_3";
-        else if (agv.compare("agv4") == 0)
+        else if (location.compare("agv4") == 0)
             kit_tray = "kit_tray_4";
+        else if (location.compare("as1") == 0)
+            kit_tray = "briefcase_1";
+        else if (location.compare("as2") == 0)
+            kit_tray = "briefcase_2";
+        else if (location.compare("as3") == 0)
+            kit_tray = "briefcase_3";
+        else if (location.compare("as4") == 0)
+            kit_tray = "briefcase_4";
 
         transformStamped.header.stamp = ros::Time::now();
         transformStamped.header.frame_id = kit_tray;
@@ -214,7 +222,6 @@ namespace motioncontrol {
             header = "quality_control_sensor_4_frame";
             child = "quality_control_sensor_4_model_";
         }
-
         else if (frame.compare("logical_camera_bins0") == 0){
             header = "logical_camera_bins0_frame";
             child = "logical_camera_bins0_model_";
@@ -222,6 +229,54 @@ namespace motioncontrol {
         else if (frame.compare("logical_camera_bins1") == 0){
             header = "logical_camera_bins1_frame";
             child = "logical_camera_bins1_model_";
+        }
+        else if (frame.compare("logical_camera_agv1as1") == 0){
+            header = "logical_camera_agv1as1_frame";
+            child = "logical_camera_agv1as1_model_";
+        }
+        else if (frame.compare("logical_camera_agv1as2") == 0){
+            header = "logical_camera_agv1as2_frame";
+            child = "logical_camera_agv1as2_model_";
+        }
+        else if (frame.compare("logical_camera_agv2as1") == 0){
+            header = "logical_camera_agv2as1_frame";
+            child = "logical_camera_agv2as1_model_";
+        }
+        else if (frame.compare("logical_camera_agv2as2") == 0){
+            header = "logical_camera_agv2as2_frame";
+            child = "logical_camera_agv2as2_model_";
+        }
+        else if (frame.compare("logical_camera_agv3as3") == 0){
+            header = "logical_camera_agv3as3_frame";
+            child = "logical_camera_agv3as3_model_";
+        }
+        else if (frame.compare("logical_camera_agv3as4") == 0){
+            header = "logical_camera_agv3as4_frame";
+            child = "logical_camera_agv3as4_model_";
+        }
+        else if (frame.compare("logical_camera_agv4as3") == 0){
+            header = "logical_camera_agv4as3_frame";
+            child = "logical_camera_agv4as3_model_";
+        }
+        else if (frame.compare("logical_camera_agv4as4") == 0){
+            header = "logical_camera_agv4as4_frame";
+            child = "logical_camera_agv4as4_model_";
+        }
+        else if (frame.compare("logical_camera_station1") == 0){
+            header = "logical_camera_station1_frame";
+            child = "logical_camera_station1_model_";
+        }
+        else if (frame.compare("logical_camera_station2") == 0){
+            header = "logical_camera_station2_frame";
+            child = "logical_camera_station2_model_";
+        }
+        else if (frame.compare("logical_camera_station3") == 0){
+            header = "logical_camera_station3_frame";
+            child = "logical_camera_station3_model_";
+        }
+        else if (frame.compare("logical_camera_station4") == 0){
+            header = "logical_camera_station4_frame";
+            child = "logical_camera_station4_model_";
         }
         
 

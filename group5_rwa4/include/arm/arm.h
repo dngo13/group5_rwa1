@@ -68,7 +68,8 @@ namespace motioncontrol {
         // Send command message to robot controller
         bool sendJointPosition(trajectory_msgs::JointTrajectory command_msg);
         void goToPresetLocation(std::string location_name);
-        void pick_from_conveyor(std::vector<int> ebin);
+        void pick_from_conveyor(std::vector<int> ebin, unsigned short int);
+        void flippart(geometry_msgs::Pose part_pose);
         //--preset locations;
         start home1_, home2_;
         agv agv1_, agv2_, agv3_, agv4_;
@@ -214,7 +215,7 @@ namespace gantry_motioncontrol {
             std::vector<double> gantry_full_preset;  //3 joints
             std::vector<double> gantry_torso_preset; //6 joints
             std::vector<double> gantry_arm_preset;   //9 joints
-        } start, bin, agv, grasp;
+        } start, bin, agv, grasp, near_as, as;
 
         Gantry(ros::NodeHandle& node);
         /**
@@ -235,10 +236,12 @@ namespace gantry_motioncontrol {
         void deactivateGripper();
         nist_gear::VacuumGripperState getGripperState();
         //--preset locations;
-        start home_;
-        bin at_bin1_, safe_bins_, at_bins1234_;
-        agv at_agv1_;
+        start home_, home2_;
+        bin at_bin1_,at_bin2_, at_bin3_, at_bin4_, at_bin5_, at_bin6_, at_bin7_, at_bin8_, safe_bins_, at_bins1234_, at_bins5678_;
+        agv at_agv1_, at_agv2_, at_agv3_, at_agv4_, at_agv1_as1_, at_agv1_as2_, at_agv2_as1_, at_agv2_as2_, at_agv3_as3_, at_agv3_as4_, at_agv4_as3_, at_agv4_as4_;
         grasp pre_grasp_, post_grasp_;
+        near_as near_as1_, near_as2_, near_as3_, near_as4_;
+        as at_as1_, at_as2_, at_as3_, at_as4_;
 
         private:
         std::vector<double> joint_group_positions_;

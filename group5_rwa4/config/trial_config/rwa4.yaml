@@ -68,7 +68,7 @@ orders:
     announcement_condition: agv_station_reached
     announcement_condition_value: agv4_at_as3
     assembly:
-      shipment_count: 1
+      shipment_count: 2
       stations: [as3, as1]
       products:
         part_0:
