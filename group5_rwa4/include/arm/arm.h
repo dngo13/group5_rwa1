@@ -68,7 +68,7 @@ namespace motioncontrol {
         // Send command message to robot controller
         bool sendJointPosition(trajectory_msgs::JointTrajectory command_msg);
         void goToPresetLocation(std::string location_name);
-        void pick_from_conveyor(std::vector<int> ebin);
+        void pick_from_conveyor(std::vector<int> ebin, unsigned short int);
         //--preset locations;
         start home1_, home2_;
         agv agv1_, agv2_, agv3_, agv4_;

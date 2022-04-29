@@ -119,19 +119,27 @@ namespace motioncontrol {
 
     geometry_msgs::Pose transformtoWorldFrame(
         const geometry_msgs::Pose& target,
-        std::string agv) {
+        std::string location) {
         static tf2_ros::StaticTransformBroadcaster br;
         geometry_msgs::TransformStamped transformStamped;
 
         std::string kit_tray;
-        if (agv.compare("agv1") == 0)
+        if (location.compare("agv1") == 0)
             kit_tray = "kit_tray_1";
-        else if (agv.compare("agv2") == 0)
+        else if (location.compare("agv2") == 0)
             kit_tray = "kit_tray_2";
-        else if (agv.compare("agv3") == 0)
+        else if (location.compare("agv3") == 0)
             kit_tray = "kit_tray_3";
-        else if (agv.compare("agv4") == 0)
+        else if (location.compare("agv4") == 0)
             kit_tray = "kit_tray_4";
+        else if (location.compare("as1") == 0)
+            kit_tray = "briefcase_1";
+        else if (location.compare("as2") == 0)
+            kit_tray = "briefcase_2";
+        else if (location.compare("as3") == 0)
+            kit_tray = "briefcase_3";
+        else if (location.compare("as4") == 0)
+            kit_tray = "briefcase_4";
 
         transformStamped.header.stamp = ros::Time::now();
         transformStamped.header.frame_id = kit_tray;

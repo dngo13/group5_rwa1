@@ -101,7 +101,6 @@ void LogicalCamera::logical_camera_bins1_callback(
         }
         else if(world_pose.position.x < -2.28 && world_pose.position.y < -2.96){
           product.bin_number = 8;
-          ROS_INFO_STREAM("in 8");
           bins_list.at(7).push_back(product);
         }
         camera_parts_list.at(1).push_back(product);
@@ -266,7 +265,6 @@ void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
 // }
 
 std::vector<int> LogicalCamera::get_ebin_list(){
-  empty_bin.clear();
   for (int i = 0; i<8;i++){
     if(bins_list.at(i).size() == 0){
       empty_bin.push_back(i+1);

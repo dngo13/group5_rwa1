@@ -479,9 +479,9 @@ namespace motioncontrol {
         return part_world_pose;
     }
 
-    void Arm::pick_from_conveyor(std::vector<int> ebin)
+    void Arm::pick_from_conveyor(std::vector<int> ebin, unsigned short int n)
     {   
-        for(int i = 0 ; i<3; i++){
+        for(int i = 0 ; i < n; i++){
             double trigger_time_ = ros::Time::now().toSec();
             int sbin = 0;
             goToPresetLocation("on");
@@ -1056,7 +1056,7 @@ namespace gantry_motioncontrol {
         // For the full robot = torso + arm
 
  
-        home_.gantry_torso_preset = { -3.5, 0.0, -1.57 };
+        home_.gantry_torso_preset = { -3.3, 0.0, -1.57 };
         home_.gantry_arm_preset = {-0.01, -0.92, 1.20, -0.25, 1.54, 0.83 };
         //concatenate gantry torso and gantry arm
         home_.gantry_full_preset.insert(home_.gantry_full_preset.begin(), home_.gantry_torso_preset.begin(), home_.gantry_torso_preset.end());
@@ -1172,14 +1172,14 @@ namespace gantry_motioncontrol {
         at_agv2_as1_.gantry_full_preset.insert(at_agv2_as1_.gantry_full_preset.end(), at_agv2_as1_.gantry_arm_preset.begin(), at_agv2_as1_.gantry_arm_preset.end());
 
         // above near_as1
-        near_as1_.gantry_torso_preset = { -3.30, -3.21, 1.57 };
+        near_as1_.gantry_torso_preset = { -3.0, -3.21, 3.14 };
         near_as1_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
         near_as1_.gantry_full_preset.insert(near_as1_.gantry_full_preset.begin(), near_as1_.gantry_torso_preset.begin(), near_as1_.gantry_torso_preset.end());
         near_as1_.gantry_full_preset.insert(near_as1_.gantry_full_preset.end(), near_as1_.gantry_arm_preset.begin(), near_as1_.gantry_arm_preset.end());
 
         // above as1
-        at_as1_.gantry_torso_preset = { -3.85, -3.21, 1.57 };
-        at_as1_.gantry_arm_preset = { 0 , -1.13 , 1.88 ,-0.72 ,1.55 ,0.83 };
+        at_as1_.gantry_torso_preset = { -3.65, -3.21, 1.57 };
+        at_as1_.gantry_arm_preset = { 0 , -2.26 , 1.50 ,0.76 ,1.55 ,0.83 };
         at_as1_.gantry_full_preset.insert(at_as1_.gantry_full_preset.begin(), at_as1_.gantry_torso_preset.begin(), at_as1_.gantry_torso_preset.end());
         at_as1_.gantry_full_preset.insert(at_as1_.gantry_full_preset.end(), at_as1_.gantry_arm_preset.begin(), at_as1_.gantry_arm_preset.end());
 
@@ -1402,41 +1402,50 @@ namespace gantry_motioncontrol {
 
 
     /////////////////////////////////////////////////////
-    bool Gantry::placePart(geometry_msgs::Pose part_init_pose, geometry_msgs::Pose part_pose_in_frame, std::string agv)
+    bool Gantry::placePart(geometry_msgs::Pose part_init_pose_in_world, geometry_msgs::Pose target_pose_in_frame, std::string location)
     {
-        auto target_pose_in_frame = part_pose_in_frame;
         // get the target pose of the part in the world frame
         auto part_in_world_frame = motioncontrol::transformtoWorldFrame(
             target_pose_in_frame,
-            agv);
+            location);
 
-        // complete our struct instance
-        geometry_msgs::Pose target_pose_in_world;
-        target_pose_in_world.position.x = part_in_world_frame.position.x;
-        target_pose_in_world.position.y = part_in_world_frame.position.y;
-        target_pose_in_world.position.z = part_in_world_frame.position.z;
-        target_pose_in_world.orientation.x = part_in_world_frame.orientation.x;
-        target_pose_in_world.orientation.y = part_in_world_frame.orientation.y;
-        target_pose_in_world.orientation.z = part_in_world_frame.orientation.z;
-        target_pose_in_world.orientation.w = part_in_world_frame.orientation.w;
-        motioncontrol::print(target_pose_in_world);
+        // // complete our struct instance
+        // geometry_msgs::Pose target_pose_in_world;
+        // target_pose_in_world.position.x = part_in_world_frame.position.x;
+        // target_pose_in_world.position.y = part_in_world_frame.position.y;
+        // target_pose_in_world.position.z = part_in_world_frame.position.z;
+        // target_pose_in_world.orientation.x = part_in_world_frame.orientation.x;
+        // target_pose_in_world.orientation.y = part_in_world_frame.orientation.y;
+        // target_pose_in_world.orientation.z = part_in_world_frame.orientation.z;
+        // target_pose_in_world.orientation.w = part_in_world_frame.orientation.w;
+        // motioncontrol::print(target_pose_in_world);
 
-        geometry_msgs::Pose currentPose = full_gantry_group_.getCurrentPose().pose;
+        // geometry_msgs::Pose currentPose = full_gantry_group_.getCurrentPose().pose;
 
-        //TODO: Consider other agvs
-        if (agv == "agv1") {
+        if (location == "agv1") {
             goToPresetLocation(at_agv1_);
         }
-        if (agv == "agv2") {
+        if (location == "agv2") {
             goToPresetLocation(at_agv2_);
         }
-        if (agv == "agv3") {
+        if (location == "agv3") {
             goToPresetLocation(at_agv3_);
         }
-        if (agv == "agv4") {
+        if (location == "agv4") {
             goToPresetLocation(at_agv4_);
         }
-
+        if (location == "as1") {
+            goToPresetLocation(at_as1_);
+        }
+        if (location == "as2") {
+            goToPresetLocation(at_as2_);
+        }
+        if (location == "as3") {
+            goToPresetLocation(at_as3_);
+        }
+        if (location == "as4") {
+            goToPresetLocation(at_as4_);
+        }
 
         ROS_INFO("Target World Position: %f, %f, %f",
             part_in_world_frame.position.x,
@@ -1457,7 +1466,6 @@ namespace gantry_motioncontrol {
             ee_pose.orientation.z,
             ee_pose.orientation.w);
 
-        auto part_init_pose_in_world = part_init_pose;
         // orientation of the part in the bin, in world frame
         tf2::Quaternion q_init_part(
             part_init_pose_in_world.orientation.x,
@@ -1505,7 +1513,6 @@ namespace gantry_motioncontrol {
         // TODO: check the part was actually placed in the correct pose in the agv
         // and that it is not faulty
     }
-
 
     /////////////////////////////////////////////////////
     void Gantry::activateGripper()
