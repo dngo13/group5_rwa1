@@ -105,6 +105,7 @@ public:
   /// callback for timer
   void callback(const ros::TimerEvent& event);
 
+  bool parts_rolling_on_conveyor{false};
 
 private:
   ros::NodeHandle node_;

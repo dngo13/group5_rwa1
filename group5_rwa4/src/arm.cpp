@@ -485,14 +485,25 @@ namespace motioncontrol {
             double trigger_time_ = ros::Time::now().toSec();
             int sbin = 0;
             goToPresetLocation("on");
+            geometry_msgs::Pose arm_ee_link_pose = arm_group_.getCurrentPose().pose;
+            auto side_orientation = motioncontrol::quaternionFromEuler(0, 0, 1.57);
             while (!gripper_state_.enabled) {
                 activateGripper();
             }
             while (!gripper_state_.attached && ros::Time::now().toSec() - trigger_time_ < 20){
     
             }
-            ROS_INFO_STREAM("object attached");
-            goToPresetLocation("above");
+            ROS_INFO_STREAM("object attached"); 
+            
+            side_orientation = motioncontrol::quaternionFromEuler(0, 0, 0);
+            arm_ee_link_pose = arm_group_.getCurrentPose().pose;
+            arm_ee_link_pose.position.z = arm_ee_link_pose.position.z + 0.5; 
+            arm_ee_link_pose.orientation.x = side_orientation.getX();
+            arm_ee_link_pose.orientation.y = side_orientation.getY();
+            arm_ee_link_pose.orientation.z = side_orientation.getZ();
+            arm_ee_link_pose.orientation.w = side_orientation.getW();
+            arm_group_.setPoseTarget(arm_ee_link_pose);
+            arm_group_.move();
             for(auto &bin: ebin){
                 ROS_INFO_STREAM("bin number "<< bin);
                 if(bin == 1 || bin == 2 || bin == 5 || bin == 6)
@@ -504,25 +515,18 @@ namespace motioncontrol {
             ROS_INFO_STREAM("sbin number "<< sbin);
             geometry_msgs::Pose bin = get_part_pose_in_empty_bin(sbin);
             ROS_INFO_STREAM("Y_pos: "<< bin.position.y);
-            geometry_msgs::Pose arm_ee_link_pose = arm_group_.getCurrentPose().pose;
-            auto side_orientation = motioncontrol::quaternionFromEuler(1.57, 0, 0);
-            // auto flat_orientation = motioncontrol::quaternionFromEuler(0, 1.57, 0);
-            // arm_ee_link_pose = arm_group_.getCurrentPose().pose;
-            arm_ee_link_pose.orientation.x = side_orientation.getX();
-            arm_ee_link_pose.orientation.y = side_orientation.getY();
-            arm_ee_link_pose.orientation.z = side_orientation.getZ();
-            arm_ee_link_pose.orientation.w = side_orientation.getW();
-            arm_group_.setPoseTarget(arm_ee_link_pose);
-            arm_group_.move();
-            // arm_ee_link_pose = arm_group_.getCurrentPose().pose;
+            side_orientation = motioncontrol::quaternionFromEuler(0, 0, 0);
             moveBaseTo(bin.position.y - 0.5);
             arm_ee_link_pose.position.x = bin.position.x - 0.15;
             arm_ee_link_pose.position.y = bin.position.y;
-            arm_ee_link_pose.position.z = bin.position.z + 0.09;
+            arm_ee_link_pose.position.z = bin.position.z + 0.5;
             arm_group_.setMaxVelocityScalingFactor(1.0);
             arm_group_.setPoseTarget(arm_ee_link_pose);
             arm_group_.move();
-        
+            arm_ee_link_pose.position.z = bin.position.z + 0.1;
+            arm_group_.setMaxVelocityScalingFactor(1.0);
+            arm_group_.setPoseTarget(arm_ee_link_pose);
+            arm_group_.move();
             // get the current joint positions
             const moveit::core::JointModelGroup* joint_model_group =
                 arm_group_.getCurrentState()->getJointModelGroup("kitting_arm");
@@ -1178,7 +1182,7 @@ namespace gantry_motioncontrol {
         near_as1_.gantry_full_preset.insert(near_as1_.gantry_full_preset.end(), near_as1_.gantry_arm_preset.begin(), near_as1_.gantry_arm_preset.end());
 
         // above as1
-        at_as1_.gantry_torso_preset = { -3.65, -3.21, 1.57 };
+        at_as1_.gantry_torso_preset = { -3.70, -3.0, 1.57 };
         at_as1_.gantry_arm_preset = { 0 , -2.26 , 1.50 ,0.76 ,1.55 ,0.83 };
         at_as1_.gantry_full_preset.insert(at_as1_.gantry_full_preset.begin(), at_as1_.gantry_torso_preset.begin(), at_as1_.gantry_torso_preset.end());
         at_as1_.gantry_full_preset.insert(at_as1_.gantry_full_preset.end(), at_as1_.gantry_arm_preset.begin(), at_as1_.gantry_arm_preset.end());
@@ -1291,7 +1295,7 @@ namespace gantry_motioncontrol {
      *
      * We use the group full_gantry_group_ to allow the robot more flexibility
      */
-    bool Gantry::pickPart(geometry_msgs::Pose part_init_pose)
+    bool Gantry::pickPart(geometry_msgs::Pose part_init_pose_in_world)
     {
         ros::Duration(3).sleep();
         activateGripper();
@@ -1308,9 +1312,11 @@ namespace gantry_motioncontrol {
             gantry_ee_link_pose.orientation.w
         );
 
+        ROS_INFO_STREAM("arm: " << gantry_ee_link_pose);
+        ROS_INFO_STREAM("full: " << full_gantry_group_.getCurrentPose().pose.orientation);
+
         // pose to go to after grasping a part (lift the arm a little bit)
         geometry_msgs::Pose postGraspPose;
-        auto part_init_pose_in_world = part_init_pose;
 
         part_init_pose_in_world.position.z = part_init_pose_in_world.position.z + 0.08;
         part_init_pose_in_world.orientation.x = gantry_ee_link_pose.orientation.x;
@@ -1404,20 +1410,24 @@ namespace gantry_motioncontrol {
     /////////////////////////////////////////////////////
     bool Gantry::placePart(geometry_msgs::Pose part_init_pose_in_world, geometry_msgs::Pose target_pose_in_frame, std::string location)
     {
+
+        ROS_INFO_STREAM("arm: " << arm_gantry_group_.getCurrentPose().pose.orientation);
+        ROS_INFO_STREAM("full: " << full_gantry_group_.getCurrentPose().pose.orientation);
+
         // get the target pose of the part in the world frame
-        auto part_in_world_frame = motioncontrol::transformtoWorldFrame(
+        auto target_in_world_frame = motioncontrol::transformtoWorldFrame(
             target_pose_in_frame,
             location);
 
         // // complete our struct instance
         // geometry_msgs::Pose target_pose_in_world;
-        // target_pose_in_world.position.x = part_in_world_frame.position.x;
-        // target_pose_in_world.position.y = part_in_world_frame.position.y;
-        // target_pose_in_world.position.z = part_in_world_frame.position.z;
-        // target_pose_in_world.orientation.x = part_in_world_frame.orientation.x;
-        // target_pose_in_world.orientation.y = part_in_world_frame.orientation.y;
-        // target_pose_in_world.orientation.z = part_in_world_frame.orientation.z;
-        // target_pose_in_world.orientation.w = part_in_world_frame.orientation.w;
+        // target_pose_in_world.position.x = target_in_world_frame.position.x;
+        // target_pose_in_world.position.y = target_in_world_frame.position.y;
+        // target_pose_in_world.position.z = target_in_world_frame.position.z;
+        // target_pose_in_world.orientation.x = target_in_world_frame.orientation.x;
+        // target_pose_in_world.orientation.y = target_in_world_frame.orientation.y;
+        // target_pose_in_world.orientation.z = target_in_world_frame.orientation.z;
+        // target_pose_in_world.orientation.w = target_in_world_frame.orientation.w;
         // motioncontrol::print(target_pose_in_world);
 
         // geometry_msgs::Pose currentPose = full_gantry_group_.getCurrentPose().pose;
@@ -1456,15 +1466,15 @@ namespace gantry_motioncontrol {
         }
 
         ROS_INFO("Target World Position: %f, %f, %f",
-            part_in_world_frame.position.x,
-            part_in_world_frame.position.y,
-            part_in_world_frame.position.z);
+            target_in_world_frame.position.x,
+            target_in_world_frame.position.y,
+            target_in_world_frame.position.z);
 
         ROS_INFO("Target World Orientation: %f, %f, %f, %f",
-            part_in_world_frame.orientation.x,
-            part_in_world_frame.orientation.y,
-            part_in_world_frame.orientation.z,
-            part_in_world_frame.orientation.w);
+            target_in_world_frame.orientation.x,
+            target_in_world_frame.orientation.y,
+            target_in_world_frame.orientation.z,
+            target_in_world_frame.orientation.w);
 
         auto ee_pose = arm_gantry_group_.getCurrentPose().pose;
 
@@ -1482,10 +1492,10 @@ namespace gantry_motioncontrol {
             part_init_pose_in_world.orientation.w);
         // orientation of the part in the tray, in world frame
         tf2::Quaternion q_target_part(
-            part_in_world_frame.orientation.x,
-            part_in_world_frame.orientation.y,
-            part_in_world_frame.orientation.z,
-            part_in_world_frame.orientation.w);
+            target_in_world_frame.orientation.x,
+            target_in_world_frame.orientation.y,
+            target_in_world_frame.orientation.z,
+            target_in_world_frame.orientation.w);
 
         // relative rotation between init and target
         tf2::Quaternion q_rot = q_target_part * q_init_part.inverse();
@@ -1494,11 +1504,11 @@ namespace gantry_motioncontrol {
         q_rslt.normalize();
 
         // orientation of the gripper when placing the part in the tray
-        part_in_world_frame.orientation.x = q_rslt.x();
-        part_in_world_frame.orientation.y = q_rslt.y();
-        part_in_world_frame.orientation.z = q_rslt.z();
-        part_in_world_frame.orientation.w = q_rslt.w();
-        part_in_world_frame.position.z += 0.17;
+        target_in_world_frame.orientation.x = q_rslt.x();
+        target_in_world_frame.orientation.y = q_rslt.y();
+        target_in_world_frame.orientation.z = q_rslt.z();
+        target_in_world_frame.orientation.w = q_rslt.w();
+        target_in_world_frame.position.z += 0.17;
 
         //allow replanning if it fails
         // arm_gantry_group_.allowReplanning(true);
@@ -1509,7 +1519,7 @@ namespace gantry_motioncontrol {
         // arm_gantry_group_.setMaxAccelerationScalingFactor(0.2);
         // arm_gantry_group_.setMaxVelocityScalingFactor(0.2);
 
-        arm_gantry_group_.setPoseTarget(part_in_world_frame);
+        arm_gantry_group_.setPoseTarget(target_in_world_frame);
         arm_gantry_group_.move();
         ros::Duration(2.0).sleep();
         deactivateGripper();
@@ -1520,6 +1530,226 @@ namespace gantry_motioncontrol {
             return false;
         // TODO: check the part was actually placed in the correct pose in the agv
         // and that it is not faulty
+    }
+
+
+    bool Gantry::movePart(geometry_msgs::Pose part_init_pose_in_world, geometry_msgs::Pose target_pose_in_frame, std::string location, std::string type){
+                
+        // orientation of the part in the bin, in world frame
+        tf2::Quaternion q_init_part(
+            part_init_pose_in_world.orientation.x,
+            part_init_pose_in_world.orientation.y,
+            part_init_pose_in_world.orientation.z,
+            part_init_pose_in_world.orientation.w);
+
+        // get the target pose of the part in the world frame
+        auto target_in_world_frame = motioncontrol::transformtoWorldFrame(
+            target_pose_in_frame,
+            location);
+
+        // orientation of the part in the tray, in world frame
+        tf2::Quaternion q_target_part(
+            target_in_world_frame.orientation.x,
+            target_in_world_frame.orientation.y,
+            target_in_world_frame.orientation.z,
+            target_in_world_frame.orientation.w);
+
+        // relative rotation between init and target
+        tf2::Quaternion q_rot = q_target_part * q_init_part.inverse();
+        // apply this rotation to the current gripper rotation
+        
+        // pose of the end effector in the world frame
+        geometry_msgs::Pose gantry_ee_link_pose = arm_gantry_group_.getCurrentPose().pose;
+        
+        auto flat_orientation = motioncontrol::quaternionFromEuler(0, 1.57, 0);
+        
+        gantry_ee_link_pose.orientation.x = flat_orientation.getX();
+        gantry_ee_link_pose.orientation.y = flat_orientation.getY();
+        gantry_ee_link_pose.orientation.z = flat_orientation.getZ();
+        gantry_ee_link_pose.orientation.w = flat_orientation.getW();
+        
+        double z_add {0.08};
+
+        if (type.find("pump") != std::string::npos){
+            z_add = 0.08;
+        }
+        if (type.find("battery") != std::string::npos){
+            z_add = 0.06;
+        }
+    
+        part_init_pose_in_world.orientation = gantry_ee_link_pose.orientation;
+        part_init_pose_in_world.position.z = part_init_pose_in_world.position.z + z_add;
+        
+        
+        
+        
+        
+
+        // ROS_INFO_STREAM("arm: " << gantry_ee_link_pose);
+        // ROS_INFO_STREAM("full: " << full_gantry_group_.getCurrentPose().pose.orientation);
+        // motioncontrol::eulerFromQuaternion(gantry_ee_link_pose);
+        // motioncontrol::eulerFromQuaternion(full_gantry_group_.getCurrentPose().pose);
+        // pose to go to after grasping a part (lift the arm a little bit)
+        geometry_msgs::Pose postGraspPose;
+        
+        // part_init_pose_in_world.position.z = part_init_pose_in_world.position.z + 0.08;
+        // part_init_pose_in_world.orientation.x = gantry_ee_link_pose.orientation.x;
+        // part_init_pose_in_world.orientation.y = gantry_ee_link_pose.orientation.y;
+        // part_init_pose_in_world.orientation.z = gantry_ee_link_pose.orientation.z;
+        // part_init_pose_in_world.orientation.w = gantry_ee_link_pose.orientation.w;
+
+        // activate gripper
+        ros::Duration(3).sleep();
+        activateGripper();
+        auto state = getGripperState();
+
+
+        if (!state.enabled) {
+            int MAX_ATTEMPT = 10;
+            for (int i{}; i < MAX_ATTEMPT; i++) {
+                ros::Duration(0.5).sleep();
+                activateGripper();
+                state = getGripperState();
+            }
+        }
+
+        if (!state.enabled) {
+            ROS_FATAL_STREAM("[Gripper] = Could not enable gripper...shutting down");
+            ros::shutdown();
+        }
+
+        if (state.enabled) {
+            ROS_INFO_STREAM("[Gripper] = enabled");
+            //--Move arm to part
+            arm_gantry_group_.setPoseTarget(part_init_pose_in_world);
+            arm_gantry_group_.move();
+
+            state = getGripperState();
+            // move the arm closer until the object is attached
+            while (!state.attached) {
+                part_init_pose_in_world.position.z = part_init_pose_in_world.position.z - 0.0005;
+                arm_gantry_group_.setPoseTarget(part_init_pose_in_world);
+                arm_gantry_group_.move();
+                arm_gantry_group_.setPoseTarget(gantry_ee_link_pose);
+                state = getGripperState();
+            }
+
+            ROS_INFO_STREAM("[Gripper] = object attached");
+            // ros::Duration(1.0).sleep();
+            postGraspPose = arm_gantry_group_.getCurrentPose().pose;
+            postGraspPose.position.z = postGraspPose.position.z + 0.1;
+            //--Move arm to previous position
+            arm_gantry_group_.setPoseTarget(postGraspPose);
+            arm_gantry_group_.move();
+            ros::Duration(2.0).sleep();
+            arm_gantry_group_.setPoseTarget(gantry_ee_link_pose);
+            arm_gantry_group_.move();
+        }
+
+        
+
+        if (location == "agv1") {
+            goToPresetLocation(home_);
+            goToPresetLocation(at_bins1234_);
+            goToPresetLocation(at_agv1_);
+        }
+        if (location == "agv2") {
+            goToPresetLocation(home_);
+            goToPresetLocation(at_bins1234_);
+            goToPresetLocation(at_agv2_);
+        }
+        if (location == "agv3") {
+            goToPresetLocation(home_);
+            goToPresetLocation(at_bins5678_);
+            goToPresetLocation(at_agv3_);
+        }
+        if (location == "agv4") {
+            goToPresetLocation(home_);
+            goToPresetLocation(at_bins5678_);
+            goToPresetLocation(at_agv4_);
+        }
+        if (location == "as1") {
+            goToPresetLocation(near_as1_);
+            goToPresetLocation(at_as1_);
+        }
+        if (location == "as2") {
+            goToPresetLocation(at_as2_);
+        }
+        if (location == "as3") {
+            goToPresetLocation(at_as3_);
+        }
+        if (location == "as4") {
+            goToPresetLocation(at_as4_);
+        }
+
+
+        // ROS_INFO("Target World Position: %f, %f, %f",
+        //     target_in_world_frame.position.x,
+        //     target_in_world_frame.position.y,
+        //     target_in_world_frame.position.z);
+
+        // ROS_INFO("Initial World Orientation: %f, %f, %f, %f",
+        //     part_init_pose_in_world.orientation.x,
+        //     part_init_pose_in_world.orientation.y,
+        //     part_init_pose_in_world.orientation.z,
+        //     part_init_pose_in_world.orientation.w);
+
+        // ROS_INFO("Target World Orientation: %f, %f, %f, %f",
+        //     target_in_world_frame.orientation.x,
+        //     target_in_world_frame.orientation.y,
+        //     target_in_world_frame.orientation.z,
+        //     target_in_world_frame.orientation.w);
+
+        // auto init_world_pose_euler = motioncontrol::eulerFromQuaternion(piw);
+        // auto target_pose_in_world_euler = motioncontrol::eulerFromQuaternion(target_in_world_frame);
+
+        // auto ee_pose = arm_gantry_group_.getCurrentPose().pose;
+
+        tf2::Quaternion  gantry_ee_link_orientation(
+            gantry_ee_link_pose.orientation.x,
+            gantry_ee_link_pose.orientation.y,
+            gantry_ee_link_pose.orientation.z,
+            gantry_ee_link_pose.orientation.w
+        );
+
+        tf2::Quaternion q_current(
+            gantry_ee_link_pose.orientation.x,
+            gantry_ee_link_pose.orientation.y,
+            gantry_ee_link_pose.orientation.z,
+            gantry_ee_link_pose.orientation.w);
+        
+        
+        tf2::Quaternion q_rslt = q_rot * q_current;
+        q_rslt.normalize();
+
+        
+        // orientation of the gripper when placing the part in the tray
+        target_in_world_frame.orientation.x = q_rslt.x();
+        target_in_world_frame.orientation.y = q_rslt.y();
+        target_in_world_frame.orientation.z = q_rslt.z();
+        target_in_world_frame.orientation.w = q_rslt.w();
+        target_in_world_frame.position.z += 0.1;
+
+        //allow replanning if it fails
+        // arm_gantry_group_.allowReplanning(true);
+        //Set the allowable error of position (unit: meter) and attitude (unit: radians)
+        // arm_gantry_group_.setGoalPositionTolerance(0.001);
+        // arm_gantry_group_.setGoalOrientationTolerance(0.01);
+        // //Set the maximum speed and acceleration allowed
+        // arm_gantry_group_.setMaxAccelerationScalingFactor(0.2);
+        // arm_gantry_group_.setMaxVelocityScalingFactor(0.2);
+
+        arm_gantry_group_.setPoseTarget(target_in_world_frame);
+        arm_gantry_group_.move();
+        ros::Duration(2.0).sleep();
+        deactivateGripper();
+        auto state1 = getGripperState();
+        if (state1.attached)
+            return true;
+        else
+            return false;
+
+
     }
 
     /////////////////////////////////////////////////////

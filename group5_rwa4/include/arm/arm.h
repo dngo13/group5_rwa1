@@ -226,7 +226,7 @@ namespace gantry_motioncontrol {
         void init();
         bool pickPart(geometry_msgs::Pose part_init_pose);
         bool placePart(geometry_msgs::Pose part_init_pose, geometry_msgs::Pose part_pose_in_frame, std::string agv);
-
+        bool movePart(geometry_msgs::Pose part_init_pose_in_world, geometry_msgs::Pose target_pose_in_frame, std::string location, std::string type);
 
         // Send command message to robot controller
         bool sendJointPosition(trajectory_msgs::JointTrajectory command_msg);

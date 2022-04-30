@@ -207,7 +207,8 @@ void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPt
   {
     // ROS_INFO("Break beam0 triggered.");
     if (msg->object_detected) {  // If there is an object in proximity.
-      ROS_INFO("Break beam triggered.");
+      // ROS_INFO("Break beam triggered.");
+      parts_rolling_on_conveyor = true;
     }
   }
 
@@ -216,7 +217,7 @@ void MyCompetitionClass::proximity_sensor0_callback(const sensor_msgs::Range::Co
   // ROS_INFO_THROTTLE(1, "Proximity sensor0 sees something.");
   if ((msg->max_range - msg->range) > 0.01)
   {  // If there is an object in proximity.
-    ROS_INFO_THROTTLE(1, "Proximity sensor sees something.");
+    // ROS_INFO_THROTTLE(1, "Proximity sensor sees something.");
   }
 }
 

@@ -84,6 +84,7 @@ int main(int argc, char ** argv)
   ros::AsyncSpinner spinner(0);
   spinner.start();
 
+  ros::Time start = ros::Time::now();
   // Instance of custom class from above.
   MyCompetitionClass comp_class(node);
   comp_class.init();
@@ -149,8 +150,14 @@ int main(int argc, char ** argv)
   rate.sleep();	
 
   // find parts seen by logical cameras
-  auto list1 = cam.findparts();   
+  auto list1 = cam.findparts();  
+  rate.sleep(); 
+  
+  // ROS_INFO_STREAM(list1.at(0).size());
 
+  // for(int i{0}; i < list1.at(0).size(); i++){
+  //   ROS_INFO_STREAM(list1.at(0).at(i).frame_pose.position);
+  // }
   auto ebin = cam.get_ebin_list();
   for(auto &bin: ebin){
     ROS_INFO_STREAM("bin number "<< bin);
@@ -193,12 +200,19 @@ int main(int argc, char ** argv)
   // gantry.goToPresetLocation(gantry.near_as2_);
   // gantry.goToPresetLocation(gantry.home2_);
 
-  
-  arm.pick_from_conveyor(ebin, 3);
+  // while(ros::Time::now().toSec() - start.toSec() < 20){
+  //     if (comp_class.parts_rolling_on_conveyor){
+  //     arm.pick_from_conveyor(ebin, 1);
+  //     break;
+  //   }
+  // }
+
+  // arm.pick_from_conveyor(ebin, 1);
 
   arm.goToPresetLocation("home1");
   arm.goToPresetLocation("home2");
 
+  
   // find parts seen by logical cameras
   auto list = cam.findparts(); 
   // Segregate parts and create the map of parts
@@ -446,7 +460,7 @@ int main(int argc, char ** argv)
           ROS_INFO_STREAM("SHIPMENT COUNT: " << shipment_product_count);
 
           for(auto &iter: parts_for_assembly){
-
+            
             ROS_INFO_STREAM(iter.type);
             if(!iter.processed){
               auto p =cam_map.find(iter.type);
@@ -459,10 +473,10 @@ int main(int argc, char ** argv)
                     ROS_INFO_STREAM("Moving the part: " << iter.type);
                     gantry.goToPresetLocation(gantry.near_as1_);
                     gantry.goToPresetLocation(gantry.at_agv2_as1_);
-                    gantry.pickPart(p->second.at(i).world_pose);
-                    gantry.goToPresetLocation(gantry.near_as1_);
-                    gantry.goToPresetLocation(gantry.at_as1_);
-                    gantry.placePart(p->second.at(i).world_pose, iter.frame_pose, asmb.stations);
+                    // gantry.pickPart(p->second.at(i).world_pose);
+                    // gantry.goToPresetLocation(gantry.near_as1_);
+                    // gantry.goToPresetLocation(gantry.at_as1_);
+                    gantry.movePart(p->second.at(i).world_pose, iter.frame_pose, asmb.stations, iter.type);
                     cam_map[iter.type].at(i).status = "processed";
                   }
                 }

@@ -112,6 +112,12 @@ void LogicalCamera::logical_camera_bins1_callback(
 
 
 std::array<std::vector<Product>,19> LogicalCamera::findparts(){
+
+  for (int i{0}; i < 18; i++){
+    get_cam[i] = true;
+    camera_parts_list.at(i).clear();
+  }
+
   ros::Subscriber logical_camera_bins0_subscriber = node_.subscribe(
     "/ariac/logical_camera_bins0", 1, 
     &LogicalCamera::logical_camera_bins0_callback, this);
@@ -265,7 +271,7 @@ void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
 // }
 
 std::vector<int> LogicalCamera::get_ebin_list(){
-  for (int i = 0; i<8;i++){
+  for (int i = 0; i < 8; i++){
     if(bins_list.at(i).size() == 0){
       empty_bin.push_back(i+1);
     }
