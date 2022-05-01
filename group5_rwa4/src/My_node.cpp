@@ -276,8 +276,8 @@ int main(int argc, char ** argv)
                     auto roll = rpy[0];
                     ROS_INFO_STREAM("Roll :" <<roll);
                     if(abs(abs(roll) - 3.14) < 0.5){ 
-                      part = p->second.at(i)         
-                      arm.flippart(p->second.at(i).type,p->second.at(i).world_pose, rbin);
+                      auto part = p->second.at(i);        
+                      arm.flippart(part, rbin, iter.frame_pose, kit.agv_id);
                     }
                     else{
                       arm.movePart(iter.type, p->second.at(i).world_pose, iter.frame_pose, kit.agv_id);

@@ -559,9 +559,9 @@ namespace motioncontrol {
         return rbin;
     }
     ///////////////////////////////
-    void Arm::flippart(std::string part_type,geometry_msgs::Pose part_pose, std::vector<int> rbin){
-        
-        
+    void Arm::flippart(Product part, std::vector<int> rbin, geometry_msgs::Pose part_pose_in_frame, std::string agv){
+        std::string part_type = part.type;
+        geometry_msgs::Pose part_pose = part.world_pose;
         ROS_INFO_STREAM("In flip");
         pickPart(part_type, part_pose);
         int sbin = 0;
@@ -737,37 +737,16 @@ namespace motioncontrol {
         arm_group_.move();
         ros::Duration(2.0).sleep();
         deactivateGripper();
-        // // apply this rotation to the current gripper rotation
-        // tf2::Quaternion q_rslt = q_rot * q_current;
-        // q_rslt.normalize();
-        // part_pose.position.x = arm_ee_link_pose.position.x;
-        // part_pose.position.y = arm_ee_link_pose.position.y;
-        // part_pose.position.z = 0.779;
-        // part_pose.orientation.x = target_pose.getX();
-        // part_pose.orientation.y = target_pose.getY();
-        // part_pose.orientation.z = target_pose.getZ();
-        // part_pose.orientation.w = target_pose.getW();
-        // arm_ee_link_pose.position.z = bin_origin.at(2)+0.3;
-        // geometry_msgs::Pose Post_grasp = arm_ee_link_pose;
-        // arm_group_.setMaxVelocityScalingFactor(1.0);
-        // arm_group_.setPoseTarget(Post_grasp);
-        // arm_group_.move();
-        // ros::Duration(2.0).sleep();
-        // side_orientation = motioncontrol::quaternionFromEuler(0, -3.14, 0);
-        // arm_ee_link_pose.orientation.x = side_orientation.getX();
-        // arm_ee_link_pose.orientation.y = side_orientation.getY();
-        // arm_ee_link_pose.orientation.z = side_orientation.getZ();
-        // arm_ee_link_pose.orientation.w = side_orientation.getW();
-        // arm_group_.setMaxVelocityScalingFactor(1.0);
-        // arm_group_.setPoseTarget(arm_ee_link_pose);
-        // arm_group_.move();
-        // ros::Duration(2.0).sleep();
-        // arm_ee_link_pose.position.x = part_pose.position.x + 0.2 ;
-        // arm_ee_link_pose.position.y = part_pose.position.y;
-        // arm_ee_link_pose.position.z = part_pose.orientation.z + 0.5;
-        // arm_group_.setMaxVelocityScalingFactor(1.0);
-        // arm_group_.setPoseTarget(arm_ee_link_pose);
-        // arm_group_.move();
+        part.world_pose.position.x = bin_origin.at(0);
+        part.world_pose.position.y = bin_origin.at(1);
+        part.world_pose.position.z = 0.8;
+        auto final_orientation = motioncontrol::quaternionFromEuler(3.14, 0, -1.57);
+        part.world_pose.orientation.x = final_orientation.getX();
+        part.world_pose.orientation.y = final_orientation.getY();
+        part.world_pose.orientation.z = final_orientation.getZ();
+        part.world_pose.orientation.w = final_orientation.getW();
+        goToPresetLocation("home2");
+        movePart(part_type,part.world_pose,part_pose_in_frame, agv);
 
     }
     ///////////////////////////
