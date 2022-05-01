@@ -212,7 +212,7 @@ namespace motioncontrol {
         // pre-grasp pose: somewhere above the part
         auto pregrasp_pose = part_init_pose;
         pregrasp_pose.orientation = arm_ee_link_pose.orientation;
-        pregrasp_pose.position.z = z_pos + 0.06;
+        pregrasp_pose.position.z = z_pos + 0.08;
 
         // grasp pose: right above the part
         auto grasp_pose = part_init_pose;
@@ -475,7 +475,7 @@ namespace motioncontrol {
         return part_world_pose;
     }
     ///////////////////////////////
-    std::vector<int> Arm::pick_from_conveyor(std::vector<int> ebin, unsigned short int n)
+    std::vector<int>  Arm::pick_from_conveyor(std::vector<int> ebin, unsigned short int n)
     {   
         std::vector<int> rbin;
         int sbin = 0;
@@ -505,8 +505,8 @@ namespace motioncontrol {
             while (!gripper_state_.enabled) {
                 activateGripper();
             }
-            while (!gripper_state_.attached && ros::Time::now().toSec() - trigger_time_ < 20){
-    
+            while (!gripper_state_.attached && ros::Time::now().toSec() - trigger_time_ < 15){
+                
             }
             ROS_INFO_STREAM("object attached"); 
             
@@ -559,33 +559,216 @@ namespace motioncontrol {
         return rbin;
     }
     ///////////////////////////////
-    void Arm::flippart(geometry_msgs::Pose part_pose){
+    void Arm::flippart(std::string part_type,geometry_msgs::Pose part_pose, std::vector<int> rbin){
+        
+        
         ROS_INFO_STREAM("In flip");
-        moveBaseTo(part_pose.position.y - 0.5);
+        pickPart(part_type, part_pose);
+        int sbin = 0;
+        for(auto &bin: rbin){
+            ROS_INFO_STREAM("bin number "<< bin);
+            if(bin == 1 || bin == 2 || bin == 5 || bin == 6)
+            {
+                sbin = bin;
+                break;
+            }
+        }
+        std::array<double,3> bin_origin{0,0,0};
+        geometry_msgs::Pose part_world_pose;
+        if (sbin == 1){
+            bin_origin = bin1_origin_;
+        }
+        if (sbin == 2){
+            bin_origin = bin2_origin_;
+        }
+        if (sbin == 3){
+            bin_origin = bin3_origin_;
+        }
+        if (sbin == 4){
+            bin_origin = bin4_origin_;
+        }
+        if (sbin == 5){
+            bin_origin = bin5_origin_;
+        }
+        if (sbin == 6){
+            bin_origin = bin6_origin_;
+        }
+        if (sbin == 7){
+            bin_origin = bin7_origin_;
+        }
+        if (sbin == 8){
+            bin_origin = bin8_origin_;
+        }
+        ROS_INFO_STREAM("EMPTYBIN: "<<sbin);
+        moveBaseTo(bin_origin.at(1));
+        geometry_msgs::Pose arm_ee_link_pose = arm_group_.getCurrentPose().pose;
+        auto flat_orientation = motioncontrol::quaternionFromEuler(0, 1.57, 0);
+        arm_ee_link_pose.orientation.x = flat_orientation.getX();
+        arm_ee_link_pose.orientation.y = flat_orientation.getY();
+        arm_ee_link_pose.orientation.z = flat_orientation.getZ();
+        arm_ee_link_pose.orientation.w = flat_orientation.getW();
+        arm_ee_link_pose.position.x = bin_origin.at(0);
+        arm_ee_link_pose.position.y = bin_origin.at(1)-0.25 ;
+        arm_ee_link_pose.position.z = bin_origin.at(2)+0.15;
+        arm_group_.setMaxVelocityScalingFactor(1.0);
+        arm_group_.setPoseTarget(arm_ee_link_pose);
+        arm_group_.move();
+        
+        tf2::Quaternion q_current(
+            arm_ee_link_pose.orientation.x,
+            arm_ee_link_pose.orientation.y,
+            arm_ee_link_pose.orientation.z,
+            arm_ee_link_pose.orientation.w);
+        auto target_pose = motioncontrol::quaternionFromEuler(0, 0, -1.57);
+        tf2::Quaternion q_init_part(
+            part_pose.orientation.x,
+            part_pose.orientation.y,
+            part_pose.orientation.z,
+            part_pose.orientation.w);
+        tf2::Quaternion q_target_part(
+            target_pose.getX(),
+            target_pose.getY(),
+            target_pose.getZ(),
+            target_pose.getW());
+        tf2::Quaternion q_rot = q_target_part * q_init_part.inverse();
+        // apply this rotation to the current gripper rotation
+        tf2::Quaternion q_rslt = q_rot * q_current;
+        q_rslt.normalize();
+        // orientation of the gripper when placing the part in the tray
+        arm_ee_link_pose.orientation.x = q_rslt.x();
+        arm_ee_link_pose.orientation.y = q_rslt.y();
+        arm_ee_link_pose.orientation.z = q_rslt.z();
+        arm_ee_link_pose.orientation.w = q_rslt.w();
+        arm_group_.setMaxVelocityScalingFactor(1.0);
+        arm_group_.setPoseTarget(arm_ee_link_pose);
+        arm_group_.move();
+        ros::Duration(2.0).sleep();
+        deactivateGripper();
+        ros::Duration(2.0).sleep();
+
+        part_pose.position.x = arm_ee_link_pose.position.x;
+        part_pose.position.y = arm_ee_link_pose.position.y;
+        part_pose.position.z = 0.8;
+        part_pose.orientation.x = target_pose.getX();
+        part_pose.orientation.y = target_pose.getY();
+        part_pose.orientation.z = target_pose.getZ();
+        part_pose.orientation.w = target_pose.getW();
+
+        arm_ee_link_pose.position.z = bin_origin.at(2)+0.3;
+        geometry_msgs::Pose Post_grasp = arm_ee_link_pose;
+        arm_group_.setMaxVelocityScalingFactor(1.0);
+        arm_group_.setPoseTarget(Post_grasp);
+        arm_group_.move();
+        
+        auto side_orientation = motioncontrol::quaternionFromEuler(0, 0, 1.57);
+        arm_ee_link_pose.orientation.x = side_orientation.getX();
+        arm_ee_link_pose.orientation.y = side_orientation.getY();
+        arm_ee_link_pose.orientation.z = side_orientation.getZ();
+        arm_ee_link_pose.orientation.w = side_orientation.getW();
+        // target_pose.position.z = bin_origin.at(2)+0.2;
+        arm_group_.setMaxVelocityScalingFactor(1.0);
+        arm_group_.setPoseTarget(arm_ee_link_pose);
+        arm_group_.move();
+        
         while (!gripper_state_.enabled) {
             activateGripper();
         }
-        std::array<double, 3> rpy = eulerFromQuaternion(part_pose);  
-        geometry_msgs::Pose arm_ee_link_pose = arm_group_.getCurrentPose().pose;
-        auto orientation = motioncontrol::quaternionFromEuler(rpy[0], rpy[1], rpy[2]);
-        // arm_ee_link_pose.orientation.x = part_pose.orientation.x;
-        // arm_ee_link_pose.orientation.y = part_pose.orientation.y;
-        // arm_ee_link_pose.orientation.z = part_pose.orientation.z;
-        // arm_ee_link_pose.orientation.w = part_pose.orientation.w;
-        arm_ee_link_pose.orientation.x = orientation.getX();
-        arm_ee_link_pose.orientation.y = orientation.getY();
-        arm_ee_link_pose.orientation.z = orientation.getZ();
-        arm_ee_link_pose.orientation.w = orientation.getW();
-        // arm_ee_link_pose.position.x = part_pose.position.x;
-        // arm_ee_link_pose.position.y = part_pose.position.y;
-        // arm_ee_link_pose.position.z = part_pose.position.z - 1;
+        arm_ee_link_pose.position.x = part_pose.position.x;
+        arm_ee_link_pose.position.y = part_pose.position.y-0.12 ;
+        arm_ee_link_pose.position.z = part_pose.position.z;
+        arm_group_.setMaxVelocityScalingFactor(1.0);
         arm_group_.setPoseTarget(arm_ee_link_pose);
         arm_group_.move();
-        double out_time = ros::Time::now().toSec();
-        double in_time = ros::Time::now().toSec();
-        if(in_time - out_time < 5){
-            double in_time = ros::Time::now().toSec();
+        while (!gripper_state_.attached) {
+            arm_ee_link_pose.position.y += 0.005;
+            arm_group_.setPoseTarget(arm_ee_link_pose);
+            arm_group_.move();
+            ros::Duration(sleep(0.5));
         }
+
+        arm_ee_link_pose.position.z =arm_ee_link_pose.position.z+0.2;
+        arm_group_.setMaxVelocityScalingFactor(1.0);
+        arm_group_.setPoseTarget(arm_ee_link_pose);
+        arm_group_.move();
+        
+        arm_ee_link_pose.position.x = bin_origin.at(0);
+        arm_ee_link_pose.position.y = bin_origin.at(1)-0.07;
+        arm_group_.setMaxVelocityScalingFactor(1.0);
+        arm_group_.setPoseTarget(arm_ee_link_pose);
+        arm_group_.move();
+        
+        // arm_ee_link_pose = arm_group_.getCurrentPose().pose;
+        // tf2::Quaternion qn_current(
+        //     arm_ee_link_pose.orientation.x,
+        //     arm_ee_link_pose.orientation.y,
+        //     arm_ee_link_pose.orientation.z,
+        //     arm_ee_link_pose.orientation.w);
+        // target_pose = motioncontrol::quaternionFromEuler(3.14, 0, 1.57);
+        // tf2::Quaternion n_target_part(
+        //     target_pose.getX(),
+        //     target_pose.getY(),
+        //     target_pose.getZ(),
+        //     target_pose.getW());
+        // q_rot = n_target_part * q_target_part.inverse();
+        // q_rslt = q_rot * qn_current;
+        // q_rslt.normalize();
+        // arm_ee_link_pose.orientation.x = q_rslt.x();
+        // arm_ee_link_pose.orientation.y = q_rslt.y();
+        // arm_ee_link_pose.orientation.z = q_rslt.z();
+        // arm_ee_link_pose.orientation.w = q_rslt.w();
+        // arm_group_.setMaxVelocityScalingFactor(1.0);
+        // arm_group_.setPoseTarget(arm_ee_link_pose);
+        // arm_group_.move();
+        // ros::Duration(2.0).sleep();
+        // deactivateGripper();
+        const moveit::core::JointModelGroup* joint_model_group =
+            arm_group_.getCurrentState()->getJointModelGroup("kitting_arm");
+        moveit::core::RobotStatePtr current_state = arm_group_.getCurrentState();
+
+        // get the current set of joint values for the group.
+        current_state->copyJointGroupPositions(joint_model_group, joint_group_positions_);
+
+        // next, assign a value to only the linear_arm_actuator_joint
+        ROS_INFO_STREAM("wrist3 "<<joint_group_positions_.at(6));
+        joint_group_positions_.at(6) = joint_group_positions_.at(6) + M_PI;
+        // move the arm
+        ROS_INFO_STREAM("wrist3 "<<joint_group_positions_.at(6));
+        arm_group_.setJointValueTarget(joint_group_positions_);
+        arm_group_.move();
+        ros::Duration(2.0).sleep();
+        deactivateGripper();
+        // // apply this rotation to the current gripper rotation
+        // tf2::Quaternion q_rslt = q_rot * q_current;
+        // q_rslt.normalize();
+        // part_pose.position.x = arm_ee_link_pose.position.x;
+        // part_pose.position.y = arm_ee_link_pose.position.y;
+        // part_pose.position.z = 0.779;
+        // part_pose.orientation.x = target_pose.getX();
+        // part_pose.orientation.y = target_pose.getY();
+        // part_pose.orientation.z = target_pose.getZ();
+        // part_pose.orientation.w = target_pose.getW();
+        // arm_ee_link_pose.position.z = bin_origin.at(2)+0.3;
+        // geometry_msgs::Pose Post_grasp = arm_ee_link_pose;
+        // arm_group_.setMaxVelocityScalingFactor(1.0);
+        // arm_group_.setPoseTarget(Post_grasp);
+        // arm_group_.move();
+        // ros::Duration(2.0).sleep();
+        // side_orientation = motioncontrol::quaternionFromEuler(0, -3.14, 0);
+        // arm_ee_link_pose.orientation.x = side_orientation.getX();
+        // arm_ee_link_pose.orientation.y = side_orientation.getY();
+        // arm_ee_link_pose.orientation.z = side_orientation.getZ();
+        // arm_ee_link_pose.orientation.w = side_orientation.getW();
+        // arm_group_.setMaxVelocityScalingFactor(1.0);
+        // arm_group_.setPoseTarget(arm_ee_link_pose);
+        // arm_group_.move();
+        // ros::Duration(2.0).sleep();
+        // arm_ee_link_pose.position.x = part_pose.position.x + 0.2 ;
+        // arm_ee_link_pose.position.y = part_pose.position.y;
+        // arm_ee_link_pose.position.z = part_pose.orientation.z + 0.5;
+        // arm_group_.setMaxVelocityScalingFactor(1.0);
+        // arm_group_.setPoseTarget(arm_ee_link_pose);
+        // arm_group_.move();
+
     }
     ///////////////////////////
     ////// Callback Functions

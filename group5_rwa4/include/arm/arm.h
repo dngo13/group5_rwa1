@@ -63,13 +63,11 @@ namespace motioncontrol {
         void moveBaseTo(double linear_arm_actuator_joint_position);
         nist_gear::VacuumGripperState getGripperState();
 
-        
-
         // Send command message to robot controller
         bool sendJointPosition(trajectory_msgs::JointTrajectory command_msg);
         void goToPresetLocation(std::string location_name);
         std::vector<int> pick_from_conveyor(std::vector<int> ebin, unsigned short int);
-        void flippart(geometry_msgs::Pose part_pose);
+        void flippart(std::string part_type,geometry_msgs::Pose part_pose, std::vector<int> rbin);
         //--preset locations;
         start home1_, home2_;
         agv agv1_, agv2_, agv3_, agv4_;

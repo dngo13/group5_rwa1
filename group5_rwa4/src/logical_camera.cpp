@@ -112,9 +112,9 @@ void LogicalCamera::logical_camera_bins1_callback(
 
 
 std::array<std::vector<Product>,19> LogicalCamera::findparts(){
-  for (int i=0;i<19;i++){
-    get_cam[i] = true;
-  }
+  // for (int i=0;i<19;i++){
+  //   get_cam[i] = true;
+  // }
   
   ros::Subscriber logical_camera_bins0_subscriber = node_.subscribe(
     "/ariac/logical_camera_bins0", 1, 

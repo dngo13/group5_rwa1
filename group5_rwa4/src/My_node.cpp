@@ -31,6 +31,7 @@
 #include <string>
 #include <ros/ros.h>
 #include <vector>
+#include <cstdlib>
 
 #include <nist_gear/LogicalCameraImage.h>
 #include <nist_gear/Order.h>
@@ -190,15 +191,22 @@ int main(int argc, char ** argv)
   // gantry.goToPresetLocation(gantry.home2_);
 
   
-  auto rbin = arm.pick_from_conveyor(ebin, 3);
+  auto rbin = arm.pick_from_conveyor(ebin, 1);
 
   arm.goToPresetLocation("home1");
   arm.goToPresetLocation("home2");
+  ebin.clear();
+
   for(auto &bin: rbin){
     ROS_INFO_STREAM("bin number after clear "<< bin);
   }
   // find parts seen by logical cameras
   auto list = cam.findparts(); 
+  // ebin = cam.get_ebin_list();
+  
+  // for(auto &bin: ebin){
+  //   ROS_INFO_STREAM("bin number "<< bin);
+  // }
   // Segregate parts and create the map of parts
   
   cam.segregate_parts(list);
@@ -266,8 +274,14 @@ int main(int argc, char ** argv)
                     ROS_INFO_STREAM("Found pump");
                     std::array<double, 3> rpy = motioncontrol::eulerFromQuaternion(iter.frame_pose);
                     auto roll = rpy[0];
-                    ROS_INFO_STREAM("Roll :" <<roll);         
-                    arm.flippart(p->second.at(i).world_pose);
+                    ROS_INFO_STREAM("Roll :" <<roll);
+                    if(abs(abs(roll) - 3.14) < 0.5){ 
+                      part = p->second.at(i)         
+                      arm.flippart(p->second.at(i).type,p->second.at(i).world_pose, rbin);
+                    }
+                    else{
+                      arm.movePart(iter.type, p->second.at(i).world_pose, iter.frame_pose, kit.agv_id);
+                    }
                   }
                   // Pick and place the part from bin to agv tray
                   // gantry.goToPresetLocation(gantry.at_bins1234_);
