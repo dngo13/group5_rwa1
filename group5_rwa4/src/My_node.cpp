@@ -302,7 +302,7 @@ int main(int argc, char ** argv)
                         // Check is the pump is to be flipped
                         if(abs(abs(roll) - 3.14) < 0.5){ 
                           auto part = p->second.at(i);        
-                          arm.flippart(part, empty_bins, iter.frame_pose, kit.agv_id);
+                          arm.flippart(part, empty_bins, iter.frame_pose, kit.agv_id, true);
                           cam_map[iter.type].at(i).status = "processed";
 
                         }
@@ -333,10 +333,45 @@ int main(int argc, char ** argv)
                         gantry.goToPresetLocation(gantry.at_bins5678_);
                       }
 
-                      gantry.move_gantry_to_bin(p->second.at(i).bin_number);
-                      gantry.movePart(p->second.at(i).world_pose, iter.frame_pose, kit.agv_id, iter.type);
-                      gantry.goToPresetLocation(gantry.home_);
-                      cam_map[iter.type].at(i).status = "processed";
+                      if(iter.type.find("pump") != std::string::npos) {
+                        std::array<double, 3> rpy = motioncontrol::eulerFromQuaternion(iter.frame_pose);
+                        auto roll = rpy[0];
+                        ROS_INFO_STREAM("Roll :" << roll);
+                        
+                        if (abs(abs(roll) - 3.14) < 0.5){
+                          auto part = p->second.at(i);
+  
+                          int bin_selected = 0;
+                          for(auto &bin: empty_bins){
+                              ROS_INFO_STREAM("bin number "<< bin);
+                              if(bin == 1 || bin == 2 || bin == 5 || bin == 6)
+                              {
+                                  bin_selected = bin;
+                                  break;
+                              }
+                          }
+                          gantry.move_gantry_to_bin(p->second.at(i).bin_number);
+                          gantry.movePartfrombin(p->second.at(i).world_pose, iter.type, bin_selected);
+                          bool kitting_arm_required = false;
+                          arm.flippart(part, empty_bins, iter.frame_pose, kit.agv_id, kitting_arm_required);
+                          cam_map[iter.type].at(i).status = "processed";
+                        }
+                        
+                        else{
+                        gantry.move_gantry_to_bin(p->second.at(i).bin_number);
+                        gantry.movePart(p->second.at(i).world_pose, iter.frame_pose, kit.agv_id, iter.type);
+                        gantry.goToPresetLocation(gantry.home_);
+                        cam_map[iter.type].at(i).status = "processed";
+                        }
+
+                      }
+
+                      else{
+                        gantry.move_gantry_to_bin(p->second.at(i).bin_number);
+                        gantry.movePart(p->second.at(i).world_pose, iter.frame_pose, kit.agv_id, iter.type);
+                        gantry.goToPresetLocation(gantry.home_);
+                        cam_map[iter.type].at(i).status = "processed";
+                      }
                     }
                   }
                     

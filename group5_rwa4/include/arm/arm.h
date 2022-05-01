@@ -68,7 +68,7 @@ namespace motioncontrol {
         bool sendJointPosition(trajectory_msgs::JointTrajectory command_msg);
         void goToPresetLocation(std::string location_name);
         std::vector<int> pick_from_conveyor(std::vector<int> ebin, unsigned short int);
-        void flippart(Product part, std::vector<int> rbin, geometry_msgs::Pose part_pose_in_frame, std::string agv);
+        void flippart(Product part, std::vector<int> rbin, geometry_msgs::Pose part_pose_in_frame, std::string agv, bool);
 
         //--preset locations;
         start home1_, home2_;
