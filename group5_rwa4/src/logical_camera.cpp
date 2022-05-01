@@ -112,12 +112,12 @@ void LogicalCamera::logical_camera_bins1_callback(
 
 
 std::array<std::vector<Product>,19> LogicalCamera::findparts(){
-  // for (int i=0;i<18;i++){
-  //   get_cam[i] = true;
-  //   camera_parts_list.at(i).clear();
-  // }
 
-  
+  for (int i{0}; i < 18; i++){
+    get_cam[i] = true;
+    camera_parts_list.at(i).clear();
+  }
+
   ros::Subscriber logical_camera_bins0_subscriber = node_.subscribe(
     "/ariac/logical_camera_bins0", 1, 
     &LogicalCamera::logical_camera_bins0_callback, this);
@@ -206,6 +206,7 @@ std::array<std::vector<Product>,19> LogicalCamera::findparts(){
 }
 
 void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
+  camera_map_.clear();
   for (auto &l: list){
     for(auto &part: l){
       camera_map_[part.type].push_back(part);
@@ -271,8 +272,7 @@ void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
 // }
 
 std::vector<int> LogicalCamera::get_ebin_list(){
-  empty_bin.clear();
-  for (int i = 0; i<8;i++){
+  for (int i = 0; i < 8; i++){
     if(bins_list.at(i).size() == 0){
       empty_bin.push_back(i+1);
     }
@@ -381,10 +381,11 @@ std::vector<Product> LogicalCamera::get_faulty_part_list(){
 }
 
 void LogicalCamera::query_faulty_cam(){
+  faulty_part_list_.clear();
   for (int j{0}; j <= 3; j++){  
     get_faulty_cam[j] = true;
   }
-  faulty_part_list_.clear();
+  
 }
 
 void LogicalCamera::logical_camera_station1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){

@@ -141,9 +141,10 @@ void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order
     new_order.priority = 1;
     
     if(new_order.order_id == "order_1"){
-      new_order.priority = 3;
-      ROS_INFO("High priority order is announced ");
-      high_priority_announced = true;
+      order1_announced = true;
+      // new_order.priority = 3;
+      // ROS_INFO("High priority order is announced ");
+      // high_priority_announced = true;
     }
   
     for (const auto &kit: order_msg->kitting_shipments){
@@ -208,6 +209,7 @@ void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPt
     // ROS_INFO("Break beam0 triggered.");
     if (msg->object_detected) {  // If there is an object in proximity.
       // ROS_INFO("Break beam triggered.");
+      parts_rolling_on_conveyor = true;
     }
   }
 
@@ -216,7 +218,7 @@ void MyCompetitionClass::proximity_sensor0_callback(const sensor_msgs::Range::Co
   // ROS_INFO_THROTTLE(1, "Proximity sensor0 sees something.");
   if ((msg->max_range - msg->range) > 0.01)
   {  // If there is an object in proximity.
-    ROS_INFO_THROTTLE(1, "Proximity sensor sees something.");
+    // ROS_INFO_THROTTLE(1, "Proximity sensor sees something.");
   }
 }
 
