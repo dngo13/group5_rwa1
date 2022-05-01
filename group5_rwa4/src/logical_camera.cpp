@@ -206,6 +206,7 @@ std::array<std::vector<Product>,19> LogicalCamera::findparts(){
 }
 
 void LogicalCamera::segregate_parts(std::array<std::vector<Product>,19> list){
+  camera_map_.clear();
   for (auto &l: list){
     for(auto &part: l){
       camera_map_[part.type].push_back(part);
@@ -380,10 +381,11 @@ std::vector<Product> LogicalCamera::get_faulty_part_list(){
 }
 
 void LogicalCamera::query_faulty_cam(){
+  faulty_part_list_.clear();
   for (int j{0}; j <= 3; j++){  
     get_faulty_cam[j] = true;
   }
-  faulty_part_list_.clear();
+  
 }
 
 void LogicalCamera::logical_camera_station1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){

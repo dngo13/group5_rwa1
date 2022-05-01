@@ -141,9 +141,10 @@ void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order
     new_order.priority = 1;
     
     if(new_order.order_id == "order_1"){
-      new_order.priority = 3;
-      ROS_INFO("High priority order is announced ");
-      high_priority_announced = true;
+      order1_announced = true;
+      // new_order.priority = 3;
+      // ROS_INFO("High priority order is announced ");
+      // high_priority_announced = true;
     }
   
     for (const auto &kit: order_msg->kitting_shipments){

@@ -102,6 +102,9 @@ public:
   // Check for high priority, if announced
   bool high_priority_announced{false};  
 
+  // Check if order1 is announced
+  bool order1_announced{false};
+
   /// callback for timer
   void callback(const ros::TimerEvent& event);
 
