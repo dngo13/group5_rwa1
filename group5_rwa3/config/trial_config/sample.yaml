@@ -103,4 +103,5 @@ sensor_blackout:
   duration: 30
 
 faulty_products:
-  - assembly_battery_blue_6
+  - assembly_battery_blue_4
+  - assembly_sensor_red_4

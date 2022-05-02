@@ -117,7 +117,9 @@ namespace motioncontrol {
         auto init_pose_in_world = pose_in_world_frame;
 
         // ROS_INFO_STREAM(init_pose_in_world.position.x << " " << init_pose_in_world.position.y);
-        auto target_pose_in_world = motioncontrol::transformtoWorldFrame(goal_in_tray_frame, agv);
+        // auto target_pose_in_world = motioncontrol::transformtoWorldFrame(goal_in_tray_frame, agv);
+        auto target_pose_in_world = motioncontrol::gettransforminWorldFrame(goal_in_tray_frame, agv);
+        
         if (pickPart(part_type, init_pose_in_world)) {
             placePart(init_pose_in_world, goal_in_tray_frame, agv);
         }
@@ -174,16 +176,16 @@ namespace motioncontrol {
 
         // preset z depending on the part type
         // some parts are bigger than others
-        // TODO: Add new z_pos values for the regulator and the battery
+        
         double z_pos{};
         if (part_type.find("pump") != std::string::npos) {
             z_pos = 0.859;
         }
         if (part_type.find("sensor") != std::string::npos) {
-            z_pos = 0.81;
+            z_pos = 0.808;
         }
         if (part_type.find("regulator") != std::string::npos) {
-            z_pos = 0.83;
+            z_pos = 0.81;
         }
         if (part_type.find("battery") != std::string::npos) {
             z_pos = 0.79;
@@ -338,8 +340,7 @@ namespace motioncontrol {
         goToPresetLocation("home2");
 
         return true;
-        // TODO: check the part was actually placed in the correct pose in the agv
-        // and that it is not faulty
+        
     }
     /////////////////////////////////////////////////////
     void Arm::gripper_state_callback(const nist_gear::VacuumGripperState::ConstPtr& gripper_state_msg)

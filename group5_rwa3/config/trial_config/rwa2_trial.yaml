@@ -134,8 +134,6 @@ orders:
             xyz: [-0.1, -0.1, 0]
             rpy: [0, 0, 0]
   
-
-
 models_over_bins:
    bin1:
      models:
