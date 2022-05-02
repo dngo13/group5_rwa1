@@ -153,7 +153,6 @@ int main(int argc, char ** argv)
   // get the map of parts
   auto cam_map = cam.get_camera_map();
   // Create an empty list of parts for this kit
-  std::vector<Product> parts_for_kitting;
 
   std::vector<Product> parts_to_check_later;
 
@@ -174,6 +173,7 @@ int main(int argc, char ** argv)
         
         ROS_INFO_STREAM("[CURRENT PROCESS]: " << kit.shipment_type);
         
+        std::vector<Product> parts_for_kitting;
         // Push all the parts in kit to the list
         for (auto &part:kit.products){
           part.processed = false;
