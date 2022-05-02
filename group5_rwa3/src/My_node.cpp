@@ -271,7 +271,7 @@ int main(int argc, char ** argv)
                                       // Delay for list construction
                                       ROS_INFO_STREAM("entering delay");
                                       
-                                      while (inside_time - outside_time < 1.0) {
+                                      while (inside_time - outside_time < 5.0) {
                                           inside_time = ros::Time::now().toSec();
                                       }
                                       
@@ -284,9 +284,9 @@ int main(int argc, char ** argv)
                                         cam.query_faulty_cam();
                                         continue;
                                       }
-                                      if (cam.faulty_part_list_.size() > 1){
+                                      if (cam.faulty_part_list_.size() > 0){
                                         ROS_INFO_STREAM("part is faulty, removing it from the tray");
-                                        arm.pickPart(iter.type, cam.faulty_part_list_.at(1).world_pose);
+                                        arm.pickPart(iter.type, cam.faulty_part_list_.at(0).world_pose);
                                         arm.goToPresetLocation("home2");
                                         arm.deactivateGripper();
                                         cam.query_faulty_cam();
