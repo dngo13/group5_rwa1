@@ -151,7 +151,7 @@ namespace motioncontrol {
      */
     bool Arm::pickPart(std::string part_type, geometry_msgs::Pose part_init_pose) {
         arm_group_.setMaxVelocityScalingFactor(1.0);
-        moveBaseTo(part_init_pose.position.y);
+        moveBaseTo(part_init_pose.position.y - 0.3);
 
         // // move the arm above the part to grasp
         // // gripper stays at the current z
@@ -179,23 +179,23 @@ namespace motioncontrol {
         // we will bring the arm back to this pose after picking up the part
         auto postgrasp_pose3 = part_init_pose;
         postgrasp_pose3.orientation = arm_ee_link_pose.orientation;
-        postgrasp_pose3.position.z = arm_ee_link_pose.position.z;
+        postgrasp_pose3.position.z = arm_ee_link_pose.position.z+0.1;
 
         // preset z depending on the part type
         // some parts are bigger than others
         
         double z_pos{};
         if (part_type.find("pump") != std::string::npos) {
-            z_pos = 0.859;
+            z_pos = 0.82;
         }
         if (part_type.find("sensor") != std::string::npos) {
-            z_pos = 0.808;
+            z_pos = 0.78;
         }
         if (part_type.find("regulator") != std::string::npos) {
-            z_pos = 0.81;
+            z_pos = 0.79;
         }
         if (part_type.find("battery") != std::string::npos) {
-            z_pos = 0.79;
+            z_pos = 0.77;
         }
 
         // flat_orientation = motioncontrol::quaternionFromEuler(0, 1.57, 0);
@@ -279,7 +279,7 @@ namespace motioncontrol {
             part_pose_in_frame,
             agv);
 
-
+        // moveBaseTo(target_pose_in_world.position.y - 0.1);
         geometry_msgs::Pose arm_ee_link_pose = arm_group_.getCurrentPose().pose;
         auto flat_orientation = motioncontrol::quaternionFromEuler(0, 1.57, 0);
         arm_ee_link_pose = arm_group_.getCurrentPose().pose;
@@ -527,7 +527,7 @@ namespace motioncontrol {
             geometry_msgs::Pose bin = get_part_pose_in_empty_bin(bin_selected);
             ROS_INFO_STREAM("Y_pos: "<< bin.position.y);
             side_orientation = motioncontrol::quaternionFromEuler(0, 0, 0);
-            moveBaseTo(bin.position.y - 0.5);
+            moveBaseTo(bin.position.y);
             arm_ee_link_pose.position.x = bin.position.x - 0.15;
             arm_ee_link_pose.position.y = bin.position.y;
             arm_ee_link_pose.position.z = bin.position.z + 0.5;
@@ -576,7 +576,7 @@ namespace motioncontrol {
                 break;
             }
         }
-        bin_selected = 5;
+        // bin_selected = 5;
         // ROS_INFO_STREAM("selected bin number "<< bin_selected);
         std::array<double,3> bin_origin{0,0,0};
         geometry_msgs::Pose part_world_pose;
@@ -609,7 +609,7 @@ namespace motioncontrol {
         if (arm_required){
         pickPart(part_type, part_pose);
         }         
-        moveBaseTo(bin_origin.at(1)-0.2);
+        moveBaseTo(bin_origin.at(1)-0.8);
         geometry_msgs::Pose arm_ee_link_pose = arm_group_.getCurrentPose().pose;
         auto flat_orientation = motioncontrol::quaternionFromEuler(0, 1.57, 0);
         arm_ee_link_pose.orientation.x = flat_orientation.getX();
@@ -654,7 +654,7 @@ namespace motioncontrol {
         ros::Duration(2.0).sleep();
         deactivateGripper();
         ros::Duration(2.0).sleep();
-
+        // moveBaseTo(bin_origin.at(1)-0.4);
         part_pose.position.x = arm_ee_link_pose.position.x;
         part_pose.position.y = arm_ee_link_pose.position.y;
         part_pose.position.z = 0.8;
@@ -662,9 +662,9 @@ namespace motioncontrol {
         part_pose.orientation.y = target_pose.getY();
         part_pose.orientation.z = target_pose.getZ();
         part_pose.orientation.w = target_pose.getW();
-
-        arm_ee_link_pose.position.x = bin_origin.at(0);;
-        arm_ee_link_pose.position.y = bin_origin.at(1);;
+        moveBaseTo(bin_origin.at(1)-0.6);
+        arm_ee_link_pose.position.x = bin_origin.at(0);
+        arm_ee_link_pose.position.y = bin_origin.at(1);
         arm_ee_link_pose.position.z = bin_origin.at(2) + 0.3;
         geometry_msgs::Pose Post_grasp = arm_ee_link_pose;
         arm_group_.setMaxVelocityScalingFactor(1.0);
@@ -1555,7 +1555,7 @@ namespace gantry_motioncontrol {
         geometry_msgs::Pose target_in_world_frame;
         std::array<double,3> bin_origin{0,0,0};
         auto place_orientation = motioncontrol::quaternionFromEuler(0, 0, -1.57);
-        bin = 5;
+        // bin = 5;
         if (bin == 1){
             bin_origin = bin1_origin_;
         }
