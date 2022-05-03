@@ -167,25 +167,37 @@ int main(int argc, char ** argv)
 
   // find parts seen by logical cameras
   auto list1 = cam.findparts();  
-  ros::Duration(sleep(3.0)); 
+  ros::Duration(sleep(5.0)); 
 
   // Finding empty bins 
   auto empty_bins_at_start = cam.get_ebin_list();
+  auto empty_bins = empty_bins_at_start;
   ros::Duration(sleep(1.0));
   for(auto &bin: empty_bins_at_start){
     ROS_INFO_STREAM("Empty bin numbers: "<< bin);
   }
+  double Check_time = ros::Time::now().toSec();
+  while(!(comp_class.conveyor_check()) && Check_time <=30){
+    Check_time = ros::Time::now().toSec();
+  }
   
-  
-
+  // std::vector<int> empty_bins;
   // Pick parts from conveyor
-  auto empty_bins = arm.pick_from_conveyor(empty_bins_at_start, 1);
+  if(comp_class.conveyor_check()){
+    empty_bins.clear();
+    ROS_INFO_STREAM("In pick from coveyor");
+    empty_bins = arm.pick_from_conveyor(empty_bins_at_start, 3);
+  }
+  else{
+    ROS_INFO_STREAM("No parts on conveyor");
+  }
+
   empty_bins_at_start.clear();
   arm.goToPresetLocation("home1");
   arm.goToPresetLocation("home2");
   gantry.goToPresetLocation(gantry.home_);
   for(auto &bin: empty_bins){
-    ROS_INFO_STREAM("Empty bin after placing parts from conveyor: "<< bin);
+    ROS_INFO_STREAM("Empty bin after conveyor check: "<< bin);
   }  
 
   // find parts seen by logical cameras
@@ -193,6 +205,10 @@ int main(int argc, char ** argv)
   auto list = cam.findparts(); 
   ROS_INFO_STREAM("Made List");
   ros::Duration(sleep(3.0));
+  // empty_bins = cam.get_ebin_list();
+  for(auto &bin: empty_bins){
+    ROS_INFO_STREAM("Empty bin after conveyor check: "<< bin);
+  }  
   // Segregate parts and create the map of parts
   ROS_INFO_STREAM("Seg list");
   cam.segregate_parts(list);
@@ -266,7 +282,7 @@ int main(int argc, char ** argv)
                       if(iter.type.find("pump") != std::string::npos){
                         std::array<double, 3> rpy = motioncontrol::eulerFromQuaternion(iter.frame_pose);
                         auto roll = rpy[0];
-                        ROS_INFO_STREAM("Roll :" <<roll);
+                        // ROS_INFO_STREAM("Roll :" <<roll);
 
                         // Check is the pump is to be flipped
                         if(abs(abs(roll) - 3.14) < 0.5){ 
@@ -305,14 +321,14 @@ int main(int argc, char ** argv)
                       if(iter.type.find("pump") != std::string::npos) {
                         std::array<double, 3> rpy = motioncontrol::eulerFromQuaternion(iter.frame_pose);
                         auto roll = rpy[0];
-                        ROS_INFO_STREAM("Roll :" << roll);
+                        // ROS_INFO_STREAM("Roll :" << roll);
                         
                         if (abs(abs(roll) - 3.14) < 0.5){
                           auto part = p->second.at(i);
   
                           int bin_selected = 0;
                           for(auto &bin: empty_bins){
-                              ROS_INFO_STREAM("bin number "<< bin);
+                              // ROS_INFO_STREAM("bin number "<< bin);
                               if(bin == 1 || bin == 2 || bin == 5 || bin == 6)
                               {
                                   bin_selected = bin;
@@ -548,10 +564,10 @@ int main(int argc, char ** argv)
 
     // rate.sleep();
     if (orders.size()>1 && !order1_done){
-      ROS_INFO_STREAM("abd");
+      ROS_INFO_STREAM("Waiting for agv to reach the assembly station");
       double outside_time = ros::Time::now().toSec();
       double inside_time = ros::Time::now().toSec();
-      while (inside_time - outside_time < 15.0) {
+      while (inside_time - outside_time < 30.0) {
           inside_time = ros::Time::now().toSec();
       }
       // find parts seen by logical cameras

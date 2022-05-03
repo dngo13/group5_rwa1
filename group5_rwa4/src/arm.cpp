@@ -604,7 +604,7 @@ namespace motioncontrol {
         if (bin_selected == 8){
             bin_origin = bin8_origin_;
         }
-        ROS_INFO_STREAM("EMPTYBIN: "<<bin_selected);
+        // ROS_INFO_STREAM("EMPTYBIN: "<<bin_selected);
 
         if (arm_required){
         pickPart(part_type, part_pose);

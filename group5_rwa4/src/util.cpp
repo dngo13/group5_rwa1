@@ -153,7 +153,7 @@ namespace motioncontrol {
         transformStamped.transform.rotation.w = target.orientation.w;
       
 
-        for (int i{ 0 }; i < 15; ++i)
+        for (int i{ 0 }; i < 5; ++i)
             br.sendTransform(transformStamped);
         tf2_ros::Buffer tfBuffer;
         tf2_ros::TransformListener tfListener(tfBuffer);
@@ -295,7 +295,7 @@ namespace motioncontrol {
         transformStamped.transform.rotation.w = target.orientation.w;
       
 
-        for (int i{ 0 }; i < 15; ++i)
+        for (int i{ 0 }; i < 5; ++i)
             br.sendTransform(transformStamped);
         tf2_ros::Buffer tfBuffer;
         tf2_ros::TransformListener tfListener(tfBuffer);
