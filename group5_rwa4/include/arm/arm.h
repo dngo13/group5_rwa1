@@ -68,12 +68,12 @@ namespace motioncontrol {
         bool sendJointPosition(trajectory_msgs::JointTrajectory command_msg);
         void goToPresetLocation(std::string location_name);
         std::vector<int> pick_from_conveyor(std::vector<int> ebin, unsigned short int);
-        void flippart(Product part, std::vector<int> rbin, geometry_msgs::Pose part_pose_in_frame, std::string agv);
+        void flippart(Product part, std::vector<int> rbin, geometry_msgs::Pose part_pose_in_frame, std::string agv, bool);
 
         //--preset locations;
         start home1_, home2_;
         agv agv1_, agv2_, agv3_, agv4_;
-        conveyor on_, above_;
+        conveyor on_, above_, flip_;
 
         private:
         std::array<double,3> bin1_origin_ { -1.898, 3.37, 0.751 };
@@ -161,7 +161,7 @@ namespace gantry_motioncontrol {
         bin at_bin1_,at_bin2_, at_bin3_, at_bin4_, at_bin5_, at_bin6_, at_bin7_, at_bin8_, safe_bins_, at_bins1234_, at_bins5678_;
         agv at_agv1_, at_agv2_, at_agv3_, at_agv4_, at_agv1_as1_, at_agv1_as2_, at_agv2_as1_, at_agv2_as2_, at_agv3_as3_, at_agv3_as4_, at_agv4_as3_, at_agv4_as4_;
         grasp pre_grasp_, post_grasp_;
-        near_as near_as1_, near_as2_, near_as3_, near_as4_;
+        near_as near_as1_, near_as2_, near_as3_, near_as4_, near_as1_r_;
         as at_as1_, at_as2_, at_as3_, at_as4_;
 
         private:

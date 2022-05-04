@@ -140,9 +140,6 @@ int main(int argc, char ** argv)
   std::string blackout_part_type;
   geometry_msgs::Pose blackout_part_tray_pose;
   std::string check_agv_id;
-  // Create an empty list of parts for the kit
-  std::vector<Product> parts_for_kitting;
-  std::vector<Product> parts_for_assembly;
   std::vector<Product> parts_to_check_later;
   // comp_state = comp_class.getCompetitionState();
   auto competition_start_time = comp_class.getClock();
@@ -167,25 +164,22 @@ int main(int argc, char ** argv)
 
   // find parts seen by logical cameras
   auto list1 = cam.findparts();  
-  rate.sleep(); 
+  ros::Duration(sleep(3.0)); 
 
   // Finding empty bins 
   auto empty_bins_at_start = cam.get_ebin_list();
+  ros::Duration(sleep(1.0));
   for(auto &bin: empty_bins_at_start){
     ROS_INFO_STREAM("Empty bin numbers: "<< bin);
   }
   
+  
+
+  // Pick parts from conveyor
+  auto empty_bins = arm.pick_from_conveyor(empty_bins_at_start, 0);
+  empty_bins_at_start.clear();
 
   gantry.goToPresetLocation(gantry.home_);
-  // gantry.goToPresetLocation(gantry.at_bins1234_);
-  // gantry.goToPresetLocation(gantry.at_bin1_);
-  // gantry.goToPresetLocation(gantry.at_bin2_);
-  // gantry.goToPresetLocation(gantry.at_bin3_);
-  // gantry.goToPresetLocation(gantry.at_bin4_);
-  // gantry.goToPresetLocation(gantry.at_agv1_);
-  // gantry.goToPresetLocation(gantry.at_bins1234_);
-  // gantry.goToPresetLocation(gantry.at_agv2_);
-  // gantry.goToPresetLocation(gantry.at_bins1234_);
   // gantry.goToPresetLocation(gantry.near_as1_);
   // gantry.goToPresetLocation(gantry.at_agv1_as1_);
   // gantry.goToPresetLocation(gantry.near_as1_);
@@ -194,46 +188,45 @@ int main(int argc, char ** argv)
   // gantry.goToPresetLocation(gantry.at_agv2_as1_);
   // gantry.goToPresetLocation(gantry.near_as1_);
   // gantry.goToPresetLocation(gantry.at_as1_);
-  // gantry.goToPresetLocation(gantry.near_as1_);
+  // gantry.goToPresetLocation(gantry.near_as1_);  
   // gantry.goToPresetLocation(gantry.home_);
-  // gantry.goToPresetLocation(gantry.home2_);
-  // gantry.goToPresetLocation(gantry.near_as2_);
-  // gantry.goToPresetLocation(gantry.at_agv1_as2_);
-  // gantry.goToPresetLocation(gantry.near_as2_);
-  // gantry.goToPresetLocation(gantry.at_as2_);
-  // gantry.goToPresetLocation(gantry.near_as2_);
-  // gantry.goToPresetLocation(gantry.at_agv2_as2_);
-  // gantry.goToPresetLocation(gantry.near_as2_);
-  // gantry.goToPresetLocation(gantry.at_as2_);
-  // gantry.goToPresetLocation(gantry.near_as2_);
-  // gantry.goToPresetLocation(gantry.home2_);
 
-  // while(ros::Time::now().toSec() - start.toSec() < 20){
-  //     if (comp_class.parts_rolling_on_conveyor){
-  //     arm.pick_from_conveyor(empty_bins_at_start, 1);
-  //     break;
-  //   }
-  // }
+  // gantry.goToPresetLocation(gantry.near_as3_);
+  // gantry.goToPresetLocation(gantry.at_agv3_as3_);
+  // gantry.goToPresetLocation(gantry.near_as3_);
+  // gantry.goToPresetLocation(gantry.at_as3_);
+  // gantry.goToPresetLocation(gantry.near_as3_);
+  // gantry.goToPresetLocation(gantry.at_agv4_as3_);
+  // gantry.goToPresetLocation(gantry.near_as3_);
+  // gantry.goToPresetLocation(gantry.at_as3_);
+  // gantry.goToPresetLocation(gantry.near_as3_);  
+  // gantry.goToPresetLocation(gantry.home_);
 
 
-  // Pick parts from conveyor
-  auto empty_bins = arm.pick_from_conveyor(empty_bins_at_start, 1);
-  empty_bins_at_start.clear();
+
 
   arm.goToPresetLocation("home1");
   arm.goToPresetLocation("home2");
-
+  gantry.goToPresetLocation(gantry.home_);
   for(auto &bin: empty_bins){
     ROS_INFO_STREAM("Empty bin after placing parts from conveyor: "<< bin);
   }  
 
   // find parts seen by logical cameras
+  ROS_INFO_STREAM("Making List");
   auto list = cam.findparts(); 
+  ROS_INFO_STREAM("Made List");
+  ros::Duration(sleep(3.0));
   // Segregate parts and create the map of parts
+  ROS_INFO_STREAM("Seg list");
   cam.segregate_parts(list);
+  ROS_INFO_STREAM("Segd list");
+  ros::Duration(sleep(3.0));
   // get the map of parts
+  ROS_INFO_STREAM("Creating map");
   auto cam_map = cam.get_camera_map();
-  rate.sleep(); 
+  ROS_INFO_STREAM("Created map");
+  ros::Duration(sleep(3.0)); 
   
   while(ros::ok){
   
@@ -244,9 +237,13 @@ int main(int argc, char ** argv)
   {
     if (!order0_done){
       // kitting
+      ROS_INFO_STREAM(orders.at(0).kitting.size());
       for(auto &kit: orders.at(0).kitting){
 
         ROS_INFO_STREAM("[CURRENT PROCESS]: " << kit.shipment_type);
+
+        // Create an empty list of parts for the kit
+        std::vector<Product> parts_for_kitting;
         
         // Push all the parts in kit to the list
         for (auto &part:kit.products){
@@ -302,7 +299,7 @@ int main(int argc, char ** argv)
                         // Check is the pump is to be flipped
                         if(abs(abs(roll) - 3.14) < 0.5){ 
                           auto part = p->second.at(i);        
-                          arm.flippart(part, empty_bins, iter.frame_pose, kit.agv_id);
+                          arm.flippart(part, empty_bins, iter.frame_pose, kit.agv_id, true);
                           cam_map[iter.type].at(i).status = "processed";
 
                         }
@@ -333,10 +330,45 @@ int main(int argc, char ** argv)
                         gantry.goToPresetLocation(gantry.at_bins5678_);
                       }
 
-                      gantry.move_gantry_to_bin(p->second.at(i).bin_number);
-                      gantry.movePart(p->second.at(i).world_pose, iter.frame_pose, kit.agv_id, iter.type);
-                      gantry.goToPresetLocation(gantry.home_);
-                      cam_map[iter.type].at(i).status = "processed";
+                      if(iter.type.find("pump") != std::string::npos) {
+                        std::array<double, 3> rpy = motioncontrol::eulerFromQuaternion(iter.frame_pose);
+                        auto roll = rpy[0];
+                        ROS_INFO_STREAM("Roll :" << roll);
+                        
+                        if (abs(abs(roll) - 3.14) < 0.5){
+                          auto part = p->second.at(i);
+  
+                          int bin_selected = 0;
+                          for(auto &bin: empty_bins){
+                              ROS_INFO_STREAM("bin number "<< bin);
+                              if(bin == 1 || bin == 2 || bin == 5 || bin == 6)
+                              {
+                                  bin_selected = bin;
+                                  break;
+                              }
+                          }
+                          gantry.move_gantry_to_bin(p->second.at(i).bin_number);
+                          gantry.movePartfrombin(p->second.at(i).world_pose, iter.type, bin_selected);
+                          bool kitting_arm_required = false;
+                          arm.flippart(part, empty_bins, iter.frame_pose, kit.agv_id, kitting_arm_required);
+                          cam_map[iter.type].at(i).status = "processed";
+                        }
+                        
+                        else{
+                        gantry.move_gantry_to_bin(p->second.at(i).bin_number);
+                        gantry.movePart(p->second.at(i).world_pose, iter.frame_pose, kit.agv_id, iter.type);
+                        gantry.goToPresetLocation(gantry.home_);
+                        cam_map[iter.type].at(i).status = "processed";
+                        }
+
+                      }
+
+                      else{
+                        gantry.move_gantry_to_bin(p->second.at(i).bin_number);
+                        gantry.movePart(p->second.at(i).world_pose, iter.frame_pose, kit.agv_id, iter.type);
+                        gantry.goToPresetLocation(gantry.home_);
+                        cam_map[iter.type].at(i).status = "processed";
+                      }
                     }
                   }
                     
@@ -402,17 +434,24 @@ int main(int argc, char ** argv)
                                       }
                                       
                                       // Check if part is faulty
-                                      if (cam.faulty_part_list_.size() == 1 && (cam.faulty_part_list_.at(0).type.compare(iter.type) == 0)){
+                                      if (cam.faulty_part_list_.size() > 1){
+                                        unsigned short int id{0};
+                                        if (cam.faulty_part_list_.at(0).faulty_cam_agv.compare(kit.agv_id) == 0){
+                                          id = 0;
+                                        }
+                                        if (cam.faulty_part_list_.at(1).faulty_cam_agv.compare(kit.agv_id) == 0){
+                                          id = 1;
+                                        }
                                         ROS_INFO_STREAM("part is faulty, removing it from the tray size 1");
-                                        arm.pickPart(iter.type, cam.faulty_part_list_.at(0).world_pose);
+                                        arm.pickPart(iter.type, cam.faulty_part_list_.at(id).world_pose);
                                         arm.goToPresetLocation("home2");
                                         arm.deactivateGripper();
                                         cam.query_faulty_cam();
                                         continue;
                                       }
-                                      if (cam.faulty_part_list_.size() > 1){
+                                      if (cam.faulty_part_list_.size() == 1){
                                         ROS_INFO_STREAM("part is faulty, removing it from the tray");
-                                        arm.pickPart(iter.type, cam.faulty_part_list_.at(1).world_pose);
+                                        arm.pickPart(iter.type, cam.faulty_part_list_.at(0).world_pose);
                                         arm.goToPresetLocation("home2");
                                         arm.deactivateGripper();
                                         cam.query_faulty_cam();
@@ -486,10 +525,9 @@ int main(int argc, char ** argv)
         }
         ros::Duration(sleep(1.0));
         motioncontrol::Agv agv{node, kit.agv_id};
-        if (agv.getAGVStatus()){
-          agv.shipAgv(kit.shipment_type, kit.station_id);
-        }
-
+        auto agv_stat = agv.getAGVStatus();
+        agv.shipAgv(kit.shipment_type, kit.station_id);
+        ROS_INFO_STREAM("AGV Shipped "<< kit.agv_id);
         ROS_INFO_STREAM("Moving to next shipment");
 
 
@@ -498,6 +536,7 @@ int main(int argc, char ** argv)
       for(auto &asmb: orders.at(0).assembly){
         ROS_INFO_STREAM("[CURRRENT PROCESS]: " << asmb.shipment_type);
 
+        std::vector<Product> parts_for_assembly;
         for (auto &part:asmb.products){
           part.processed = false;
           parts_for_assembly.push_back(part);
@@ -541,16 +580,37 @@ int main(int argc, char ** argv)
       order0_done = true;
     }
 
-    if (comp_class.order1_announced && !order1_done){
+    // orders = comp_class.get_order_list();
+
+    // rate.sleep();
+    if (orders.size()>1 && !order1_done){
+      ROS_INFO_STREAM("inside order 1");
+      double outside_time = ros::Time::now().toSec();
+      double inside_time = ros::Time::now().toSec();
+      while (inside_time - outside_time < 15.0) {
+          inside_time = ros::Time::now().toSec();
+      }
       // find parts seen by logical cameras
-      auto list = cam.findparts(); 
+      ROS_INFO_STREAM("Finding parts");
+      auto list = cam.findparts();
+      ROS_INFO_STREAM("Seg list"); 
       // Segregate parts and create the map of parts
       cam.segregate_parts(list);
+      ROS_INFO_STREAM("map creation");
       // get the map of parts
       auto cam_map = cam.get_camera_map();
-
+      outside_time = ros::Time::now().toSec();
+      inside_time = ros::Time::now().toSec();
+      // Delay for list construction
+      ROS_INFO_STREAM("entering delay");
+      while (inside_time - outside_time < 5.0) {
+          inside_time = ros::Time::now().toSec();
+      }
+      
       for(auto &asmb: orders.at(1).assembly){
         ROS_INFO_STREAM("[CURRRENT PROCESS]: " << asmb.shipment_type);
+
+        std::vector<Product> parts_for_assembly;
         for (auto &part:asmb.products){
           part.processed = false;
           parts_for_assembly.push_back(part);
@@ -558,14 +618,22 @@ int main(int argc, char ** argv)
         unsigned short int shipment_product_count(0);
         std::string assembly_station = asmb.stations;
 
+        // for (int i{0}; i < cam_map.find("assembly_pump_blue")->second.size(); i++){
+        //     ROS_INFO_STREAM(cam_map.find("assembly_pump_blue")->second.at(i).camera);
+        // }
+        // for (int i{0}; i < cam_map.find("assembly_battery_green")->second.size(); i++){
+        //     ROS_INFO_STREAM(cam_map.find("assembly_battery_green")->second.at(i).camera);
+        // }
+
         while(shipment_product_count <= asmb.products.size()){
           if (shipment_product_count == asmb.products.size()){
             break;
           }
           
-          ROS_INFO_STREAM("SHIPMENT COUNT: " << shipment_product_count);
+          
+          // ROS_INFO_STREAM("SHIPMENT COUNT: " << shipment_product_count);
           for(auto &iter: parts_for_assembly){
-            ROS_INFO_STREAM(iter.type);
+            // ROS_INFO_STREAM(iter.type);
             auto p = cam_map.find(iter.type);
             if (p != cam_map.end()){
               for (int i{0}; i < p->second.size(); i++){
@@ -583,11 +651,18 @@ int main(int argc, char ** argv)
 
         ros::Duration(sleep(1.0));
         as_submit_assembly(node, asmb.stations, asmb.shipment_type);
+        if((asmb.stations=="as2")||(asmb.stations=="as4"))
+        {
+          gantry.goToPresetLocation(gantry.home2_);
+        }
+
         gantry.goToPresetLocation(gantry.home_);
+        parts_for_assembly.clear();
       }
       order1_done = true;
+      notfinished = false;
     }
-    notfinished = false;
+    
   }
 
 
