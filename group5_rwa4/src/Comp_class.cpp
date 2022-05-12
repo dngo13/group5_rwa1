@@ -36,6 +36,10 @@ void MyCompetitionClass::init() {
     logical_camera_subscriber_ = node_.subscribe(
     "/ariac/logical_camera_bins0", 1, 
     &MyCompetitionClass::logical_camera_callback, this);
+    
+    break_beam_subscriber_ = node_.subscribe(
+    "/ariac/breakbeam_0_change", 1, 
+    &MyCompetitionClass::breakbeam0_callback, this);
 
     // Timer at start
     timer = node_.createTimer(ros::Duration(2), &MyCompetitionClass::callback, this);
@@ -141,10 +145,10 @@ void MyCompetitionClass::order_callback(const nist_gear::Order::ConstPtr & order
     new_order.priority = 1;
     
     if(new_order.order_id == "order_1"){
-      order1_announced = true;
-      // new_order.priority = 3;
-      // ROS_INFO("High priority order is announced ");
-      // high_priority_announced = true;
+      // order1_announced = true;
+      new_order.priority = 3;
+      ROS_INFO("High priority order is announced ");
+      high_priority_announced = true;
     }
   
     for (const auto &kit: order_msg->kitting_shipments){
@@ -189,11 +193,6 @@ std::vector<Order> MyCompetitionClass::get_order_list(){
       return order_list_;
   }
 
-// void MyCompetitionClass::depth_camera_bins1_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg)
-// {
-//   ROS_INFO_STREAM_THROTTLE(10,
-//     "depth camera bin1 detected something ");
-// } 
 
 void MyCompetitionClass::logical_camera_callback(const nist_gear::LogicalCameraImage::ConstPtr & image_msg){
   blackout_time_ = ros::Time::now().toSec();
@@ -206,19 +205,19 @@ double MyCompetitionClass::CheckBlackout(){
 
 void MyCompetitionClass::breakbeam0_callback(const nist_gear::Proximity::ConstPtr & msg) 
   {
-    // ROS_INFO("Break beam0 triggered.");
-    if (msg->object_detected) {  // If there is an object in proximity.
-      // ROS_INFO("Break beam triggered.");
+    blackout_time_ = ros::Time::now().toSec();
+    if (msg->object_detected) {  
       parts_rolling_on_conveyor = true;
     }
   }
 
+bool MyCompetitionClass::conveyor_check(){
+  return parts_rolling_on_conveyor;
+}
+
 void MyCompetitionClass::proximity_sensor0_callback(const sensor_msgs::Range::ConstPtr & msg)
 {
-  // ROS_INFO_THROTTLE(1, "Proximity sensor0 sees something.");
-  if ((msg->max_range - msg->range) > 0.01)
-  {  // If there is an object in proximity.
-    // ROS_INFO_THROTTLE(1, "Proximity sensor sees something.");
+  if ((msg->max_range - msg->range) > 0.01){
   }
 }
 
@@ -231,7 +230,6 @@ void MyCompetitionClass::laser_profiler0_callback(const sensor_msgs::LaserScan::
       });
   if (number_of_valid_ranges > 0)
   {
-    // ROS_INFO_THROTTLE(10, "Laser profiler sees something.");
   }
 }
 

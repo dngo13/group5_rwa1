@@ -108,7 +108,8 @@ public:
   /// callback for timer
   void callback(const ros::TimerEvent& event);
 
-  bool parts_rolling_on_conveyor{false};
+  bool conveyor_check();
+  
 
 private:
   ros::NodeHandle node_;
@@ -126,11 +127,13 @@ private:
   ros::Subscriber competition_clock_subscriber_;
   ros::Subscriber logical_camera_subscriber_;
   ros::Subscriber orders_subscriber;
+  ros::Subscriber break_beam_subscriber_;
   std::vector<Order> order_list_;
   bool order_processed_;
   bool wait{false};
   ros::Timer timer;
   double blackout_time_ = 0;
+  bool parts_rolling_on_conveyor{false};
 };
 
 #endif

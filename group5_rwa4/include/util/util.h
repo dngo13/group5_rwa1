@@ -48,6 +48,7 @@ typedef struct Product
     bool processed;
     std::string qcs_id;
     int bin_number;
+    std::string faulty_cam_agv;
 }   
 product;
 
@@ -105,6 +106,7 @@ namespace motioncontrol {
     std::array<double, 3> eulerFromQuaternion(const geometry_msgs::Pose& pose);
     std::array<double, 3> eulerFromQuaternion(double x, double y, double z, double w);
     std::array<double, 3> eulerFromQuaternion(const tf2::Quaternion& quat);
+    int get_empty_bins(std::vector<int> empty_bins);
     tf2::Quaternion quaternionFromEuler(double r, double p, double y);
     template <typename T>
     bool contains(std::vector<T> vec, const T& elem);

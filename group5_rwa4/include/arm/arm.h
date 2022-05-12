@@ -43,12 +43,60 @@ namespace motioncontrol {
          * @brief Initialize the object
          */
         void init();
+        /**
+         * @brief Pick part using kitting arm
+         * 
+         * @param part_type Type of part
+         * @param part_pose Pose of the part in world
+         * @return true 
+         * @return false 
+         */
         bool pickPart(std::string part_type, geometry_msgs::Pose part_pose);
+        /**
+         * @brief Pick faulty part from the agv
+         * 
+         * @param part_type Type of part
+         * @param part_pose Pose of the part in world
+         * @return true 
+         * @return false 
+         */
+        bool pickfaulty(std::string part_type, geometry_msgs::Pose part_pose);
+        /**
+         * @brief Place the part on the agv
+         * 
+         * @param part_init_pose Initial pose of the part in world
+         * @param part_goal_pose Target pose of the part in world
+         * @param agv Agv_id
+         * @return true 
+         * @return false 
+         */
         bool placePart(geometry_msgs::Pose part_init_pose, geometry_msgs::Pose part_goal_pose, std::string agv);
         void testPreset(const std::vector<ArmPresetLocation>& preset_list);
+        /**
+         * @brief Pick and place part using kitting arm
+         * 
+         * @param part_type Type of part
+         * @param pose_in_world_frame Initial pose of the part in world
+         * @param goal_in_tray_frame Target pose of the part in world
+         * @param agv Agv_id
+         */
         void movePart(std::string part_type, geometry_msgs::Pose pose_in_world_frame, geometry_msgs::Pose goal_in_tray_frame, std::string agv);
+        /**
+         * @brief Activate kitting arm gripper
+         * 
+         */
         void activateGripper();
+        /**
+         * @brief Deactivate kitting arm gripper
+         * 
+         */
         void deactivateGripper();
+        /**
+         * @brief Get the pose of the part to be place in empty bin 
+         * 
+         * @param bin_number bin number, value in between 1-8
+         * @return geometry_msgs::Pose Pose in world frame
+         */
         geometry_msgs::Pose get_part_pose_in_empty_bin(int bin_number);
         /**
          * @brief Move the joint linear_arm_actuator_joint only
@@ -60,20 +108,51 @@ namespace motioncontrol {
          * @param location A preset location
          */
         void moveBaseTo(double linear_arm_actuator_joint_position);
+        /**
+         * @brief Get the Gripper State
+         * 
+         * @return nist_gear::VacuumGripperState 
+         */
         nist_gear::VacuumGripperState getGripperState();
 
         
 
-        // Send command message to robot controller
+        /**
+         * @brief Send command message to robot controller
+         * 
+         * @param command_msg 
+         * @return true 
+         * @return false 
+         */
         bool sendJointPosition(trajectory_msgs::JointTrajectory command_msg);
+        /**
+         * @brief Move the kitting arm to preset location
+         * 
+         * @param location_name Location
+         */
         void goToPresetLocation(std::string location_name);
+        /**
+         * @brief Pick part from conveyor
+         * 
+         * @param ebin empty bin number
+         * @param int number of parts to be picked
+         * @return std::vector<int> 
+         */
         std::vector<int> pick_from_conveyor(std::vector<int> ebin, unsigned short int);
-        void flippart(Product part, std::vector<int> rbin, geometry_msgs::Pose part_pose_in_frame, std::string agv);
+        /**
+         * @brief Flips the part(pump)
+         * 
+         * @param part Product
+         * @param rbin empty bins
+         * @param part_pose_in_frame Pose in world frame 
+         * @param agv Agv_id
+         */
+        void flippart(Product part, std::vector<int> rbin, geometry_msgs::Pose part_pose_in_frame, std::string agv, bool);
 
         //--preset locations;
         start home1_, home2_;
         agv agv1_, agv2_, agv3_, agv4_;
-        conveyor on_, above_;
+        conveyor on_, above_, flip_;
 
         private:
         std::array<double,3> bin1_origin_ { -1.898, 3.37, 0.751 };
@@ -143,12 +222,66 @@ namespace gantry_motioncontrol {
          *
          */
         void init();
+        /**
+         * @brief Picks the part using gantry arm
+         * 
+         * @param part_init_pose Initial pose in world
+         * @return true 
+         * @return false 
+         */
         bool pickPart(geometry_msgs::Pose part_init_pose);
+        /**
+         * @brief Places the part
+         * 
+         * @param part_init_pose Initial pose in world
+         * @param part_pose_in_frame Goal pose in world
+         * @param agv Agv_id
+         * @return true 
+         * @return false 
+         */
         bool placePart(geometry_msgs::Pose part_init_pose, geometry_msgs::Pose part_pose_in_frame, std::string agv);
+        /**
+         * @brief Picks and places the part
+         * 
+         * @param part_init_pose_in_world Initial pose in world
+         * @param target_pose_in_frame Goal pose in world
+         * @param location Agv or assembly station id.
+         * @param type Part type
+         * @return true 
+         * @return false 
+         */
         bool movePart(geometry_msgs::Pose part_init_pose_in_world, geometry_msgs::Pose target_pose_in_frame, std::string location, std::string type);
+        /**
+         * @brief Picks and places part on empty bin
+         * 
+         * @param part_init_pose_in_world Initial pose in world
+         * @param type Part type
+         * @param bin bin number
+         * @return true 
+         * @return false 
+         */
         bool movePartfrombin(geometry_msgs::Pose part_init_pose_in_world, std::string type, unsigned short int bin);
+        /**
+         * @brief Moves the gantry to preset location near bin
+         * 
+         * @param bin 
+         */
         void move_gantry_to_bin(unsigned short int bin);
+        /**
+         * @brief Moves the gantry to preset location near assembly station
+         * 
+         * @param c_name 
+         */
         void move_gantry_to_assembly_station(std::string c_name);
+        /**
+         * @brief Flips the part
+         * 
+         * @param part Product
+         * @param rbin empty bin
+         * @param part_pose_in_frame Initial pose in world
+         * @param agv Agv_id
+         */
+        void flippart(Product part, std::vector<int> rbin, geometry_msgs::Pose part_pose_in_frame, std::string agv, bool);
 
         // Send command message to robot controller
         bool sendJointPosition(trajectory_msgs::JointTrajectory command_msg);

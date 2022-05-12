@@ -153,7 +153,7 @@ namespace motioncontrol {
         transformStamped.transform.rotation.w = target.orientation.w;
       
 
-        for (int i{ 0 }; i < 15; ++i)
+        for (int i{ 0 }; i < 5; ++i)
             br.sendTransform(transformStamped);
         tf2_ros::Buffer tfBuffer;
         tf2_ros::TransformListener tfListener(tfBuffer);
@@ -295,7 +295,7 @@ namespace motioncontrol {
         transformStamped.transform.rotation.w = target.orientation.w;
       
 
-        for (int i{ 0 }; i < 15; ++i)
+        for (int i{ 0 }; i < 5; ++i)
             br.sendTransform(transformStamped);
         tf2_ros::Buffer tfBuffer;
         tf2_ros::TransformListener tfListener(tfBuffer);
@@ -328,4 +328,19 @@ namespace motioncontrol {
 
         return world_pose;
     }
+
+    int get_empty_bin(std::vector<int> empty_bins){
+        int bin_selected = 0;
+        for(auto &bin: empty_bins){
+            ROS_INFO_STREAM("bin number "<< bin);
+            if(bin == 1 || bin == 2 || bin == 5 || bin == 6)
+            {
+                bin_selected = bin;
+                break;
+            }
+        }
+        
+        return bin_selected;
+    }
+
 }

@@ -14,7 +14,7 @@ options:
   insert_models_over_bins: true
   insert_models_over_stations: false
   enable_robot_camera: false
-  belt_population_cycles: 0
+  belt_population_cycles: 4
 time_limit: -1
 
 
@@ -37,7 +37,18 @@ agv_infos:
   agv3:
     location: ks3
   agv4:
-    location: ks4    
+    location: as3
+    products: 
+      part_0:
+        type: assembly_battery_green
+        pose:
+          xyz: [0.1, 0.1, 0]
+          rpy: [0, 0, 0]
+      part_1:
+        type: assembly_pump_blue
+        pose:
+          xyz: [-0.1, -0.1, 0]
+          rpy: [pi, 0, pi/2]   
     
 orders:
   order_0:
@@ -48,25 +59,20 @@ orders:
     announcement_condition_value: 0.0
     kitting:
       shipment_count: 1
-      agvs: [agv4]
-      destinations: [as3]
+      agvs: [agv1]
+      destinations: [as1]
       products:
-        # part_0:
-        #   type: assembly_battery_green
-        #   pose:
-        #     xyz: [0.1, 0.1, 0]
-        #     rpy: [0, 0, 0]
         part_0:
-          type: assembly_pump_blue
+          type: assembly_sensor_red
           pose:
-            xyz: [-0.1, -0.1, 0]
-            rpy: [pi, 0, pi/2]
+            xyz: [-0.1, 0.1, 0]
+            rpy: [0, 0, 'pi/3']
   order_1:
     priority: 1 # default is 1 if omitted, we could omit this line
     kitting_robot_health: 1 
     assembly_robot_health: 1
     announcement_condition: agv_station_reached
-    announcement_condition_value: agv4_at_as3
+    announcement_condition_value: agv1_at_as1
     assembly:
       shipment_count: 2
       stations: [as3, as1]
@@ -83,15 +89,6 @@ orders:
             rpy: [pi, 0, 0]
 
 models_over_bins:
-   bin1:
-     models:
-       assembly_battery_green:
-         xyz_start: [0.1, 0.1, 0.0]
-         xyz_end: [0.5, 0.5, 0.0]
-         rpy: [0, 0, pi/4]
-         num_models_x: 2
-         num_models_y: 2
-
    bin3:
      models:
        assembly_pump_blue:
@@ -100,6 +97,14 @@ models_over_bins:
          rpy: [0, 0, pi/4]
          num_models_x: 2
          num_models_y: 2
+   bin2:
+    models:
+      assembly_sensor_red:
+        xyz_start: [0.2, 0.2, 0.0]
+        xyz_end: [0.4, 0.4, 0.0]
+        rpy: [0, 0, 0]
+        num_models_x: 2
+        num_models_y: 2
    bin6:
      models:
        assembly_pump_blue:
@@ -108,22 +113,22 @@ models_over_bins:
          rpy: [0, 0, -pi/4]
          num_models_x: 2
          num_models_y: 2
+    
 
-# belt_models:
-#   assembly_battery_green:
-#     10.0:
-#       pose:
-#         xyz: [0.0, 4.3, 0.92]
-#         rpy: [0, 0, 'pi/2']
+belt_models:
+  assembly_battery_green:
+    10.0:
+      pose:
+        xyz: [0.0, 4.3, 0.92]
+        rpy: [0, 0, 'pi/2']
 
 # faulty_products:
-  # - assembly_battery_green_2
-  # - assembly_pump_blue_3
-  # # - assembly_pump_blue_6
-  # - assembly_pump_blue_8
+#   - assembly_pump_blue_2
+#   - assembly_pump_blue_3
+#   - assembly_pump_blue_6
+#   - assembly_pump_blue_7
 
 # sensor_blackout:
-#   product_count: 3
-#   duration: 30
-
+#   product_count: 1
+#   duration: 50
 

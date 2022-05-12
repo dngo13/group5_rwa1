@@ -1,5 +1,4 @@
 sensors:
-
   logical_camera_bins0:
     type: logical_camera
     pose:
@@ -117,24 +116,11 @@ sensors:
       xyz: [-0.530616, 3.130324, 1.835210]
       rpy: [3.141593, 1.570792, 0.000000]
 
-
-  laser_profiler_0:
-    type: laser_profiler
-    pose:
-      xyz: [-0.559490, 2.307264, 1.507532]
-      rpy: [-1.570796, 1.570796, 0]
-
-  proximity_sensor_0:
-    type: proximity_sensor
-    pose:
-      xyz: [-0.786464, 2.963990, 0.886511]
-      rpy: [3.141593, 0.000000, 0.000000]
-
   breakbeam_0:
     type: break_beam
     pose:
-      xyz: [-0.279039, 4.943474, 0.894281]
-      rpy: [0.000000, 0.000000, -1.826134]
+      xyz: [-0.573076, 4.675404 , 0.92]
+      rpy: [0.000000, 0.000000, -1.57]
 
 robot_camera:
   enable: false

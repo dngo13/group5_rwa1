@@ -1,5 +1,5 @@
-# group5_rwa3
-# Package for ENPM 663-RWA3. 
+# group5_final_project
+# Package for ENPM 663-Final-Project
 
 Authors:
 Darshan Jain, Pulkit Mehta, Jeffin Kachappilly
@@ -13,18 +13,17 @@ This package requires:
 
 - Clone the package into the workspace and build the package using,
 ```
-$ catkin build group5_rwa3
+$ catkin build group5_rwa4
 ```
 
 - Source the workspace and then run,
 ```
-$ roslaunch group5_rwa3 ariac.launch 
+$ roslaunch group5_rwa4 ariac.launch 
 ```
 
 - In a seperate terminal run:
 ```
-$ rosrun group5_rwa3 My_node
+$ rosrun group5_rwa4 My_node
 ```
-
 
 
